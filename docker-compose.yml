@@ -1,0 +1,15 @@
+networks:
+  market:
+    external:
+      name: market
+
+version: '2'
+
+services:
+  unique-market:
+    container_name: uniq-market-client
+    build:
+      context: ./
+      dockerfile: ./.docker/Dockerfile
+    networks:
+      - market
