@@ -11,6 +11,7 @@ import { TransferModal } from './TransferModal';
 import { AuctionModal } from './AuctionModal';
 import { WithdrawBidStagesModal } from './WithdrawBidModal';
 import { CancelAuctionStagesModal } from './CancelAuctionModal';
+import CheckoutModal from './CheckoutModal';
 
 export type TTokenPageModalProps = {
   offer?: Offer
@@ -50,8 +51,10 @@ const TokenPageModal = ({ onClose, onFinish, marketType, offer, token }: TTokenP
         return CancelSellFixStagesModal;
       case MarketType.delistAuction:
         return CancelAuctionStagesModal;
-      case MarketType.purchase:
-        return PurchaseModal;
+      // case MarketType.purchase:
+        // return PurchaseModal;
+      case MarketType.checkout:
+        return CheckoutModal;
       case MarketType.transfer:
         return TransferModal;
       case MarketType.default:

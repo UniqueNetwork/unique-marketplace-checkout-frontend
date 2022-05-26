@@ -24,7 +24,7 @@ export const BuyToken: FC<BuyTokenProps> = ({ offer, onBuy }) => {
   }, [offer?.price, selectedAccount?.balance?.KSM, marketCommission]);
 
   const onBuyClick = useCallback(() => {
-    if (!isEnoughBalance) return;
+    // if (!isEnoughBalance) return;
 
     onBuy();
   }, [onBuy, isEnoughBalance]);
@@ -40,7 +40,7 @@ export const BuyToken: FC<BuyTokenProps> = ({ offer, onBuy }) => {
         role='primary'
         title='Buy'
         wide={true}
-        disabled={!isEnoughBalance}
+        // disabled={!isEnoughBalance}
       />
     </ButtonWrapper>
     {!isEnoughBalance && <Text color={'coral-500'}>Your balance is too low to buy</Text>}
