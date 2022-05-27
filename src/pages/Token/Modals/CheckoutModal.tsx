@@ -42,7 +42,7 @@ const CheckoutModal: FC<TTokenPageModalBodyProps> = () => {
         <Heading size='2'>Buy token</Heading>
       </Content>
       <CheckoutForm
-        publicKey='pk_sbox_6e4nist6o5uenuq6ei5dithevqt'
+        publicKey='pk_test_1a2d17ad-83cb-4c06-aa02-4f937afd5cfa'
         onCardValidationChanged={onCardValidationChanged}
         onCardSubmitted={onCardSubmitted}
         onCardTokenized={onCardTokenized}
