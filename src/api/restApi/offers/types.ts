@@ -51,6 +51,8 @@ export type Offer = {
     prefix: string
     attributes: OfferTokenAttribute[]
   }
+  currency: string
+  isSellBlockchain: boolean
 }
 
 export type OffersResponse = PaginatedResponse<Offer>

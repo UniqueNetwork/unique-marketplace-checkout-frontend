@@ -1,5 +1,5 @@
 import React, { FC } from 'react';
-import { Heading, Icon } from '@unique-nft/ui-kit';
+import { Heading, Icon, Text } from '@unique-nft/ui-kit';
 import BN from 'bn.js';
 import styled from 'styled-components/macro';
 
@@ -9,16 +9,17 @@ import { useApi } from '../../../hooks/useApi';
 
 interface PriceProps {
   price: string;
+  isUsd: boolean;
 }
 
-export const Price: FC<PriceProps> = ({ price }) => {
+export const Price: FC<PriceProps> = ({ price, isUsd }) => {
   const { api } = useApi();
 
   return (
     <PriceWrapper>
       <Row>
-        <Heading size={'1'}>{`${formatKusamaBalance(new BN(price).toString(), api?.market?.kusamaDecimals)}`}</Heading>
-        <Icon file={Kusama} size={32}/>
+        <Heading size={'1'}>{`${formatKusamaBalance(new BN(price).toString(), api?.market?.kusamaDecimals)}${isUsd ? ' $' : ''}`}</Heading>
+        {!isUsd && <Icon file={Kusama} size={32}/>}
       </Row>
     </PriceWrapper>
   );

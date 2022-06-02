@@ -19,7 +19,7 @@ export const SellToken: FC<SellTokenProps> = ({ offer, onSellClick, onTransferCl
   if (offer) {
     return (<>
       <Text size={'l'}>{'Price'}</Text>
-      <Price price={offer.price} />
+      <Price price={offer.price} isUsd={offer.currency === 'USD'} />
       <ButtonWrapper>
         <Button title={'Delist'} role={'danger'} onClick={onDelistClick} />
       </ButtonWrapper>

@@ -51,8 +51,8 @@ const TokenPageModal = ({ onClose, onFinish, marketType, offer, token }: TTokenP
         return CancelSellFixStagesModal;
       case MarketType.delistAuction:
         return CancelAuctionStagesModal;
-      // case MarketType.purchase:
-        // return PurchaseModal;
+      case MarketType.purchase:
+        return PurchaseModal;
       case MarketType.checkout:
         return CheckoutModal;
       case MarketType.transfer:

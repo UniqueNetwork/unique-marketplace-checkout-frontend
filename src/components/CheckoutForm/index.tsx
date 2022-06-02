@@ -1,6 +1,7 @@
 import React, { FC, FormEvent, useCallback, useEffect } from 'react';
 import { FramesInitProps, FramesObject, ValidationChangeEvent } from '../../types/CheckoutTypes';
 import styled from 'styled-components/macro';
+import { AdditionalLight, Grey300, Secondary500 } from '../../styles/colors';
 
 declare global {
   interface Window {
@@ -27,12 +28,21 @@ const CheckoutForm: FC<CheckoutFormProps> = ({
     base: {
       color: '#040B1D',
       letterSpacing: 0,
-      padding: '12px 16px',
-      fontSize: '12px',
-      lineHeight: '18px',
-      background: '#fafafa',
-      border: '1px solid #7F90A1',
-      borderRadius: '4px'
+      // padding: '12px 16px',
+      // fontSize: '12px',
+      // lineHeight: '18px',
+      background: '#FFFFFF',
+      // border: '1px solid #7F90A1',
+      borderRadius: '4px',
+      // color: '#040B1D',
+      // letterSpacing: 0,
+      padding: '8px 16px',
+      fontWeight: 400,
+      fontSize: 16,
+      lineHeight: 24,
+      // background: ${AdditionalLight},
+      border: '1px solid #D2D3D6'
+      // borderRadius: 4
     },
     focus: {
       borderColor: '#009CF0'
@@ -115,13 +125,13 @@ const CheckoutForm: FC<CheckoutFormProps> = ({
   }, []);
 
     return (
-      <FormStyled
+      <form
         id={'payment-form'}
         onSubmit={onSubmit}
         className={className}
       >
         {children}
-      </FormStyled>
+      </form>
     );
 };
 
@@ -155,13 +165,9 @@ export const CVVFrame: React.FC<React.HTMLAttributes<HTMLDivElement>> = ({
   />
 );
 
-const FormStyled = styled.form`
-  width: 300px;
-  margin: 0 auto;
-`;
-
 const StyledFrame = styled.div`
   height: 40px;
+  margin-top: 16px;
 `;
 
 export * from '../../types/CheckoutTypes';
