@@ -33,7 +33,7 @@ export const BuyToken: FC<BuyTokenProps> = ({ offer, onBuy }) => {
 
   return (<>
     <Text size={'l'}>Price</Text>
-    <Price price={offer.price} isUsd={offer.currency === 'USD'} />
+    <Price price={offer.price} isSellBlockchain={offer.isSellBlockchain} />
     <ButtonWrapper>
       <Button
         onClick={onBuyClick}
