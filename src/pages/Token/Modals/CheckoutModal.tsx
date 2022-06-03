@@ -11,6 +11,7 @@ import { useAccounts } from '../../../hooks/useAccounts';
 import { DropdownSelect } from '../../../components/Header/WalletManager/AccountSelect/DropdownSelect';
 import { Account } from '../../../account/AccountContext';
 import AccountCard from '../../../components/Account/Account';
+import config from '../../../config';
 
 const CheckoutModal: FC<TTokenPageModalBodyProps> = () => {
   const [cardValid, setCardValid] = useState(false);
@@ -52,7 +53,7 @@ const CheckoutModal: FC<TTokenPageModalBodyProps> = () => {
         : <>
           <Heading size='2'>Buy NFT for 20$</Heading>
           <CheckoutForm
-            publicKey='pk_test_1a2d17ad-83cb-4c06-aa02-4f937afd5cfa'
+            publicKey={config.checkoutPublicKey || ''}
             onCardValidationChanged={onCardValidationChanged}
             onCardSubmitted={onCardSubmitted}
             onCardTokenized={onCardTokenized}
