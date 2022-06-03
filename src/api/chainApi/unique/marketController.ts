@@ -72,7 +72,7 @@ class MarketController implements IMarketController {
     // if (!options.minPrice) throw new Error('Min price not provided');
     this.minPrice = options.minPrice || 0;
     // if (!options.kusamaDecimals) throw new Error('Kusama decimals not provided');
-    this.kusamaDecimals = options.kusamaDecimals || 12 // TODO: could and should be taken from kusamaApi
+    this.kusamaDecimals = options.kusamaDecimals || 12; // TODO: could and should be taken from kusamaApi
     this.defaultGasAmount = options.defaultGasAmount || 2500000;
     if (!options.nftController) throw new Error('NFTController not provided');
     this.nftController = options.nftController;
