@@ -59,7 +59,7 @@ export const OfferCard: FC<TTokensCard> = ({ offer }) => {
         </a>
         <PriceWrapper>
           <Text size='s'>{topBid ? `${formatKusamaBalance(Number(topBid))}` : `${formatKusamaBalance(offer?.price)}` }</Text>
-          <Icon file={Kusama} size={16} />
+          {offer.isSellBlockchain ? <Icon file={Kusama} size={16}/> : <Text size='s'>$</Text>}
         </PriceWrapper>
         {!offer?.auction && <Text size={'xs'} color={'grey-500'} >Price</Text>}
         {offer?.auction && <AuctionInfoWrapper>
