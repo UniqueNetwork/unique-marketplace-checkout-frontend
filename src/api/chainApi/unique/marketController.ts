@@ -76,8 +76,8 @@ class MarketController implements IMarketController {
     this.defaultGasAmount = options.defaultGasAmount || 2500000;
     if (!options.nftController) throw new Error('NFTController not provided');
     this.nftController = options.nftController;
-    if (!options.auctionAddress) throw new Error('Auction address not provided');
-    this.auctionAddress = options.auctionAddress;
+    // if (!options.auctionAddress) throw new Error('Auction address not provided');
+    this.auctionAddress = options.auctionAddress || '';
     const provider = new Web3.providers.WebsocketProvider(this.uniqueSubstrateApiRpc, {
       reconnect: {
         auto: true,
