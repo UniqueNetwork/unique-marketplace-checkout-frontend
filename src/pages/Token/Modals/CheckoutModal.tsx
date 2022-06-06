@@ -56,8 +56,6 @@ const CheckoutModal: FC<TTokenPageModalBodyProps> = ({ offer }) => {
     setPaymentCompleted(true);
   }, [offer, walletAddress, payForTokenWithCard]);
 
-  console.log('offer', offer);
-
   return (
     <Content>
       {paymentCompleted
