@@ -18,7 +18,7 @@ export const Price: FC<PriceProps> = ({ price, isSellBlockchain }) => {
   return (
     <PriceWrapper>
       <Row>
-        <Heading size={'1'}>{`${formatKusamaBalance(new BN(price).toString(), api?.market?.kusamaDecimals)}${!isSellBlockchain ? ' $' : ''}`}</Heading>
+        <Heading size={'1'}>{`${formatKusamaBalance(new BN(price).toString(), api?.market?.kusamaDecimals)}${!isSellBlockchain ? '$' : ''}`}</Heading>
         {isSellBlockchain && <Icon file={Kusama} size={32}/>}
       </Row>
     </PriceWrapper>
