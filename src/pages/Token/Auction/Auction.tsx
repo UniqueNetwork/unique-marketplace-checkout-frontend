@@ -6,7 +6,7 @@ import BN from 'bn.js';
 import { Offer } from '../../../api/restApi/offers/types';
 import { NFTToken } from '../../../api/chainApi/unique/types';
 import { AdditionalPositive100, AdditionalPositive500, Coral100, Coral500, Grey300 } from '../../../styles/colors';
-import { useOfferSubscription } from '../../../hooks/useOfferSubscription';
+// import { useOfferSubscription } from '../../../hooks/useOfferSubscription';
 import { useAccounts } from '../../../hooks/useAccounts';
 import { compareEncodedAddresses, isTokenOwner } from '../../../api/chainApi/utils/addressUtils';
 import { PriceForAuction } from '../TokenDetail/PriceForAuction';
@@ -107,7 +107,7 @@ const Auction: FC<AuctionProps> = ({ offer: initialOffer, onPlaceABidClick, onDe
     }
   }, [onClose, offer.auction?.bids]);
 
-  useOfferSubscription({ offer, onPlaceBid, onAuctionStopped, onAuctionClosed });
+  // useOfferSubscription({ offer, onPlaceBid, onAuctionStopped, onAuctionClosed });
 
   const price = offer.price;
 
