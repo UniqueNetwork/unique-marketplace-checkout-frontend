@@ -7,7 +7,7 @@ import config from '../config';
 import { gqlClient as gql, rpcClient as rpc } from '.';
 import { getSettings } from './restApi/settings/settings';
 import { ApolloProvider } from '@apollo/client';
-import AuctionSocketProvider from './restApi/auction/AuctionSocketProvider';
+// import AuctionSocketProvider from './restApi/auction/AuctionSocketProvider';
 import { Settings } from './restApi/settings/types';
 
 interface ChainProviderProps {
@@ -54,9 +54,9 @@ const ApiWrapper = ({ children, gqlClient = gql, rpcClient = rpc }: ChainProvide
 
   return (
     <ApiProvider value={value}>
-      <AuctionSocketProvider url={config.uniqueApiUrl}>
-        <ApolloProvider client={gqlClient.client}>{children}</ApolloProvider>
-      </AuctionSocketProvider>
+      {/* <AuctionSocketProvider url={config.uniqueApiUrl}> */}
+      <ApolloProvider client={gqlClient.client}>{children}</ApolloProvider>
+      {/* </AuctionSocketProvider> */}
     </ApiProvider>
   );
 };
