@@ -1,3 +1,10 @@
+export enum FetchStatus {
+  default = 'Default',
+  inProgress = 'InProgress',
+  success = 'Success',
+  error = 'Error'
+}
+
 export type TCheckoutPayParams = {
   tokenCard: string
   transferAddress: string

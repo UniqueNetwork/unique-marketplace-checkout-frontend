@@ -16,6 +16,7 @@ import { useCheckout } from '../../../api/restApi/checkout/checkout';
 import { formatKusamaBalance } from '../../../utils/textUtils';
 import BN from 'bn.js';
 import { useApi } from '../../../hooks/useApi';
+import { FetchStatus } from '../../../api/restApi/checkout/types';
 
 const CheckoutModal: FC<TTokenPageModalBodyProps> = ({ offer }) => {
   const [cardValid, setCardValid] = useState(false);
@@ -30,7 +31,7 @@ const CheckoutModal: FC<TTokenPageModalBodyProps> = ({ offer }) => {
   const { accounts, selectedAccount } = useAccounts();
   const [walletAddress, setWalletAddress] = useState(selectedAccount?.address || '');
   const hasAccounts = useRef(accounts?.length > 0);
-  const { payForTokenWithCard } = useCheckout();
+  const { payForTokenWithCard, paymentRequestStatus } = useCheckout();
   const { api } = useApi();
 
   const onCardValidationChanged = useCallback((valid: boolean): void => setCardValid(valid), []);
@@ -60,7 +61,7 @@ const CheckoutModal: FC<TTokenPageModalBodyProps> = ({ offer }) => {
     <Content>
       {paymentCompleted
         ? <>
-          <CompletedMessage />
+          <CompletedMessage paymentRequestStatus={paymentRequestStatus} />
         </>
         : <>
           <Heading size='2'>{`Buy NFT for  ${formatKusamaBalance(new BN(offer?.price || '').toString(), api?.market?.kusamaDecimals)}$`}</Heading>
@@ -212,14 +213,15 @@ const Error = styled.span`
 
 export default CheckoutModal;
 
-const CompletedMessage = () => {
+const CompletedMessage = ({ paymentRequestStatus }: {paymentRequestStatus: string}) => {
   return (
     <MessageWrapper>
-      <Heading size='2'>Payment completed</Heading>
-      <Message>
+      <Heading size='2'>{paymentRequestStatus === FetchStatus.success ? 'Payment completed' : 'Payment failed'}</Heading>
+      {paymentRequestStatus === FetchStatus.success && <Message>
         <CheckCircle/>
-        <p>Your data has been successfully sent. <br/> Please wait a few minutes. NFT will be available in your wallet soon</p>
-      </Message>
+        <p>Your data has been successfully sent. <br/> Please wait a few minutes. NFT will be available in your wallet
+          soon</p>
+      </Message>}
     </MessageWrapper>
   );
 };
