@@ -16,8 +16,8 @@ interface CollectionsFilterProps {
 
 const CollectionsFilter: FC<CollectionsFilterProps> = ({ value, onChange, onTraitsChange }) => {
   const { collections, isFetching } = useCollections();
-  const { traits, fetch: fetchTraits, reset: resetTraits, isFetching: isTraitsFetching } = useTraits();
-  const { collections: selectedCollections = [], traits: selectedTraits = [] } = value || {};
+  // const { traits, fetch: fetchTraits, reset: resetTraits, isFetching: isTraitsFetching } = useTraits();
+  const { collections: selectedCollections = [] } = value || {};
 
   const onCollectionSelect = useCallback((collectionId: number) => (value: boolean) => {
     let _selectedCollections;
@@ -29,19 +29,19 @@ const CollectionsFilter: FC<CollectionsFilterProps> = ({ value, onChange, onTrai
     // since traits are shown only if one collection is selected -> we should always reset them
     onChange(_selectedCollections, []);
 
-    if (_selectedCollections.length === 1) fetchTraits(_selectedCollections[0]);
-    else resetTraits();
-  }, [selectedCollections, fetchTraits, resetTraits, onTraitsChange]);
+    // if (_selectedCollections.length === 1) fetchTraits(_selectedCollections[0]);
+    // else resetTraits();
+  }, [selectedCollections, onChange]);
 
-  const onAttributeSelect = useCallback((trait: Trait) => (value: boolean) => {
-    let _selectedTraits;
-    if (value) {
-      _selectedTraits = [...selectedTraits, trait.trait];
-    } else {
-      _selectedTraits = selectedTraits.filter((item) => item !== trait.trait);
-    }
-    onTraitsChange?.(_selectedTraits);
-  }, [onTraitsChange, selectedTraits]);
+  // const onAttributeSelect = useCallback((trait: Trait) => (value: boolean) => {
+  //   let _selectedTraits;
+  //   if (value) {
+  //     _selectedTraits = [...selectedTraits, trait.trait];
+  //   } else {
+  //     _selectedTraits = selectedTraits.filter((item) => item !== trait.trait);
+  //   }
+  //   onTraitsChange?.(_selectedTraits);
+  // }, [onTraitsChange, selectedTraits]);
 
   const onCollectionsClear = useCallback(() => {
     onChange([], []);
@@ -71,24 +71,24 @@ const CollectionsFilter: FC<CollectionsFilterProps> = ({ value, onChange, onTrai
           ))}
       </CollectionFilterWrapper>
     </Accordion>
-    {onTraitsChange && selectedCollections.length === 1 && <AttributesFilterWrapper>
-      <Accordion title={'Traits'} isOpen={true}>
-        <CollectionFilterWrapper>
-          {isTraitsFetching && Array.from({ length: 3 }).map((_, index) => <CheckboxSkeleton key={`checkbox-skeleton-${index}`} />)}
-          {traits.map((trait) => (
-            <AttributeWrapper key={`attribute-${trait.trait}`}>
-              <Checkbox
-                checked={selectedTraits.indexOf(trait.trait) !== -1}
-                label={trait.trait}
-                size={'m'}
-                onChange={onAttributeSelect(trait)}
-              />
-              <Text color={'grey-400'}>{trait.count.toString()}</Text>
-            </AttributeWrapper>
-          ))}
-        </CollectionFilterWrapper>
-      </Accordion>
-    </AttributesFilterWrapper>}
+    {/* {onTraitsChange && selectedCollections.length === 1 && <AttributesFilterWrapper> */}
+    {/*   <Accordion title={'Traits'} isOpen={true}> */}
+    {/*     <CollectionFilterWrapper> */}
+    {/*       {isTraitsFetching && Array.from({ length: 3 }).map((_, index) => <CheckboxSkeleton key={`checkbox-skeleton-${index}`} />)} */}
+    {/*       {traits.map((trait) => ( */}
+    {/*         <AttributeWrapper key={`attribute-${trait.trait}`}> */}
+    {/*           <Checkbox */}
+    {/*             checked={selectedTraits.indexOf(trait.trait) !== -1} */}
+    {/*             label={trait.trait} */}
+    {/*             size={'m'} */}
+    {/*             onChange={onAttributeSelect(trait)} */}
+    {/*           /> */}
+    {/*           <Text color={'grey-400'}>{trait.count.toString()}</Text> */}
+    {/*         </AttributeWrapper> */}
+    {/*       ))} */}
+    {/*     </CollectionFilterWrapper> */}
+    {/*   </Accordion> */}
+    {/* </AttributesFilterWrapper>} */}
   </>);
 };
 

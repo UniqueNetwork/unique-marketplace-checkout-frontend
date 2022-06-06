@@ -12,8 +12,13 @@ import { DropdownSelect } from '../../../components/Header/WalletManager/Account
 import { Account } from '../../../account/AccountContext';
 import AccountCard from '../../../components/Account/Account';
 import config from '../../../config';
+import { useCheckout } from '../../../api/restApi/checkout/checkout';
+import { formatKusamaBalance } from '../../../utils/textUtils';
+import BN from 'bn.js';
+import { useApi } from '../../../hooks/useApi';
+import { FetchStatus } from '../../../api/restApi/checkout/types';
 
-const CheckoutModal: FC<TTokenPageModalBodyProps> = () => {
+const CheckoutModal: FC<TTokenPageModalBodyProps> = ({ offer }) => {
   const [cardValid, setCardValid] = useState(false);
   const [loading, setLoading] = useState(false);
   const [paymentCompleted, setPaymentCompleted] = useState(false);
@@ -26,6 +31,8 @@ const CheckoutModal: FC<TTokenPageModalBodyProps> = () => {
   const { accounts, selectedAccount } = useAccounts();
   const [walletAddress, setWalletAddress] = useState(selectedAccount?.address || '');
   const hasAccounts = useRef(accounts?.length > 0);
+  const { payForTokenWithCard, paymentRequestStatus } = useCheckout();
+  const { api } = useApi();
 
   const onCardValidationChanged = useCallback((valid: boolean): void => setCardValid(valid), []);
   const onFrameValidationChanged = useCallback((event: ValidationChangeEvent) => {
@@ -37,21 +44,27 @@ const CheckoutModal: FC<TTokenPageModalBodyProps> = () => {
     }
   }, []);
   const onCardSubmitted = useCallback((): void => setLoading(true), []);
-  const onCardTokenized = useCallback((token: string): void => {
+  const onCardTokenized = useCallback(async (cardToken: string) => {
     // send request with tokenized card here
+    setCardToken(cardToken);
+    await payForTokenWithCard({
+      tokenId: offer?.tokenId || 0,
+      collectionId: offer?.collectionId || 0,
+      tokenCard: cardToken,
+      transferAddress: walletAddress
+    });
     setLoading(false);
-    setCardToken(token);
     setPaymentCompleted(true);
-  }, []);
+  }, [offer, walletAddress, payForTokenWithCard]);
 
   return (
     <Content>
       {paymentCompleted
         ? <>
-          <CompletedMessage />
+          <CompletedMessage paymentRequestStatus={paymentRequestStatus} />
         </>
         : <>
-          <Heading size='2'>Buy NFT for 20$</Heading>
+          <Heading size='2'>{`Buy NFT for  ${formatKusamaBalance(new BN(offer?.price || '').toString(), api?.market?.kusamaDecimals)}$`}</Heading>
           <CheckoutForm
             publicKey={config.checkoutPublicKey || ''}
             onCardValidationChanged={onCardValidationChanged}
@@ -200,14 +213,15 @@ const Error = styled.span`
 
 export default CheckoutModal;
 
-const CompletedMessage = () => {
+const CompletedMessage = ({ paymentRequestStatus }: {paymentRequestStatus: string}) => {
   return (
     <MessageWrapper>
-      <Heading size='2'>Payment completed</Heading>
-      <Message>
+      <Heading size='2'>{paymentRequestStatus === FetchStatus.success ? 'Payment completed' : 'Payment failed'}</Heading>
+      {paymentRequestStatus === FetchStatus.success && <Message>
         <CheckCircle/>
-        <p>Your data has been successfully sent. <br/> Please wait a few minutes. NFT will be available in your wallet soon</p>
-      </Message>
+        <p>Your data has been successfully sent. <br/> Please wait a few minutes. NFT will be available in your wallet
+          soon</p>
+      </Message>}
     </MessageWrapper>
   );
 };

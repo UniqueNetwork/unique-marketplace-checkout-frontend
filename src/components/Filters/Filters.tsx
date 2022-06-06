@@ -8,11 +8,11 @@ import CollectionsFilter from './CollectionsFilter';
 import { useAccounts } from '../../hooks/useAccounts';
 
 export const Filters: FC<FiltersProps> = ({ value, onFilterChange }) => {
-  const { selectedAccount } = useAccounts();
+  // const { selectedAccount } = useAccounts();
 
-  const onStatusFilterChange = useCallback((statuses: Statuses) => {
-    onFilterChange({ ...value, statuses });
-  }, [value, onFilterChange, selectedAccount]);
+  // const onStatusFilterChange = useCallback((statuses: Statuses) => {
+  //   onFilterChange({ ...value, statuses });
+  // }, [value, onFilterChange, selectedAccount]);
 
   const onPricesFilterChange = useCallback((prices: PriceRange | undefined) => {
     onFilterChange({ ...value, prices });
@@ -27,7 +27,7 @@ export const Filters: FC<FiltersProps> = ({ value, onFilterChange }) => {
   }, [value, onFilterChange]);
 
   return <FiltersStyled>
-    <StatusFilter value={value?.statuses} onChange={onStatusFilterChange}/>
+    {/* <StatusFilter value={value?.statuses} onChange={onStatusFilterChange}/> */}
     <PricesFilter value={value?.prices} onChange={onPricesFilterChange} />
     <CollectionsFilter value={value} onChange={onCollectionsFilterChange} onTraitsChange={onCollectionTraitsFilterChange} />
   </FiltersStyled>;
