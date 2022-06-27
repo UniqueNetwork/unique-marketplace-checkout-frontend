@@ -8,9 +8,9 @@ import { MyTokensFilterState, MyTokensStatuses } from './types';
 import StatusFilter from './StatusFilter';
 
 export const Filters: FC<FiltersProps<MyTokensFilterState>> = ({ value, onFilterChange }) => {
-  const onStatusFilterChange = useCallback((statuses: MyTokensStatuses) => {
-    onFilterChange({ ...(value || {}), statuses });
-  }, [value, onFilterChange]);
+  // const onStatusFilterChange = useCallback((statuses: MyTokensStatuses) => {
+  //   onFilterChange({ ...(value || {}), statuses });
+  // }, [value, onFilterChange]);
 
   const onPricesFilterChange = useCallback((prices: PriceRange | undefined) => {
     onFilterChange({ ...(value || {}), prices });
@@ -29,7 +29,7 @@ export const Filters: FC<FiltersProps<MyTokensFilterState>> = ({ value, onFilter
   }, [value, onFilterChange]);
 
   return <FiltersStyled>
-    <StatusFilter value={value?.statuses} onChange={onStatusFilterChange}/>
+    {/* <StatusFilter value={value?.statuses} onChange={onStatusFilterChange}/> */}
     <PricesFilter value={value?.prices} onChange={onPricesFilterChange} />
     <CollectionsFilter
       value={value}

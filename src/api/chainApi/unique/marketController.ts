@@ -61,23 +61,23 @@ class MarketController implements IMarketController {
     this.uniqApi = uniqApi;
     this.kusamaApi = kusamaApi;
     const options = { ...defaultMarketPlaceControllerConfig, ...config };
-    if (!options.contractAddress) throw new Error('Contract address not found');
-    this.contractAddress = options.contractAddress;
-    if (!options.contractOwner) throw new Error('Contract owner not provided');
-    this.contractOwner = options.contractOwner; // ???
-    if (!options.uniqueSubstrateApiRpc) throw new Error('Uniq substrate rpc not provided');
-    this.uniqueSubstrateApiRpc = options.uniqueSubstrateApiRpc;
-    if (!options.escrowAddress) throw new Error('Escrow address is not provided');
-    this.escrowAddress = options.escrowAddress;
-    if (!options.minPrice) throw new Error('Min price not provided');
-    this.minPrice = options.minPrice;
-    if (!options.kusamaDecimals) throw new Error('Kusama decimals not provided');
-    this.kusamaDecimals = options.kusamaDecimals; // TODO: could and should be taken from kusamaApi
+    // if (!options.contractAddress) throw new Error('Contract address not found');
+    this.contractAddress = options.contractAddress || '';
+    // if (!options.contractOwner) throw new Error('Contract owner not provided');
+    this.contractOwner = options.contractOwner || ''; // ???
+    // if (!options.uniqueSubstrateApiRpc) throw new Error('Uniq substrate rpc not provided');
+    this.uniqueSubstrateApiRpc = options.uniqueSubstrateApiRpc || '';
+    // if (!options.escrowAddress) throw new Error('Escrow address is not provided');
+    this.escrowAddress = options.escrowAddress || '';
+    // if (!options.minPrice) throw new Error('Min price not provided');
+    this.minPrice = options.minPrice || 0;
+    // if (!options.kusamaDecimals) throw new Error('Kusama decimals not provided');
+    this.kusamaDecimals = options.kusamaDecimals || 12; // TODO: could and should be taken from kusamaApi
     this.defaultGasAmount = options.defaultGasAmount || 2500000;
     if (!options.nftController) throw new Error('NFTController not provided');
     this.nftController = options.nftController;
-    if (!options.auctionAddress) throw new Error('Auction address not provided');
-    this.auctionAddress = options.auctionAddress;
+    // if (!options.auctionAddress) throw new Error('Auction address not provided');
+    this.auctionAddress = options.auctionAddress || '';
     const provider = new Web3.providers.WebsocketProvider(this.uniqueSubstrateApiRpc, {
       reconnect: {
         auto: true,

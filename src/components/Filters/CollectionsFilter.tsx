@@ -21,20 +21,20 @@ interface CollectionsFilterProps {
 
 const CollectionsFilter: FC<CollectionsFilterProps> = ({ value, onChange, onAttributesChange, onAttributeCountsChange }) => {
   const { collections, isFetching } = useCollections();
-  const { attributes, fetch: fetchAttributes, reset: resetAttributes, isFetching: isAttributesFetching } = useAttributes();
-  const { attributeCounts, fetch: fetchAttributeCounts, isFetching: isAttributeCountsFetching } = useAttributeCounts();
-  const { collections: selectedCollections = [], attributes: selectedAttributes = [], attributeCounts: selectedAttributeCounts = [] } = value || {};
-  const { settings } = useApi();
+  // const { attributes, fetch: fetchAttributes, reset: resetAttributes, isFetching: isAttributesFetching } = useAttributes();
+  // const { attributeCounts, fetch: fetchAttributeCounts, isFetching: isAttributeCountsFetching } = useAttributeCounts();
+  const { collections: selectedCollections = [] } = value || {};
+  // const { settings } = useApi();
 
-  useEffect(() => {
-    if (selectedCollections.length === 1 && !isAttributesFetching) fetchAttributes(selectedCollections[0]);
-  }, []);
+  // useEffect(() => {
+  //   if (selectedCollections.length === 1 && !isAttributesFetching) fetchAttributes(selectedCollections[0]);
+  // }, []);
 
-  useEffect(() => {
-    if (settings && settings.blockchain.unique.collectionIds.length > 0 && attributeCounts.length === 0) {
-      fetchAttributeCounts(selectedCollections?.length ? selectedCollections : settings?.blockchain.unique.collectionIds || []);
-    }
-  }, [settings?.blockchain.unique.collectionIds]);
+  // useEffect(() => {
+  //   if (settings && settings.blockchain.unique.collectionIds.length > 0 && attributeCounts.length === 0) {
+  //     fetchAttributeCounts(selectedCollections?.length ? selectedCollections : settings?.blockchain.unique.collectionIds || []);
+  //   }
+  // }, [settings?.blockchain.unique.collectionIds]);
 
   const onCollectionSelect = useCallback((collectionId: number) => (value: boolean) => {
     let _selectedCollections;
@@ -46,17 +46,17 @@ const CollectionsFilter: FC<CollectionsFilterProps> = ({ value, onChange, onAttr
     // since traits are shown only if one collection is selected -> we should always reset them
     onChange(_selectedCollections, [], []);
 
-    if (_selectedCollections.length === 1) fetchAttributes(_selectedCollections[0]);
-    else resetAttributes();
+    // if (_selectedCollections.length === 1) fetchAttributes(_selectedCollections[0]);
+    // else resetAttributes();
 
-    if (_selectedCollections.length > 0) fetchAttributeCounts(_selectedCollections);
-    else fetchAttributeCounts(settings?.blockchain.unique.collectionIds || []);
-  }, [selectedCollections, fetchAttributes, resetAttributes, onAttributesChange, onChange, settings?.blockchain.unique.collectionIds]);
+    // if (_selectedCollections.length > 0) fetchAttributeCounts(_selectedCollections);
+    // else fetchAttributeCounts(settings?.blockchain.unique.collectionIds || []);
+  }, [selectedCollections, onChange]);
 
   const onCollectionsClear = useCallback(() => {
     onChange([], [], []);
-    fetchAttributeCounts(settings?.blockchain.unique.collectionIds || []);
-  }, [onChange, settings?.blockchain.unique.collectionIds]);
+    // fetchAttributeCounts(settings?.blockchain.unique.collectionIds || []);
+  }, [onChange]);
 
   return (<>
     <Accordion title={'Collections'}
@@ -82,18 +82,18 @@ const CollectionsFilter: FC<CollectionsFilterProps> = ({ value, onChange, onAttr
           ))}
       </CollectionFilterWrapper>
     </Accordion>
-    {onAttributeCountsChange && attributeCounts.length > 0 && <AttributeCountsFilter
-      attributeCounts={attributeCounts}
-      selectedAttributeCounts={selectedAttributeCounts}
-      isAttributeCountsFetching={isAttributeCountsFetching}
-      onAttributeCountsChange={onAttributeCountsChange}
-    />}
-    {onAttributesChange && selectedCollections.length === 1 && <AttributesFilter
-      attributes={attributes}
-      selectedAttributes={selectedAttributes}
-      isAttributesFetching={isAttributesFetching}
-      onAttributesChange={onAttributesChange}
-    />}
+    {/* {onAttributeCountsChange && attributeCounts.length > 0 && <AttributeCountsFilter */}
+    {/*   attributeCounts={attributeCounts} */}
+    {/*   selectedAttributeCounts={selectedAttributeCounts} */}
+    {/*   isAttributeCountsFetching={isAttributeCountsFetching} */}
+    {/*   onAttributeCountsChange={onAttributeCountsChange} */}
+    {/* />} */}
+    {/* {onAttributesChange && selectedCollections.length === 1 && <AttributesFilter */}
+    {/*   attributes={attributes} */}
+    {/*   selectedAttributes={selectedAttributes} */}
+    {/*   isAttributesFetching={isAttributesFetching} */}
+    {/*   onAttributesChange={onAttributesChange} */}
+    {/* />} */}
   </>);
 };
 

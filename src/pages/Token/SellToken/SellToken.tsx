@@ -21,7 +21,7 @@ export const SellToken: FC<SellTokenProps> = ({ offer, onSellClick, onTransferCl
   if (offer) {
     return (<>
       <Text size={'l'}>{'Price'}</Text>
-      <Price price={offer.price} />
+      <Price price={offer.price} isSellBlockchain={offer.isSellBlockchain} />
       <ButtonWrapper>
         <Button title={'Delist'} role={'danger'} onClick={onDelistClick} />
       </ButtonWrapper>
@@ -32,12 +32,12 @@ export const SellToken: FC<SellTokenProps> = ({ offer, onSellClick, onTransferCl
   return (
     <>
       <ActionsWrapper>
-        {settings?.marketType !== 'primary' && <Button title={'Sell'} role={'primary'} onClick={onSellClick}/>}
+        {/* {settings?.marketType !== 'primary' && <Button title={'Sell'} role={'primary'} onClick={onSellClick}/>} */}
         <Button title={'Transfer'} onClick={onTransferClick} />
       </ActionsWrapper>
-      {(settings?.marketType !== 'primary' && !selectedAccount?.isOnWhiteList) && <WarningWrapper>
-        A fee of ~0,001 KSM may be applied to the first sale transaction. Your address will be added to the transaction sponsoring whitelist allowing you to make feeless transactions.
-      </WarningWrapper>}
+      {/* {(settings?.marketType !== 'primary' && !selectedAccount?.isOnWhiteList) && <WarningWrapper> */}
+      {/*   A fee of ~0,001 KSM may be applied to the first sale transaction. Your address will be added to the transaction sponsoring whitelist allowing you to make feeless transactions. */}
+      {/* </WarningWrapper>} */}
       <Divider />
     </>
   );
