@@ -22,7 +22,6 @@ export const FinalModal: FC<TCreateAccountBodyModalProps> = ({ accountProperties
     <AddressWrapper>
       <Avatar size={24} src={DefaultAvatar} address={accountProperties?.address} />
       <Text
-        // @ts-ignore
         testid={`${testid}-address`}
       >{accountProperties?.address || ''}</Text>
     </AddressWrapper>
@@ -58,13 +57,11 @@ export const FinalModal: FC<TCreateAccountBodyModalProps> = ({ accountProperties
     <ButtonWrapper>
       <StepsTextStyled size={'m'}>Step 3/3</StepsTextStyled>
       <Button
-        // @ts-ignore
         testid={`${testid}-previous-button`}
         onClick={onGoBack}
         title='Previous'
       />
       <Button
-        // @ts-ignore
         testid={`${testid}-next-button`}
         onClick={onSaveClick}
         role='primary'

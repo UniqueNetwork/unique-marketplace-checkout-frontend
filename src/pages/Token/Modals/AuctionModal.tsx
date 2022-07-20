@@ -19,7 +19,7 @@ import { Offer } from '../../../api/restApi/offers/types';
 import { useAuction } from '../../../api/restApi/auction/auction';
 import { TCalculatedBid } from '../../../api/restApi/auction/types';
 
-export const AuctionModal: FC<TTokenPageModalBodyProps> = ({ offer, setIsClosable, onFinish }) => {
+export const AuctionModal: FC<TTokenPageModalBodyProps> = ({ offer, setIsClosable, onFinish, testid }) => {
   const [status, setStatus] = useState<'ask' | 'place-bid-stage'>('ask'); // TODO: naming
   const [bidValue, setBidValue] = useState<TPlaceABid>();
 
@@ -29,7 +29,7 @@ export const AuctionModal: FC<TTokenPageModalBodyProps> = ({ offer, setIsClosabl
     setIsClosable(false);
   }, [setStatus, setBidValue, setIsClosable]);
 
-  if (status === 'ask') return (<AskBidModal offer={offer} onConfirmPlaceABid={onConfirmPlaceABid} />);
+  if (status === 'ask') return (<AskBidModal offer={offer} onConfirmPlaceABid={onConfirmPlaceABid} testid={`${testid}-bid`} />);
   if (status === 'place-bid-stage') {
     return (<AuctionStagesModal
       accountAddress={bidValue?.accountAddress}
@@ -37,6 +37,7 @@ export const AuctionModal: FC<TTokenPageModalBodyProps> = ({ offer, setIsClosabl
       onFinish={onFinish}
       offer={offer}
       setIsClosable={setIsClosable}
+      testid={`${testid}-stages`}
     />);
   }
   return null;
@@ -44,7 +45,7 @@ export const AuctionModal: FC<TTokenPageModalBodyProps> = ({ offer, setIsClosabl
 
 const chainOptions = [{ id: 'KSM', title: 'KSM', iconRight: { size: 18, name: 'chain-kusama' } }];
 
-export const AskBidModal: FC<{ offer?: Offer, onConfirmPlaceABid(value: TPlaceABid): void}> = ({ offer, onConfirmPlaceABid }) => {
+export const AskBidModal: FC<{ offer?: Offer, onConfirmPlaceABid(value: TPlaceABid): void, testid: string}> = ({ offer, onConfirmPlaceABid, testid }) => {
   const [chain, setChain] = useState<string | undefined>('KSM');
   const { kusamaFee } = useFee();
   const { selectedAccount } = useAccounts();
@@ -139,7 +140,6 @@ export const AskBidModal: FC<{ offer?: Offer, onConfirmPlaceABid(value: TPlaceAB
       <TextStyled
         color='additional-warning-500'
         size='s'
-        // @ts-ignore
         testid={`${testid}-fee-warning`}
       >
         {`A fee of ~ ${kusamaFee} ${chain || ''} can be applied to the transaction`}

@@ -82,7 +82,6 @@ const CollectionsFilter: FC<CollectionsFilterProps> = ({ value, onChange, onAttr
             />
             <CollectionCover src={collection.coverImageUrl} size={22} type={'circle'}/>
             <Text
-              // @ts-ignore
               testid={`${testid}-name-${collection.id}`}
             >{collection.collectionName || ''}</Text>
           </CheckboxWrapper>

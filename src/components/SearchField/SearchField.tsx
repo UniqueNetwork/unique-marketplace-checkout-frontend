@@ -66,7 +66,6 @@ const SearchField: FC<SearchFieldProps> = ({ className, searchValue, placeholder
         onClick={onSearchClick}
         role='primary'
         title='Search'
-        // @ts-ignore
         testid={`${testid}-search-button`}
       />}
     </SearchWrapper>

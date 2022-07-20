@@ -34,7 +34,6 @@ export const SellToken: FC<SellTokenProps> = ({ offer, isAllowed, onSellClick, o
           title={'Delist'}
           role={'danger'}
           onClick={onDelistClick}
-          // @ts-ignore
           testid={`${testid}-delist-button`}
         />
       </ButtonWrapper>
@@ -51,13 +50,11 @@ export const SellToken: FC<SellTokenProps> = ({ offer, isAllowed, onSellClick, o
           title={'Sell'}
           role={'primary'}
           onClick={onSellClick}
-          // @ts-ignore
           testid={`${testid}-sell-button`}
         />}
         <Button
           title={'Transfer'}
           onClick={onTransferClick}
-          // @ts-ignore
           testid={`${testid}-transfer-button`}
         />
       </ActionsWrapper>

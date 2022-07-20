@@ -30,7 +30,6 @@ export const AskCredentialsModal: FC<TCreateAccountBodyModalProps> = ({ accountP
     <AddressWrapper>
       <Avatar size={24} src={DefaultAvatar} address={accountProperties?.address} />
       <Text
-        // @ts-ignore
         testid={`${testid}-address`}
         color={'grey-500'}
       >{accountProperties?.address || ''}</Text>
@@ -64,13 +63,11 @@ export const AskCredentialsModal: FC<TCreateAccountBodyModalProps> = ({ accountP
     <ButtonWrapper>
       <StepsTextStyled size={'m'}>Step 2/3</StepsTextStyled>
       <Button
-        // @ts-ignore
         testid={`${testid}-previous-button`}
         onClick={onGoBack}
         title='Previous'
       />
       <Button
-        // @ts-ignore
         testid={`${testid}-next-button`}
         disabled={!passwordsMatch || !passwordIsValid || !nameIsValid}
         onClick={onNextClick}

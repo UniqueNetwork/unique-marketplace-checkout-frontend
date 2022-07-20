@@ -82,7 +82,6 @@ const PricesFilter: FC<PricesFilterProps> = ({ value, onChange, testid }) => {
         <Button
           title={'Apply'}
           onClick={onApply}
-          // @ts-ignore
           testid={`${testid}-apply-button`}
         />
       </PriceFilterWrapper>

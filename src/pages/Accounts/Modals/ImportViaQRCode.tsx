@@ -49,7 +49,6 @@ export const ImportViaQRCodeAccountModal: FC<TAccountModalProps> = ({ isVisible,
       {address && <AddressWrapper>
         <Avatar size={24} src={DefaultAvatar} address={address} />
         <Text
-          // @ts-ignore
           testid={`${testid}-address`}
         >{address}</Text>
       </AddressWrapper>}
@@ -68,7 +67,6 @@ export const ImportViaQRCodeAccountModal: FC<TAccountModalProps> = ({ isVisible,
 
     <ButtonWrapper>
       <Button
-        // @ts-ignore
         testid={`${testid}-save-button`}
         disabled={!address || !password}
         onClick={onSaveClick}

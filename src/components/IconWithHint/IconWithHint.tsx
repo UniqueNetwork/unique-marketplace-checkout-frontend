@@ -29,13 +29,14 @@ const IconWithHint: FC<IProps> = ({ placement = 'bottom', offset = 5, children }
         onMouseOver={onHover}
         onMouseOut={onHoverEnd}
       >
-        <Tooltip
-          content={<img alt='questionIcon' src={isHovered ? questionFilledIcon : questionIcon}/>}
-          placement={placement}
-          offset={offset}
-        >
-          {children}
-        </Tooltip>
+        {/* TODO: uncomment this once tooltips are updated in ui-kit */}
+        {/* <Tooltip */}
+        {/*   content={<img alt='questionIcon' src={isHovered ? questionFilledIcon : questionIcon}/>} */}
+        {/*   placement={placement} */}
+        {/*   offset={offset} */}
+        {/* > */}
+        {/*   {children} */}
+        {/* </Tooltip> */}
       </IconContainer>
     </Cell>
   );

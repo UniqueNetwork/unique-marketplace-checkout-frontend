@@ -77,7 +77,6 @@ export const ImportViaJSONAccountModal: FC<TAccountModalProps> = ({ isVisible, o
     </WarningBlock>
     <ButtonWrapper>
       <Button
-        // @ts-ignore
         testid={`${testid}-restore-button`}
         disabled={!password || !pair}
         onClick={onRestoreClick}

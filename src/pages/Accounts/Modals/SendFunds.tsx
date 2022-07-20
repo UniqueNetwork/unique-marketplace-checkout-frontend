@@ -172,7 +172,6 @@ export const AskTransferFundsModal: FC<AskSendFundsModalProps> = ({ isVisible, o
     </AddressWrapper>
     <AmountWrapper>
       <Text
-        // @ts-ignore
         testid={`${testid}-balance`}
         size={'s'}
       >{`${formatKusamaBalance(sender?.balance?.KSM?.toString() || 0)} ${tokenSymbol}`}</Text>
@@ -192,7 +191,6 @@ export const AskTransferFundsModal: FC<AskSendFundsModalProps> = ({ isVisible, o
     </RecipientSelectWrapper>
     <AmountWrapper>
       {recipientBalance && <Text
-        // @ts-ignore
         testid={`${testid}-recipient-balance`}
         size={'s'}
       >{`${formatKusamaBalance(recipientBalance?.toString() || 0)} ${tokenSymbol}`}</Text> }
@@ -215,7 +213,6 @@ export const AskTransferFundsModal: FC<AskSendFundsModalProps> = ({ isVisible, o
     />
     <ButtonWrapper>
       <Button
-        // @ts-ignore
         testid={`${testid}-confirm-button`}
         disabled={isConfirmDisabled}
         onClick={onSend}
@@ -268,7 +265,6 @@ const KusamaFeeMessage: FC<KusamaFeeMessageProps> = ({ isFeeLoading, kusamaFee, 
   return (
     <KusamaFeeMessageWrapper>
       <Text
-        // @ts-ignore
         testid={`${testid}-text`}
         color='additional-warning-500'
         size='s'

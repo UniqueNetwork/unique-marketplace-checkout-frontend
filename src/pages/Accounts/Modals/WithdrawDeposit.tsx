@@ -166,7 +166,6 @@ export const WithdrawDepositAskModal: FC<WithdrawDepositAskModalProps> = ({ isVi
           collectionId={Number(bid.collectionId)}
         >
           <Text
-            // @ts-ignore
             testid={`${testid}-bid-${bid.auctionId}-amount`}
             size={'m'}
           >{`${formatKusamaBalance(bid.amount)} ${tokenSymbol}`}</Text>
@@ -186,13 +185,11 @@ export const WithdrawDepositAskModal: FC<WithdrawDepositAskModalProps> = ({ isVi
     <Row>
       <Text color='grey-500'>Amount to withdraw:&nbsp;</Text>
       <Text
-        // @ts-ignore
         testid={`${testid}-withdraw-amount`}
       >{`${formatKusamaBalance(amountToWithdraw.toString())} ${tokenSymbol}`}</Text>
     </Row>
     <ButtonWrapper>
       <Button
-        // @ts-ignore
         testid={`${testid}-confirm-button`}
         disabled={amountToWithdraw.eq(new BN(0))}
         onClick={onSubmit}

@@ -32,7 +32,6 @@ const DefaultMarketStages: FC<TStagesModalProps> = ({ stages, status, onFinish, 
           <TitleWrapper>
             <Text
               size={'m'}
-              // @ts-ignore
               testid={`${testid}-stage${index + 1}`}
             >{stage.title}</Text>
             {stages.length > 1 && <Text size={'s'} color={'grey-500'}>

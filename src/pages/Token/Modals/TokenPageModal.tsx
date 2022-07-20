@@ -27,7 +27,7 @@ export type TTokenPageModalBodyProps = {
   offer?: Offer
   onFinish(): void // TODO: make a type, in future we would definitly wan't to pass smth like success/error/error.message
   setIsClosable(value: boolean): void
-  testid?: string
+  testid: string
 }
 
 const TokenPageModal = ({ onClose, onFinish, marketType, offer, token, testid }: TTokenPageModalProps) => {

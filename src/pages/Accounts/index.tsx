@@ -292,7 +292,6 @@ export const AccountsPage = () => {
     <AccountPageWrapper>
       <Row>
         <CreateAccountButton
-          // @ts-ignore
           testid={`${testid}-create-substrate-button`}
           title={'Create substrate account'}
           onClick={onCreateAccountClick}
@@ -305,7 +304,6 @@ export const AccountsPage = () => {
           </DropdownMenu>}
         >
           <AddAccountButton
-            // @ts-ignore
             testid={`${testid}-add-via-button`}
             title={'Add account via'}
             role={'primary'}

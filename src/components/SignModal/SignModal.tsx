@@ -65,7 +65,6 @@ export const SignModal: FC<TSignModalProps> = ({ account, isVisible, onFinish, o
     </CredentialsWrapper>
     <ButtonWrapper>
       <Button
-        // @ts-ignore
         testid={`${testid}-sign-button`}
         disabled={!password}
         onClick={onSignClick}

@@ -37,7 +37,6 @@ export const TextInput: FC<TextInputProps> = ({ value, onChange, placeholder, la
 
   return <InputWrapper className={className}>
     <InputText
-      // @ts-ignore
       testid={`${testid}-input`}
       placeholder={placeholder}
       onChange={onChangeInput}

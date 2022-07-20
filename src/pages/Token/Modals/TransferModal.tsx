@@ -61,7 +61,6 @@ const AskTransferModal: FC<{ onTransfer(receiver: string): void, testid: string 
         label='Please enter the address you wish to send the NFT to'
         onChange={onAddressInputChange}
         value={address}
-        // @ts-ignore
         testid={`${testid}-address-input`}
       />
       <WarningBlock>
@@ -76,7 +75,6 @@ const AskTransferModal: FC<{ onTransfer(receiver: string): void, testid: string 
           onClick={onConfirmTransferClick}
           role='primary'
           title='Confirm'
-          // @ts-ignore
           testid={`${testid}-confirm-button`}
         />
       </ButtonWrapper>

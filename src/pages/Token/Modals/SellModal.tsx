@@ -156,7 +156,6 @@ export const AskSellModal: FC<TAskSellModalProps> = ({ onSellAuction, onSellFixP
           onClick={onConfirmFixPriceClick}
           role='primary'
           title='Confirm'
-          // @ts-ignore
           testid={`${testid}-confirm-button`}
         />
       </ButtonWrapper>
@@ -184,7 +183,6 @@ export const AskSellModal: FC<TAskSellModalProps> = ({ onSellAuction, onSellFixP
           options={durationOptions}
           optionKey={'id'}
           value={durationSelectValue?.toString()}
-          // @ts-ignore
           testid={`${testid}-duration-select`}
         />
       </Row>
@@ -194,7 +192,6 @@ export const AskSellModal: FC<TAskSellModalProps> = ({ onSellAuction, onSellFixP
           onClick={onConfirmAuctionClick}
           role='primary'
           title='Confirm'
-          // @ts-ignore
           testid={`${testid}-confirm-button`}
         />
       </ButtonWrapper>

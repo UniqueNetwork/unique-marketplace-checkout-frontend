@@ -35,7 +35,6 @@ export const NumberInput: FC<AmountInputProps> = ({ value, onChange, placeholder
       onChange={onChangeInput}
       value={value}
       label={label}
-      // @ts-ignore
       testid={`${testid}`}
     />
     {value &&

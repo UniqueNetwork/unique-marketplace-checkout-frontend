@@ -194,14 +194,12 @@ export const MarketPage = () => {
               onChange={onSortingChange}
               options={sortingOptions}
               value={sortingValue}
-              // @ts-ignore
               testid={`${testid}-sorting-select`}
             />
           </SortSelectWrapper>
         </SearchAndSortingWrapper>
         <div>
           <Text
-            // @ts-ignore
             testid={`${testid}-items-count`}
             size='m'
           >{isFetching ? 'Loading items' : `${offersCount} items`}</Text>

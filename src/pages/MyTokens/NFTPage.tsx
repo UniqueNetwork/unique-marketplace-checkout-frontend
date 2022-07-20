@@ -226,14 +226,12 @@ export const NFTPage = () => {
               onChange={onSortingChange}
               options={sortingOptions}
               value={sortingValue}
-              // @ts-ignore
               testid={`${testid}-sorting-select`}
             />
           </SortSelectWrapper>
         </SearchAndSortingWrapper>
         <div>
           <Text
-            // @ts-ignore
             testid={`${testid}-items-count`}
             size='m'
           >{isFetchingTokens || isFetchingOffers || isLoading ? 'Loading items' : `${featuredTokens.length} items`}</Text>

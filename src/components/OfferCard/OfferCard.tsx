@@ -63,7 +63,6 @@ export const OfferCard: FC<TTokensCard> = ({ offer, testid }) => {
             size='l'
             weight='regular'
             color={'secondary-500'}
-            // @ts-ignore
             testid={`${testid}-tokenId`}
           >
             {`${prefix || ''} #${offer?.tokenId}`}
@@ -81,7 +80,6 @@ export const OfferCard: FC<TTokensCard> = ({ offer, testid }) => {
         </a>
         <PriceWrapper>
           <Text
-            // @ts-ignore
             testid={`${testid}-price`}
             size='l'
           >{topBid ? `${formatKusamaBalance(Number(topBid))}` : `${formatKusamaBalance(offer?.price)}` }</Text>
@@ -90,19 +88,16 @@ export const OfferCard: FC<TTokensCard> = ({ offer, testid }) => {
         {!offer?.auction && <Text size={'xs'} color={'grey-500'} >Price</Text>}
         {offer?.auction && <AuctionInfoWrapper>
           {isTopBidder && <Text
-            // @ts-ignore
             testid={`${testid}-leading-bid`}
             size={'xs'}
             color={'additional-positive-500'}
           >Leading bid</Text>}
           {isBidder && !isTopBidder && <Text
-            // @ts-ignore
             testid={`${testid}-outbid`}
             size={'xs'}
             color={'coral-500'}
           >Outbid</Text>}
           {!isBidder && !isTopBidder && <Text
-            // @ts-ignore
             testid={`${testid}-bids`}
             size={'xs'}
             color={'grey-500'}

@@ -37,14 +37,12 @@ const ConfirmModal: FC<IConfirmModalProps> = ({
       </Content>
       <Footer>
         <Button
-          // @ts-ignore
           testid={`${testid}-cancel-button`}
           onClick={onCancel}
           role='outlined'
           title={cancelText}
         />
         <Button
-          // @ts-ignore
           testid={`${testid}-confirm-button`}
           onClick={onConfirmClick}
           role='primary'

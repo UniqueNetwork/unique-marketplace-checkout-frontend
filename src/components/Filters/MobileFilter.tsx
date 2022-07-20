@@ -46,21 +46,18 @@ export function MobileFilters<T = FilterState>({ filterCount, filterComponent, d
         role={'primary'}
         onClick={onVisibleButtonClick}
         title={`Filter and sort ${filterCount ? `(${filterCount})` : ''} `}
-        // @ts-ignore
         testid={`${testid}-filter-sort-button`}
       />}
       {isVisible && <>
         <Button
           onClick={onShowButtonClick}
           title={'Show'}
-          // @ts-ignore
           testid={`${testid}-show-button`}
         />
         <Button
           role={'danger'}
           onClick={onResetButtonClick}
           title={'Reset'}
-          // @ts-ignore
           testid={`${testid}-reset-button`}
         />
       </>
@@ -83,7 +80,6 @@ export function MobileFilters<T = FilterState>({ filterCount, filterComponent, d
             onChange={onSortingChange}
             options={sortingOptions}
             value={sortingValue}
-            // @ts-ignore
             testid={`${testid}-sorting-select`}
           />
         </SortStyled>

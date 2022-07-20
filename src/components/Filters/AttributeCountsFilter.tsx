@@ -48,7 +48,6 @@ const AttributeCountsFilter: FC<AttributeCountsFilterProps> = ({ attributeCounts
               testid={`${testid}-checkbox-${attributeCount.numberOfAttributes}`}
             />
             <Text
-              // @ts-ignore
               testid={`${testid}-amount-${attributeCount.amount}`}
               color={'grey-500'}
             >{attributeCount.amount.toString()}</Text>

@@ -120,20 +120,17 @@ const Auction: FC<AuctionProps> = ({ offer: initialOffer, onPlaceABidClick, onDe
         {canDelist && <Button title={'Delist'}
           role={'danger'}
           onClick={onDelistAuctionClick}
-          // @ts-ignore
           testid={`${testid}-delist-button`}
         />}
         {canPlaceABid && <Button title={'Place a bid'}
           role={'primary'}
           onClick={onPlaceABidClick}
           disabled={!canPlaceABid}
-          // @ts-ignore
           testid={`${testid}-place-bid-button`}
         />}
         {canWithdraw && <Button
           title={'Withdraw'}
           onClick={onWithdrawClick}
-          // @ts-ignore
           testid={`${testid}-withdraw-button`}
         />}
       </Row>}

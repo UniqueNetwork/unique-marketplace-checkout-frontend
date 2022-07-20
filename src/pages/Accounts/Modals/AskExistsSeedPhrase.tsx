@@ -39,7 +39,6 @@ export const AskExistsSeedPhraseModal: FC<TCreateAccountBodyModalProps> = ({ acc
     <AddressWrapper>
       {address && <><Avatar size={24} src={DefaultAvatar} address={address} />
         <Text
-          // @ts-ignore
           testid={`${testid}-address`}
           size={'s'}
           color={'grey-500'}
@@ -50,7 +49,6 @@ export const AskExistsSeedPhraseModal: FC<TCreateAccountBodyModalProps> = ({ acc
     <InputSeedWrapper>
       <Text>The secret seed value</Text>
       <InputText
-        // @ts-ignore
         testid={`${testid}-seed-input`}
         onChange={onSeedChange}
         value={seed}
@@ -59,7 +57,6 @@ export const AskExistsSeedPhraseModal: FC<TCreateAccountBodyModalProps> = ({ acc
     <ButtonWrapper>
       <StepsTextStyled size={'m'}>Step 1/3</StepsTextStyled>
       <Button
-        // @ts-ignore
         testid={`${testid}-next-button`}
         disabled={!address}
         onClick={onNextClick}

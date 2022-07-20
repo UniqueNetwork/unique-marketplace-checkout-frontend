@@ -65,7 +65,6 @@ export const AskSeedPhraseModal: FC<TCreateAccountBodyModalProps> = ({ onFinish,
     <AddressWrapper>
       {address && <Avatar size={24} src={DefaultAvatar} address={address} />}
       <Text
-        // @ts-ignore
         testid={`${testid}-address`}
         color={'grey-500'}
       >{address}</Text>
@@ -113,7 +112,6 @@ export const AskSeedPhraseModal: FC<TCreateAccountBodyModalProps> = ({ onFinish,
     <ButtonWrapper>
       <StepsTextStyled size={'m'}>Step 1/3</StepsTextStyled>
       <Button
-        // @ts-ignore
         testid={`${testid}-next-button`}
         disabled={!address || !confirmSeedSaved || !seedValid}
         onClick={onNextClick}

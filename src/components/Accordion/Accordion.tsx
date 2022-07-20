@@ -49,7 +49,6 @@ const Accordion: FC<AccordionProps> = ({ title, isOpen: isOpenProps, children, o
           title={'Clear'}
           onClick={onClearClick}
           role={'danger'}
-          // @ts-ignore
           testid={`${testid}-clear-button`}
         />}
       </AccordionHeaderWrapper>
