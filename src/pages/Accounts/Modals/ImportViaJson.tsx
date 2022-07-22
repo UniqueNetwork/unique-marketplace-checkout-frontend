@@ -53,7 +53,6 @@ export const ImportViaJSONAccountModal: FC<TAccountModalProps> = ({ isVisible, o
         <Text size={'s'} color={'grey-500'}>Click to select or drop the file here</Text>
       </TitleWrapper>
       <Upload
-        // @ts-ignore
         testid={`${testid}-upload-button`}
         onChange={onUploadChange}
         type={'square'}

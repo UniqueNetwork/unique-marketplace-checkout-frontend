@@ -18,7 +18,6 @@ export const Price: FC<PriceProps> = ({ price, testid = '' }) => {
     <PriceWrapper>
       <Row>
         <Heading
-          // @ts-ignore
           testid={`${testid}-price`}
           size={'1'}
         >{`${formatKusamaBalance(new BN(price).toString(), api?.market?.kusamaDecimals)}`}</Heading>

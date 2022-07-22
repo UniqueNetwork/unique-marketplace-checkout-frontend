@@ -15,7 +15,6 @@ export const TradesPage = () => {
 
   return (<>
     <Tabs
-      // @ts-ignore
       testid={`${testid}-tabs`}
       activeIndex={activeTab}
       labels={['All tokens', 'My tokens']}

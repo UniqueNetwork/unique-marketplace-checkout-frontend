@@ -68,7 +68,6 @@ export function MobileFilters<T = FilterState>({ filterCount, filterComponent, d
         activeIndex={activeTabIndex}
         labels={tabs}
         onClick={setActiveTabIndex}
-        // @ts-ignore
         testid={`${testid}-tabs`}
       />
       <Tabs
