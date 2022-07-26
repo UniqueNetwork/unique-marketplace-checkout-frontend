@@ -90,6 +90,10 @@ const Content = styled.div`
 `;
 
 const TableStyled = styled(Table)`
+  @media (max-width: 768px) {
+    max-height: 400px;
+    overflow: auto;
+  }
   @media (max-width: 640px) {
     & > div {
       grid-template-columns: 1fr !important;
