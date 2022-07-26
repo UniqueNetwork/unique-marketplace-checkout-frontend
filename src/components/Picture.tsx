@@ -1,14 +1,16 @@
 import React, { FC, useEffect, useState } from 'react';
 import { BlueGrey100 } from '../styles/colors';
 import Skeleton from './Skeleton/Skeleton';
+import { VideoAttribute } from '../api/uniqueSdk/types';
 
 interface PictureProps {
   src?: string
   alt: string
   size?: number
+  video?: VideoAttribute
 }
 
-export const Picture: FC<PictureProps> = ({ alt, src, size }) => {
+export const Picture: FC<PictureProps> = ({ alt, src, size, video }) => {
   const [imageSrc, setImageSrc] = useState<string | undefined>();
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
@@ -36,7 +38,18 @@ export const Picture: FC<PictureProps> = ({ alt, src, size }) => {
 
   return (<div className={'picture'}>
     {isLoading && <Skeleton width={'100%'} height={'100%'} />}
-    {!isLoading && imageSrc &&
+    {!isLoading && video &&
+      <video
+        width='100%'
+        height='100%'
+        src={video.fullUrl || video.url}
+        poster={imageSrc}
+        controls
+        autoPlay
+        loop
+      ></video>
+    }
+    {!isLoading && imageSrc && !video &&
       <img
         alt={alt}
         src={imageSrc}

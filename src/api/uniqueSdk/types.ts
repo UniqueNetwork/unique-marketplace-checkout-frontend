@@ -59,7 +59,10 @@ export interface NFTToken {
   description?: string
   collectionCover?: string
   isAllowed?: boolean
+  video: VideoAttribute
 }
+
+export type VideoAttribute = ({ url: string; urlInfix?: undefined; ipfsCid?: undefined } & { hash?: string } & { fullUrl: string | null }) | ({ urlInfix: string; url?: undefined; ipfsCid?: undefined } & { hash?: string } & { fullUrl: string | null }) | ({ ipfsCid: string; url?: undefined; urlInfix?: undefined } & { hash?: string } & { fullUrl: string | null }) | undefined;
 
 export type MetadataType = {
   metadata?: string
