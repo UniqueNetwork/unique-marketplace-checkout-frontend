@@ -51,10 +51,10 @@ const getAccountsColumns = ({
     onShowGetKsmModal
   }: AccountsColumnsProps): TableColumnProps[] => [
   {
-    title: (<>Accounts<IconWithHint placement={'right-start'}>
-      <>Substrate account addresses (Kusama, Quartz, Polkadot, Unique, etc.) may be represented by a different address
+    title: (<>Accounts<IconWithHint align={{ appearance: 'horizontal', vertical: 'top', horizontal: 'right' }}>
+      <span>Substrate account addresses (Kusama, Quartz, Polkadot, Unique, etc.) may be represented by a different address
         character sequence, but they can be converted between each other because they share the same public key. You
-        can see all transformations for any given address on <StyledLink href='https://quartz.subscan.io/' target='_blank' rel='noreferrer'>Subscan</StyledLink>.</>
+        can see all transformations for any given address on <StyledLink href='https://quartz.subscan.io/' target='_blank' rel='noreferrer'>Subscan</StyledLink>.</span>
     </IconWithHint></>),
     width: '25%',
     field: 'accountInfo',
@@ -110,7 +110,9 @@ const getAccountsColumns = ({
         return (
           <DepositActionsWrapper>
             <Button title={'Withdraw'} onClick={onShowWithdrawDepositModal(accountInfo.address)} role={'primary'} />
-            <IconWithHint placement={'bottom-end'}>Learn more in <StyledLink href='/FAQ' target='_blank' rel='noreferrer'>FAQ</StyledLink></IconWithHint>
+            <IconWithHint align={{ appearance: 'vertical', vertical: 'bottom', horizontal: 'right' }}>
+              <span>Learn more in <StyledLink href='/FAQ' target='_blank' rel='noreferrer'>FAQ</StyledLink></span>
+            </IconWithHint>
           </DepositActionsWrapper>
         );
       }
@@ -127,7 +129,9 @@ const getAccountsColumns = ({
           </ActionsWrapper>
           {(accountInfo.deposit && isSmallDevice) && <DepositActionsWrapper>
             <Button title={'Withdraw'} onClick={onShowWithdrawDepositModal(accountInfo.address)} role={'primary'} />
-            <IconWithHint placement={'bottom-end'}>Learn more in <StyledLink href='/FAQ' target='_blank' rel='noreferrer'>FAQ</StyledLink></IconWithHint>
+            <IconWithHint align={{ appearance: 'vertical', vertical: 'bottom', horizontal: 'right' }}>
+              <span>Learn more in <StyledLink href='/FAQ' target='_blank' rel='noreferrer'>FAQ</StyledLink></span>
+            </IconWithHint>
           </DepositActionsWrapper>}
         </>
       );
