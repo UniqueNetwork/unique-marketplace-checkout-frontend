@@ -1,4 +1,4 @@
-import React, { FC, useCallback } from 'react';
+import React, { FC, useCallback, useMemo } from 'react';
 import { IconProps, InputText } from '@unique-nft/ui-kit';
 import styled from 'styled-components';
 import { IconButton } from '../IconButton/IconButton';
@@ -12,9 +12,10 @@ interface TextInputProps {
   iconLeft?: IconProps
   errorText?: string
   allowSpaces?: boolean
+  testid?: string
 }
 
-export const TextInput: FC<TextInputProps> = ({ value, onChange, placeholder, label, className, iconLeft, errorText, allowSpaces }) => {
+export const TextInput: FC<TextInputProps> = ({ value, onChange, placeholder, label, className, iconLeft, errorText, allowSpaces, testid }) => {
   const onChangeInput = useCallback((_value: string) => {
     if (!allowSpaces) onChange(_value.trim());
     else onChange(_value);
@@ -24,8 +25,21 @@ export const TextInput: FC<TextInputProps> = ({ value, onChange, placeholder, la
     onChange('');
   }, [onChange]);
 
+  const iconRight = useMemo(() => {
+    if (value) {
+      return (
+        <ClearButton
+          name={'circle-close'}
+          size={24}
+          onClick={onClear}
+          testid={`${testid}-clear-button`}
+        />);
+    } else return null;
+  }, [value, testid, onClear]);
+
   return <InputWrapper className={className}>
     <InputText
+      testid={`${testid}-input`}
       placeholder={placeholder}
       onChange={onChangeInput}
       value={value}
@@ -33,7 +47,7 @@ export const TextInput: FC<TextInputProps> = ({ value, onChange, placeholder, la
       iconLeft={iconLeft}
       statusText={errorText}
       error={!!errorText}
-      iconRight={value ? <ClearButton name={'circle-close'} size={24} onClick={onClear} /> : null}
+      iconRight={iconRight}
     />
   </InputWrapper>;
 };

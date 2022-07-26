@@ -1,16 +1,16 @@
-import React, { FC, useCallback, useState } from 'react';
+import React, { FC, useCallback, useRef, useState } from 'react';
 import questionFilledIcon from 'static/icons/question-fill.svg';
 import questionIcon from 'static/icons/question.svg';
 import styled from 'styled-components';
-import { Tooltip } from '@unique-nft/ui-kit';
+import { Tooltip, TooltipAlign } from '@unique-nft/ui-kit';
 
 interface IProps {
-  offset?: number;
-  placement?: 'left' | 'right' | 'bottom' | 'top' | 'left-start' | 'left-end' | 'right-start' | 'right-end' | 'bottom-start' | 'bottom-end' | 'top-start' | 'top-end';
+  align?: TooltipAlign;
 }
 
-const IconWithHint: FC<IProps> = ({ placement = 'bottom', offset = 5, children }) => {
+const IconWithHint: FC<IProps> = ({ align, children }) => {
   const [isHovered, setIsHovered] = useState(false);
+  const targetRef = useRef<HTMLDivElement>(null);
   const onHover = useCallback(
     () => {
       setIsHovered(true);
@@ -30,12 +30,14 @@ const IconWithHint: FC<IProps> = ({ placement = 'bottom', offset = 5, children }
         onMouseOut={onHoverEnd}
       >
         <Tooltip
-          content={<img alt='questionIcon' src={isHovered ? questionFilledIcon : questionIcon}/>}
-          placement={placement}
-          offset={offset}
+          align={align}
+          targetRef={targetRef}
         >
           {children}
         </Tooltip>
+        <div ref={targetRef}>
+          <img alt='questionIcon' src={isHovered ? questionFilledIcon : questionIcon}/>
+        </div>
       </IconContainer>
     </Cell>
   );

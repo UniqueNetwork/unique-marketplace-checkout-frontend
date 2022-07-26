@@ -22,7 +22,7 @@ const seedGenerators: TOption[] = [
   { id: 'Mnemonic', title: 'Mnemonic' }
 ];
 
-export const AskSeedPhraseModal: FC<TCreateAccountBodyModalProps> = ({ onFinish }) => {
+export const AskSeedPhraseModal: FC<TCreateAccountBodyModalProps> = ({ onFinish, testid }) => {
   const [seed, setSeed] = useState<string>('');
   const [address, setAddress] = useState<string>('');
   const [confirmSeedSaved, setConfirmSeedSaved] = useState<boolean>(false);
@@ -66,26 +66,33 @@ export const AskSeedPhraseModal: FC<TCreateAccountBodyModalProps> = ({ onFinish 
   return (<>
     <AddressWrapper>
       {address && <Avatar size={24} src={DefaultAvatar} address={address} />}
-      <Text color={'grey-500'}>{address}</Text>
+      <Text
+        testid={`${testid}-address`}
+        color={'grey-500'}
+      >{address}</Text>
     </AddressWrapper>
     <Heading size={'4'} >The secret seed value for this account</Heading>
     <SeedGeneratorSelectWrapper>
-      <Select options={seedGenerators}
+      <Select
+        testid={`${testid}-seed-generator-select`}
+        options={seedGenerators}
         value={seedGenerator}
         onChange={onSeedGeneratorChange}
         disabled={seedGenerators.length === 1}
       />
-      <IconWithHint placement={'top'}>
-        <>Find out more on <TooltipLink href='https://' title={'Polkadot Wiki'}>Polkadot Wiki</TooltipLink></>
+      <IconWithHint align={{ appearance: 'vertical', vertical: 'top', horizontal: 'middle' }}>
+        <span>Find out more on <TooltipLink href='https://' title={'Polkadot Wiki'}>Polkadot Wiki</TooltipLink></span>
       </IconWithHint>
     </SeedGeneratorSelectWrapper>
     <InputSeedWrapper>
       <SeedInput
+        data-testid={`${testid}-seed-input`}
         onChange={onSeedChange}
         value={seed}
         rows={deviceSize === DeviceSize.sm ? 4 : 2}
       />
       <IconButton
+        testid={`${testid}-seed-reload`}
         size={24}
         name={'reload'}
         color={'var(--color-additional-dark)'}
@@ -97,7 +104,9 @@ export const AskSeedPhraseModal: FC<TCreateAccountBodyModalProps> = ({ onFinish 
       Ensure that you keep this seed in a safe place. Anyone with access to it can re-create the account and gain full access to it.
     </WarningBlock>
     <ConfirmWrapperRow>
-      <Checkbox label={'I have saved my mnemonic seed safely'}
+      <Checkbox
+        testid={`${testid}-saved-seed-checkbox`}
+        label={'I have saved my mnemonic seed safely'}
         checked={confirmSeedSaved}
         onChange={setConfirmSeedSaved}
         size={'m'}
@@ -106,6 +115,7 @@ export const AskSeedPhraseModal: FC<TCreateAccountBodyModalProps> = ({ onFinish 
     <ButtonWrapper>
       <StepsTextStyled size={'m'}>Step 1/3</StepsTextStyled>
       <Button
+        testid={`${testid}-next-button`}
         disabled={!address || !confirmSeedSaved || !seedValid}
         onClick={onNextClick}
         role='primary'
