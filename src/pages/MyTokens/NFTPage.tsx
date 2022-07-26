@@ -237,8 +237,8 @@ export const NFTPage = () => {
           >{isFetchingTokens || isFetchingOffers || isLoading ? 'Loading items' : `${featuredTokens.length} items`}</Text>
         </div>
         <TokensListWrapper >
-          {!isFetchingTokens && !isFetchingOffers && !isLoading && featuredTokens.length === 0 && <NoItems />}
-          <TokensList tokens={featuredTokens} isLoading={isFetchingTokens || isFetchingOffers || isLoading} testid={`${testid}-tokens`} />
+          {!isFetchingTokens && !isFetchingOffers && !isLoading && featuredTokens.length === 0 && <NoItems isSearchResult={!!searchString || !!filterCount} />}
+          <TokensList testid={`${testid}-tokens`} tokens={featuredTokens} isLoading={isFetchingTokens || isFetchingOffers || isLoading} />
         </TokensListWrapper>
       </MainContent>
       {deviceSize <= DeviceSize.md && <MobileFilters<MyTokensFilterState>

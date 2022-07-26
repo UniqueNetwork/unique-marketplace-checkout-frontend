@@ -11,13 +11,15 @@ interface TextInputProps {
   className?: string
   iconLeft?: IconProps
   errorText?: string
+  allowSpaces?: boolean
   testid?: string
 }
 
-export const TextInput: FC<TextInputProps> = ({ value, onChange, placeholder, label, className, iconLeft, errorText, testid }) => {
+export const TextInput: FC<TextInputProps> = ({ value, onChange, placeholder, label, className, iconLeft, errorText, allowSpaces, testid }) => {
   const onChangeInput = useCallback((_value: string) => {
-    onChange(_value.trim());
-  }, [onChange]);
+    if (!allowSpaces) onChange(_value.trim());
+    else onChange(_value);
+  }, [onChange, allowSpaces]);
 
   const onClear = useCallback(() => {
     onChange('');
