@@ -97,9 +97,10 @@ export const TokensTradesPage: FC<TokensTradesPage> = ({ currentTab }) => {
     }
     const associatedSortValues: Record<string, string> = {
       price: 'Price',
-      token: 'TokenId',
-      collection: 'CollectionId',
-      tradeDate: 'TradeDate'
+      tokenId: 'TokenId',
+      tokenDescription: 'CollectionId',
+      tradeDate: 'TradeDate',
+      status: 'Status'
     };
 
     if (sortString && sortString.length) sortString += `(${associatedSortValues[newSort.field]})`;
