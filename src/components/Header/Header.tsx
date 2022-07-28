@@ -3,11 +3,12 @@ import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 import { Icon, Text } from '@unique-nft/ui-kit';
 
-import { useScreenWidthFromThreshold } from '../../hooks/useScreenWidthFromThreshold';
+import { useScreenWidthFromThreshold } from 'hooks/useScreenWidthFromThreshold';
+import useDeviceSize, { DeviceSize } from 'hooks/useDeviceSize';
+import { useAdminLoggingIn } from 'api/restApi/admin/login';
+import { useAccounts } from 'hooks/useAccounts';
 import { TMenuItems } from '../PageLayout';
 import { WalletManager } from './WalletManager/WalletManager';
-import useDeviceSize, { DeviceSize } from '../../hooks/useDeviceSize';
-import { useAdminLoggingIn } from '../../api/restApi/admin/login';
 
 interface HeaderProps {
   activeItem: TMenuItems;
@@ -21,6 +22,7 @@ export const Header: FC<HeaderProps> = ({ activeItem }) => {
     toggleMobileMenu((prevState) => !prevState);
   }, []);
   const { hasAdminPermission } = useAdminLoggingIn();
+  const { selectedAccount } = useAccounts();
 
   const deviceSize = useDeviceSize();
 
@@ -47,16 +49,27 @@ export const Header: FC<HeaderProps> = ({ activeItem }) => {
                 Market
               </DesktopMenuItem>
             </Link>
-            <Link to='myTokens'>
-              <DesktopMenuItem
-                $active={activeItem === 'My tokens'}
-                color='additional-dark'
-                size='m'
-                weight='regular'
+            {selectedAccount
+              ? <Link to='myTokens'>
+                <DesktopMenuItem
+                  $active={activeItem === 'My tokens'}
+                  color='additional-dark'
+                  size='m'
+                  weight='regular'
+                >
+                  My tokens
+                </DesktopMenuItem>
+              </Link>
+              : <DesktopMenuItem
+                  $disabled
+                  $active={activeItem === 'My tokens'}
+                  color='additional-dark'
+                  size='m'
+                  weight='regular'
               >
                 My tokens
               </DesktopMenuItem>
-            </Link>
+            }
             <Link to='trades'>
               <DesktopMenuItem
                 $active={activeItem === 'Trades'}
@@ -108,16 +121,27 @@ export const Header: FC<HeaderProps> = ({ activeItem }) => {
             </Link>
           </LinkWrapper>
           <LinkWrapper onClick={mobileMenuToggler}>
-            <Link to='myTokens'>
-              <TextStyled
-                $active={activeItem === 'My tokens'}
-                color='additional-dark'
-                size='m'
-                weight='regular'
-              >
+            {selectedAccount
+              ? <Link to='myTokens'>
+                <TextStyled
+                  $active={activeItem === 'My tokens'}
+                  color='additional-dark'
+                  size='m'
+                  weight='regular'
+                >
+                  My tokens
+                </TextStyled>
+              </Link>
+              : <DesktopMenuItem
+                  $disabled
+                  $active={activeItem === 'My tokens'}
+                  color='additional-dark'
+                  size='m'
+                  weight='regular'
+                >
                 My tokens
-              </TextStyled>
-            </Link>
+              </DesktopMenuItem>
+            }
           </LinkWrapper>
           <LinkWrapper onClick={mobileMenuToggler}>
             <Link to='trades'>
@@ -245,13 +269,15 @@ const TextStyled = styled(Text) <{ $active?: boolean }>`
   }
 `;
 
-const DesktopMenuItem = styled(Text) <{ $active?: boolean }>`
+const DesktopMenuItem = styled(Text) <{ $active?: boolean, $disabled?: boolean }>`
   && {
     margin-right: 24px;
-    color: ${(props) => props.$active ? 'var(--color-additional-dark)' : 'var(--color-primary-500)'};
+    color: ${(props) => props.$disabled ? 'var(--color-blue-grey-500)' : (props.$active ? 'var(--color-additional-dark)' : 'var(--color-primary-500)')};
     border-bottom: ${(props) => props.$active ? '1px solid var(--color-additional-dark)' : 'none'};
+    padding: ${(props) => props.$disabled && '8px 16px'};
     &:hover {
-      color: ${(props) => (props.$active ? 'var(--color-additional-dark)' : 'var(--color-primary-400)')};
+      color: ${(props) => props.$disabled ? 'var(--color-blue-grey-500)' : (props.$active ? 'var(--color-additional-dark)' : 'var(--color-primary-400)')};
+      cursor: ${(props) => props.$disabled ? 'not-allowed' : 'pointer'};
     }
   }
 `;
