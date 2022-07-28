@@ -2,6 +2,7 @@ import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { AccountsManager, Button, Text, useNotifications } from '@unique-nft/ui-kit';
+import { BN } from '@polkadot/util';
 
 import { useAccounts } from 'hooks/useAccounts';
 import { Account } from 'account/AccountContext';
@@ -10,12 +11,11 @@ import { useApi } from 'hooks/useApi';
 import DefaultAvatar from 'static/icons/default-avatar.svg';
 import { Avatar } from 'components/Avatar/Avatar';
 import { toChainFormatAddress } from 'api/chainApi/utils/addressUtils';
+import { TWithdrawBid } from 'api/restApi/auction/types';
 import GetKSMModal from 'components/GetKSMModal/GetKSMModal';
 import { formatKusamaBalance } from 'utils/textUtils';
 import BalanceSkeleton from '../../Skeleton/BalanceSkeleton';
 import config from '../../../config';
-import { BN } from '@polkadot/util';
-import { TWithdrawBid } from 'api/restApi/auction/types';
 
 const tokenSymbol = 'KSM';
 
@@ -84,15 +84,15 @@ export const WalletManager: FC = () => {
 
     const { sponsorshipFee, bids } = selectedAccount.deposits;
     const { leader, withdraw } = bids || { leader: [], withdraw: [] };
-    if ((!sponsorshipFee?.isZero() || leader.length !== 0 || withdraw.length !== 0)) {
-      const getTotalAmount = (acc: BN, bid: TWithdrawBid) => acc.add(new BN(bid.amount));
-      const deposit = (sponsorshipFee || new BN(0))
-      .add(withdraw.reduce(getTotalAmount, new BN(0)))
-      .add(leader.reduce(getTotalAmount, new BN(0)));
-      return formatKusamaBalance(deposit.toString());
+    if ((sponsorshipFee?.isZero() && leader.length === 0 && withdraw.length === 0)) {
+      return undefined;
     }
 
-    return undefined;
+    const getTotalAmount = (acc: BN, bid: TWithdrawBid) => acc.add(new BN(bid.amount));
+    const deposit = (sponsorshipFee || new BN(0))
+    .add(withdraw.reduce(getTotalAmount, new BN(0)))
+    .add(leader.reduce(getTotalAmount, new BN(0)));
+    return formatKusamaBalance(deposit.toString());
   }, [selectedAccount?.deposits]);
 
   if (!isLoading && accounts.length === 0) {
