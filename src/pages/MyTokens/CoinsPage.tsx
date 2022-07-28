@@ -1,7 +1,6 @@
 import React, { FC, useCallback, useMemo, useState } from 'react';
-import styled from 'styled-components/macro';
+import styled from 'styled-components';
 import { Button, Text, Heading } from '@unique-nft/ui-kit';
-import { TableColumnProps } from '@unique-nft/ui-kit/dist/cjs/types';
 
 import { Table } from '../../components/Table';
 import { TransferFundsModal } from '../Accounts/Modals/SendFunds';
@@ -9,6 +8,7 @@ import { PagePaper } from '../../components/PagePaper/PagePaper';
 import { formatKusamaBalance } from '../../utils/textUtils';
 import { useAccounts } from '../../hooks/useAccounts';
 import ChainLogo from '../../components/ChainLogo';
+import { TableColumnProps } from '@unique-nft/ui-kit/dist/cjs/components';
 
 const tokenSymbol = 'KSM';
 
@@ -51,7 +51,7 @@ const getAccountsColumns = ({ onShowSendFundsModal }: AccountsColumnsProps): Tab
     title: 'Actions',
     width: '33%',
     field: 'balance',
-    render(balance) {
+    render(balance: string) {
       return <ActionsWrapper>
         <Button title={'Send'} disabled={!balance} onClick={onShowSendFundsModal()} />
         <Button title={'Get'} disabled onClick={onShowSendFundsModal()} />
@@ -62,43 +62,43 @@ const getAccountsColumns = ({ onShowSendFundsModal }: AccountsColumnsProps): Tab
 
 const chains: Record<string, string> = { KSM: 'Kusama' };
 
-export const CoinsPage: FC = () => {
-  const { selectedAccount } = useAccounts();
-  const [isTransferFundsVisible, setIsTransferFundsVisible] = useState(false);
-
-  const onSendFundsClick = useCallback(() => () => {
-    setIsTransferFundsVisible(true);
-  }, []);
-
-  const onFinish = useCallback(() => {
-    setIsTransferFundsVisible(false);
-    // void fetchBalances();
-  }, []);
-
-  const balances = useMemo(() => {
-    return Object.keys(chains).map((chainKey: string) => ({
-      chainInfo: {
-        key: chainKey.toLowerCase(),
-        name: chains[chainKey],
-        address: selectedAccount?.address
-      },
-      balance: selectedAccount?.balance?.[tokenSymbol]?.toString()
-    }));
-  }, [selectedAccount]);
-
-  return (<PagePaper>
-    <CoinsPageWrapper>
-      <Row>
-        <Heading size={'4'} >Network</Heading>
-      </Row>
-      <Table
-        columns={getAccountsColumns({ onShowSendFundsModal: onSendFundsClick })}
-        data={balances}
-      />
-      <TransferFundsModal isVisible={isTransferFundsVisible} onFinish={onFinish} senderAddress={selectedAccount?.address} />
-    </CoinsPageWrapper>
-  </PagePaper>);
-};
+// export const CoinsPage: FC = () => {
+//   const { selectedAccount } = useAccounts();
+//   const [isTransferFundsVisible, setIsTransferFundsVisible] = useState(false);
+//
+//   const onSendFundsClick = useCallback(() => () => {
+//     setIsTransferFundsVisible(true);
+//   }, []);
+//
+//   const onFinish = useCallback(() => {
+//     setIsTransferFundsVisible(false);
+//     // void fetchBalances();
+//   }, []);
+//
+//   const balances = useMemo(() => {
+//     return Object.keys(chains).map((chainKey: string) => ({
+//       chainInfo: {
+//         key: chainKey.toLowerCase(),
+//         name: chains[chainKey],
+//         address: selectedAccount?.address
+//       },
+//       balance: selectedAccount?.balance?.[tokenSymbol]?.toString()
+//     }));
+//   }, [selectedAccount]);
+//
+//   return (<PagePaper>
+//     <CoinsPageWrapper>
+//       <Row>
+//         <Heading size={'4'} >Network</Heading>
+//       </Row>
+//       <Table
+//         columns={getAccountsColumns({ onShowSendFundsModal: onSendFundsClick })}
+//         data={balances}
+//       />
+//       <TransferFundsModal isVisible={isTransferFundsVisible} onFinish={onFinish} senderAddress={selectedAccount?.address} />
+//     </CoinsPageWrapper>
+//   </PagePaper>);
+// };
 
 const CoinsPageWrapper = styled.div`
   display: flex;

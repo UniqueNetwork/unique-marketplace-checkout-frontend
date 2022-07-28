@@ -1,20 +1,22 @@
 import React, { FC, useCallback } from 'react';
-import styled from 'styled-components/macro';
+import styled from 'styled-components';
 import { Checkbox, Text } from '@unique-nft/ui-kit';
 import Accordion from '../Accordion/Accordion';
 import CheckboxSkeleton from '../Skeleton/CheckboxSkeleton';
 import { AttributeItem } from './types';
 import { Attribute } from '../../api/restApi/offers/types';
 import { capitalize } from '../../utils/textUtils';
+import { sortAttributes } from './utils/sortAttributes';
 
 interface AttributesFilterProps {
   selectedAttributes?: AttributeItem[]
   attributes: Record<string, Attribute[]>
   isAttributesFetching?: boolean
   onAttributesChange?(value: { key: string, attribute: string }[]): void
+  testid: string
 }
 
-const AttributesFilter: FC<AttributesFilterProps> = ({ selectedAttributes = [], attributes, isAttributesFetching, onAttributesChange }) => {
+const AttributesFilter: FC<AttributesFilterProps> = ({ selectedAttributes = [], attributes, isAttributesFetching, onAttributesChange, testid }) => {
   const onAttributeSelect = useCallback((attributeItem: AttributeItem) => (value: boolean) => {
     let _selectedAttributes;
     if (value) {
@@ -31,22 +33,27 @@ const AttributesFilter: FC<AttributesFilterProps> = ({ selectedAttributes = [], 
 
   return (<AttributesFilterWrapper>
     {isAttributesFetching && Array.from({ length: 3 }).map((_, index) => <CheckboxSkeleton key={`checkbox-skeleton-${index}`} />)}
-    {Object.keys(attributes).map((attributeName) => (
+    {Object.keys(attributes).sort().map((attributeName) => (
       <Accordion title={capitalize(attributeName)}
         isOpen={true}
         onClear={onClear(attributeName)}
         isClearShow={selectedAttributes?.some((attribute) => attributeName === attribute.key)}
+        testid={`${testid}-accordion`}
       >
         <CollectionFilterWrapper>
-          {attributes[attributeName].map((attribute) => (
+          {attributes[attributeName].sort(sortAttributes).map((attribute) => (
             <AttributeWrapper key={`attribute-${attribute.key}`}>
               <Checkbox
                 checked={selectedAttributes.findIndex((item) => item.key === attributeName && item.attribute === attribute.key) !== -1}
                 label={attribute.key}
                 size={'m'}
                 onChange={onAttributeSelect({ key: attributeName, attribute: attribute.key })}
+                testid={`${testid}-checkbox-${attribute.key}`}
               />
-              <Text color={'grey-500'}>{attribute.count.toString()}</Text>
+              <Text
+                testid={`${testid}-count-${attribute.key}`}
+                color={'grey-500'}
+              >{attribute.count.toString()}</Text>
             </AttributeWrapper>
             ))}
         </CollectionFilterWrapper>

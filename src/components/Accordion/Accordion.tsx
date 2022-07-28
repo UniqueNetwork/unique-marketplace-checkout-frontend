@@ -1,5 +1,5 @@
 import React, { FC, ReactNode, useCallback, useState } from 'react';
-import styled from 'styled-components/macro';
+import styled from 'styled-components';
 import { Button, Text } from '@unique-nft/ui-kit';
 import { Secondary400 } from '../../styles/colors';
 
@@ -8,6 +8,7 @@ interface AccordionProps {
   isOpen?: boolean
   isClearShow?: boolean
   onClear?(): void
+  testid: string
 }
 
 const AccordionChevronIcon = () => {
@@ -26,7 +27,7 @@ const AccordionChevronIcon = () => {
   );
 };
 
-const Accordion: FC<AccordionProps> = ({ title, isOpen: isOpenProps, children, onClear, isClearShow }) => {
+const Accordion: FC<AccordionProps> = ({ title, isOpen: isOpenProps, children, onClear, isClearShow, testid }) => {
   const [isOpen, setIsOpen] = useState(isOpenProps);
 
   const onToggle = useCallback(() => {
@@ -40,7 +41,7 @@ const Accordion: FC<AccordionProps> = ({ title, isOpen: isOpenProps, children, o
   return (
     <AccordionWrapper>
       <AccordionHeaderWrapper>
-        <AccordionTitle onClick={onToggle} isOpen={isOpen} >
+        <AccordionTitle onClick={onToggle} isOpen={isOpen} data-testid={`${testid}`} >
           <Text>{title}</Text>
           <AccordionChevronIcon />
         </AccordionTitle>
@@ -48,6 +49,7 @@ const Accordion: FC<AccordionProps> = ({ title, isOpen: isOpenProps, children, o
           title={'Clear'}
           onClick={onClearClick}
           role={'danger'}
+          testid={`${testid}-clear-button`}
         />}
       </AccordionHeaderWrapper>
       <AccordionBodyWrapper isOpen={isOpen}>

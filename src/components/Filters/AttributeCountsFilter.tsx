@@ -1,18 +1,20 @@
 import React, { FC, useCallback } from 'react';
-import styled from 'styled-components/macro';
+import styled from 'styled-components';
 import { Checkbox, Text } from '@unique-nft/ui-kit';
 import Accordion from '../Accordion/Accordion';
 import CheckboxSkeleton from '../Skeleton/CheckboxSkeleton';
 import { AttributeCount } from '../../api/restApi/offers/types';
+import { sortAttributeCounts } from './utils/sortAttributes';
 
 interface AttributeCountsFilterProps {
   attributeCounts?: AttributeCount[]
   selectedAttributeCounts: number[]
   isAttributeCountsFetching?: boolean
   onAttributeCountsChange?(value: number[]): void
+  testid: string
 }
 
-const AttributeCountsFilter: FC<AttributeCountsFilterProps> = ({ attributeCounts = [], selectedAttributeCounts = [], isAttributeCountsFetching, onAttributeCountsChange }) => {
+const AttributeCountsFilter: FC<AttributeCountsFilterProps> = ({ attributeCounts = [], selectedAttributeCounts = [], isAttributeCountsFetching, onAttributeCountsChange, testid }) => {
   const onAttributeCountSelect = useCallback((attributeCount: number) => (value: boolean) => {
     let _selectedAttributeCounts;
     if (value) {
@@ -32,18 +34,23 @@ const AttributeCountsFilter: FC<AttributeCountsFilterProps> = ({ attributeCounts
       isOpen={true}
       onClear={onClear}
       isClearShow={selectedAttributeCounts.length > 0}
+      testid={`${testid}-accordion`}
     >
       <CollectionFilterWrapper>
         {isAttributeCountsFetching && Array.from({ length: 3 }).map((_, index) => <CheckboxSkeleton key={`checkbox-skeleton-${index}`} />)}
-        {attributeCounts.map((attributeCount) => (
+        {attributeCounts.sort(sortAttributeCounts).map((attributeCount) => (
           <AttributeWrapper key={`attribute-${attributeCount.numberOfAttributes}`}>
             <Checkbox
               checked={selectedAttributeCounts.indexOf(attributeCount.numberOfAttributes) !== -1}
               label={attributeCount.numberOfAttributes.toString()}
               size={'m'}
               onChange={onAttributeCountSelect(attributeCount.numberOfAttributes)}
+              testid={`${testid}-checkbox-${attributeCount.numberOfAttributes}`}
             />
-            <Text color={'grey-500'}>{attributeCount.amount.toString()}</Text>
+            <Text
+              testid={`${testid}-amount-${attributeCount.amount}`}
+              color={'grey-500'}
+            >{attributeCount.amount.toString()}</Text>
           </AttributeWrapper>
               ))}
       </CollectionFilterWrapper>

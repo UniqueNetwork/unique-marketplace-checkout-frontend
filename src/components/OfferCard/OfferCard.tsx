@@ -1,23 +1,23 @@
 import React, { FC, useMemo } from 'react';
 import { Icon, Text } from '@unique-nft/ui-kit';
-import styled from 'styled-components/macro';
-
-import { Picture } from '..';
-import { formatKusamaBalance } from '../../utils/textUtils';
-import { Offer } from '../../api/restApi/offers/types';
-import Kusama from '../../static/icons/logo-kusama.svg';
-import { compareEncodedAddresses } from '../../api/chainApi/utils/addressUtils';
-import { useAccounts } from '../../hooks/useAccounts';
-import { timeDifference } from '../../utils/timestampUtils';
-import config from '../../config';
-import { Primary600 } from '../../styles/colors';
 import { Link } from 'react-router-dom';
+import styled from 'styled-components';
+
+import { Offer } from 'api/restApi/offers/types';
+import { useAccounts } from 'hooks/useAccounts';
+import { compareEncodedAddresses } from 'api/uniqueSdk/utils/addressUtils';
+import { Picture } from '..';
+import { formatKusamaBalance } from 'utils/textUtils';
+import { timeDifference } from 'utils/timestampUtils';
+import { Primary600 } from 'styles/colors';
+import config from '../../config';
 
 export type TTokensCard = {
   offer: Offer
+  testid: string
 };
 
-export const OfferCard: FC<TTokensCard> = ({ offer }) => {
+export const OfferCard: FC<TTokensCard> = ({ offer, testid }) => {
   const { selectedAccount } = useAccounts();
 
   const {
@@ -48,24 +48,49 @@ export const OfferCard: FC<TTokensCard> = ({ offer }) => {
       </PictureWrapper>
       <Description>
         <Link to={`/token/${offer?.collectionId}/${offer?.tokenId}`} title={`${prefix || ''} #${offer?.tokenId}`}>
-          <Text size='l' weight='medium' color={'secondary-500'}>
+          <Text
+            size='l'
+            weight='regular'
+            color={'secondary-500'}
+            testid={`${testid}-tokenId`}
+          >
             {`${prefix || ''} #${offer?.tokenId}`}
           </Text>
         </Link>
-        <a href={`${config.scanUrl || ''}collections/${offer?.collectionId}`} target={'_blank'} rel='noreferrer'>
+        <a
+          data-testid={`${testid}-collection-${offer?.collectionId}-link`}
+          href={`${config.scanUrl || ''}collections/${offer?.collectionId}`}
+          target={'_blank'}
+          rel='noreferrer'
+        >
           <Text color='primary-600' size='s'>
             {`${collectionName?.substring(0, 15) || ''} [id ${offer?.collectionId || ''}]`}
           </Text>
         </a>
         <PriceWrapper>
-          <Text size='s'>{topBid ? `${formatKusamaBalance(Number(topBid))}` : `${formatKusamaBalance(offer?.price)}` }</Text>
-          <Icon file={Kusama} size={16} />
+          <Text
+            testid={`${testid}-price`}
+            size='l'
+          >{topBid ? `${formatKusamaBalance(Number(topBid))}` : `${formatKusamaBalance(offer?.price)}` }</Text>
+          <Icon name={'chain-kusama'} size={16} />
         </PriceWrapper>
         {!offer?.auction && <Text size={'xs'} color={'grey-500'} >Price</Text>}
         {offer?.auction && <AuctionInfoWrapper>
-          {isTopBidder && <Text size={'xs'} color={'additional-positive-500'} >Leading bid</Text>}
-          {isBidder && !isTopBidder && <Text size={'xs'} color={'coral-500'} >Outbid</Text>}
-          {!isBidder && !isTopBidder && <Text size={'xs'} color={'grey-500'} >{
+          {isTopBidder && <Text
+            testid={`${testid}-leading-bid`}
+            size={'xs'}
+            color={'additional-positive-500'}
+          >Leading bid</Text>}
+          {isBidder && !isTopBidder && <Text
+            testid={`${testid}-outbid`}
+            size={'xs'}
+            color={'coral-500'}
+          >Outbid</Text>}
+          {!isBidder && !isTopBidder && <Text
+            testid={`${testid}-bids`}
+            size={'xs'}
+            color={'grey-500'}
+          >{
             offer.auction.bids.length > 0 ? 'Last bid' : 'Minimum bid'
           }</Text>}
           <StyledText color={'dark'} size={'xs'}>{`${timeDifference(new Date(offer.auction?.stopAt || '').getTime() / 1000)} left`}</StyledText>
@@ -109,6 +134,7 @@ const PictureWrapper = styled(Link)`
     max-height: 100%;
     border-radius: 8px;
     transition: 50ms;
+    overflow: hidden;
 
     img {
       max-width: 100%;
@@ -130,6 +156,7 @@ const PriceWrapper = styled.div`
   display: flex;
   align-items: center;
   column-gap: calc(var(--gap) / 4);
+  margin-top: calc(var(--gap) / 2);
 `;
 
 const StyledText = styled(Text)` 
@@ -150,4 +177,12 @@ const Description = styled.div`
 const AuctionInfoWrapper = styled.div`
   display: flex;
   column-gap: calc(var(--gap) / 2);
+`;
+
+const Row = styled.div` 
+  && {
+    display: flex;
+    align-items: center;
+    column-gap: calc(var(--gap) / 4);
+  }
 `;

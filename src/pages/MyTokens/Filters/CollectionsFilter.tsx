@@ -1,12 +1,18 @@
-import React, { FC, useCallback, useMemo } from 'react';
-import styled from 'styled-components/macro';
+import React, { FC, useCallback, useEffect, useMemo } from 'react';
+import styled from 'styled-components';
 import { Checkbox, Text } from '@unique-nft/ui-kit';
-import Accordion from '../../../components/Accordion/Accordion';
+import { useCollections } from '../../../hooks/useCollections';
+import { useApi } from '../../../hooks/useApi';
+import Accordion from 'components/Accordion/Accordion';
+import AttributeCountsFilter from 'components/Filters/AttributeCountsFilter';
+import AttributesFilter from 'components/Filters/AttributesFilter';
+import CheckboxSkeleton from 'components/Skeleton/CheckboxSkeleton';
+import { AttributeItem } from 'components/Filters/types';
+import { useAttributes } from '../../../api/restApi/offers/attributes';
+import { useAttributeCounts } from '../../../api/restApi/offers/attributeCounts';
+import { CollectionCover } from 'components/CollectionCover/CollectionCover';
 import { Avatar } from '../../../components/Avatar/Avatar';
-import CheckboxSkeleton from '../../../components/Skeleton/CheckboxSkeleton';
-import { AttributeItem } from './types';
-import AttributesFilter from '../../../components/Filters/AttributesFilter';
-import AttributeCountsFilter from '../../../components/Filters/AttributeCountsFilter';
+// import { AttributeItem } from './types';
 import { NFTCollection, NFTToken } from '../../../api/chainApi/unique/types';
 import { Attribute, AttributeCount } from '../../../api/restApi/offers/types';
 
@@ -15,6 +21,7 @@ interface CollectionsFilterProps {
   onChange(collections: number[], attributes?: AttributeItem[], attributeCounts?: number[]): void
   onAttributesChange?(value: { key: string, attribute: string }[]): void
   onAttributeCountsChange?(value: number[]): void
+  testid: string
   tokens: NFTToken[]
   collections: NFTCollection[]
   isFetchingTokens: boolean
@@ -25,11 +32,26 @@ const CollectionsFilter: FC<CollectionsFilterProps> = ({
   onChange,
   onAttributesChange,
   onAttributeCountsChange,
+  testid,
   tokens,
   collections: myCollections,
   isFetchingTokens
 }) => {
+  const { collections, isFetching } = useCollections();
+  const { attributes, fetch: fetchAttributes, reset: resetAttributes, isFetching: isAttributesFetching } = useAttributes();
+  const { attributeCounts, fetch: fetchAttributeCounts, isFetching: isAttributeCountsFetching } = useAttributeCounts();
   const { collections: selectedCollections = [], attributes: selectedAttributes = [], attributeCounts: selectedAttributeCounts = [] } = value || {};
+  const { settings } = useApi();
+  //
+  // useEffect(() => {
+  //   if (selectedCollections.length === 1 && !isAttributesFetching) fetchAttributes(selectedCollections[0]);
+  // }, []);
+  //
+  // useEffect(() => {
+  //   if (settings && settings.blockchain.unique.collectionIds.length > 0 && attributeCounts.length === 0) {
+  //     fetchAttributeCounts(selectedCollections?.length ? selectedCollections : settings?.blockchain.unique.collectionIds || []);
+  //   }
+  // }, [settings?.blockchain.unique.collectionIds]);
 
   const myAttributesCount = useMemo(() => {
     // count attributes in each token
@@ -77,25 +99,31 @@ const CollectionsFilter: FC<CollectionsFilterProps> = ({
     return { Traits: [] };
   }, [tokens, selectedCollections]);
 
-  const onCollectionSelect = useCallback((collectionId: number) => (value: boolean) => {
+  const onCollectionSelect = useCallback((collectionId: number) => async (value: boolean) => {
     let _selectedCollections;
     if (value) {
       _selectedCollections = [...selectedCollections, collectionId];
     } else {
       _selectedCollections = selectedCollections.filter((item) => item !== collectionId);
     }
+
     // since traits are shown only if one collection is selected -> we should always reset them
     onChange(_selectedCollections, [], []);
 
     // if (_selectedCollections.length === 1) fetchAttributes(_selectedCollections[0]);
     // else resetAttributes();
 
-    // if (_selectedCollections.length > 0) fetchAttributeCounts(_selectedCollections);
-    // else fetchAttributeCounts(settings?.blockchain.unique.collectionIds || []);
-  }, [selectedCollections, onChange]);
+    // const _attributeCounts = await fetchAttributeCounts(_selectedCollections.length > 0 ? _selectedCollections : settings?.blockchain.unique.collectionIds || []);
+    // const _selectedAttributeCounts = selectedAttributeCounts.filter((item) => _attributeCounts.findIndex(({ numberOfAttributes }) => numberOfAttributes === item) > -1);
+    //
+    // // since attributes are shown only if one collection is selected -> we should always reset them
+    // onChange(_selectedCollections, [], _selectedAttributeCounts);
+  }, [selectedCollections, selectedAttributeCounts, onAttributesChange, onChange, settings?.blockchain.unique.collectionIds]);
 
   const onCollectionsClear = useCallback(() => {
     onChange([], [], []);
+    // onChange([]);
+    // fetchAttributeCounts(settings?.blockchain.unique.collectionIds || []);
   }, [onChange]);
 
   return (<>
@@ -103,9 +131,10 @@ const CollectionsFilter: FC<CollectionsFilterProps> = ({
       isOpen={true}
       onClear={onCollectionsClear}
       isClearShow={selectedCollections.length > 0}
+      testid={`${testid}-accordion`}
     >
       <CollectionFilterWrapper>
-        {isFetchingTokens && Array.from({ length: 3 }).map((_, index) => <CheckboxSkeleton key={`checkbox-skeleton-${index}`} />)}
+        {isFetching && Array.from({ length: 3 }).map((_, index) => <CheckboxSkeleton key={`checkbox-skeleton-${index}`} />)}
         {!isFetchingTokens && myCollections.map((collection) => (
           <CheckboxWrapper
             key={`collection-${collection.id}`}
@@ -115,24 +144,29 @@ const CollectionsFilter: FC<CollectionsFilterProps> = ({
               label={''}
               size={'m'}
               onChange={onCollectionSelect(collection.id)}
+              testid={`${testid}-checkbox-${collection.id}`}
             />
-            <Avatar src={collection.coverImageUrl} size={22} type={'circle'}/>
-            <Text>{collection.collectionName || ''}</Text>
+            <CollectionCover src={collection.coverImageUrl} size={22} type={'circle'}/>
+            <Text
+              testid={`${testid}-name-${collection.id}`}
+            >{collection.collectionName || ''}</Text>
           </CheckboxWrapper>
-          ))}
+        ))}
       </CollectionFilterWrapper>
     </Accordion>
-    {!isFetchingTokens && myAttributesCount.length > 0 && <AttributeCountsFilter
+    {!isFetchingTokens && myAttributesCount.length && <AttributeCountsFilter
       attributeCounts={myAttributesCount}
       selectedAttributeCounts={selectedAttributeCounts}
-      isAttributeCountsFetching={isFetchingTokens}
       onAttributeCountsChange={onAttributeCountsChange}
+      isAttributeCountsFetching={isFetchingTokens}
+      testid={`${testid}-attribute-count`}
     />}
-    {!isFetchingTokens && selectedCollections.length === 1 && <AttributesFilter
+    {onAttributesChange && selectedCollections.length === 1 && <AttributesFilter
       attributes={myAttributes}
       selectedAttributes={selectedAttributes}
-      isAttributesFetching={isFetchingTokens}
       onAttributesChange={onAttributesChange}
+      isAttributesFetching={isFetchingTokens}
+      testid={`${testid}-attributes`}
     />}
   </>);
 };

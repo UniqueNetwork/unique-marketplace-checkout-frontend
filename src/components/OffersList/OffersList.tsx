@@ -1,5 +1,5 @@
 import { FC } from 'react';
-import styled from 'styled-components/macro';
+import styled from 'styled-components';
 import { Offer } from '../../api/restApi/offers/types';
 import { OfferCard } from '../OfferCard/OfferCard';
 import CardSkeleton from '../Skeleton/CardSkeleton';
@@ -7,9 +7,10 @@ import CardSkeleton from '../Skeleton/CardSkeleton';
 type TTokensList = {
   offers: Offer[]
   isLoading?: boolean
+  testid: string
 };
 
-export const OffersList: FC<TTokensList> = ({ offers, isLoading }) => {
+export const OffersList: FC<TTokensList> = ({ offers, isLoading, testid }) => {
   return (
     <OffersListStyled>
       {offers?.map &&
@@ -17,6 +18,7 @@ export const OffersList: FC<TTokensList> = ({ offers, isLoading }) => {
           <OfferCard
             key={`token-${offer.collectionId}-${offer.tokenId}`}
             offer={offer}
+            testid={`${testid}-card`}
           />
         ))}
       {isLoading && <>

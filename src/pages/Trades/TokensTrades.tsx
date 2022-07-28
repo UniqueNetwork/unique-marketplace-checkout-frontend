@@ -1,41 +1,47 @@
 import React, { FC, useCallback, useEffect, useState } from 'react';
-import { Pagination } from '@unique-nft/ui-kit';
-import { SortQuery } from '@unique-nft/ui-kit/dist/cjs/types';
+import { Pagination, SortQuery } from '@unique-nft/ui-kit';
 import styled from 'styled-components';
 
 import { useTrades } from '../../api/restApi/trades/trades';
 import { Table } from '../../components/Table';
 import { PagePaper } from '../../components/PagePaper/PagePaper';
-import { tradesColumns } from './columns';
+import getTradesColumns from './columns';
 import { useAccounts } from '../../hooks/useAccounts';
-import { useGetTokensByTrades } from './hooks/useGetTokensByTrades';
 import { TradesTabs } from './types';
 import SearchField from '../../components/SearchField/SearchField';
 
+import NoTradesIcon from '../../static/icons/no-trades.svg';
+import useDeviceSize from '../../hooks/useDeviceSize';
+import TokenTradesDetailsModal from './TradesDetailsModal';
+import { Trade } from '../../api/restApi/trades/types';
+
 type TokensTradesPage = {
   currentTab: TradesTabs
+  testid: string
 }
 
-export const TokensTradesPage: FC<TokensTradesPage> = ({ currentTab }) => {
+export const TokensTradesPage: FC<TokensTradesPage> = ({ currentTab, testid }) => {
   const { selectedAccount, isLoading: isLoadingAccounts } = useAccounts();
   const [page, setPage] = useState<number>(0);
   const [sortString, setSortString] = useState<string>();
   const [pageSize, setPageSize] = useState<number>(10);
   const [searchValue, setSearchValue] = useState<string>();
+  const [selectedOfferDetails, setSelectedOfferDetails] = useState<Trade | null>(null);
+  const deviceSize = useDeviceSize();
 
   const { trades, tradesCount, fetch, isFetching } = useTrades();
-  const { tradesWithTokens, isFetchingTokens } = useGetTokensByTrades(trades);
 
   useEffect(() => {
     if (isLoadingAccounts || (currentTab === TradesTabs.MyTokensTrades && !selectedAccount?.address)) return;
     setSearchValue(undefined);
+    setPage(0);
     fetch({
       page: 1,
       pageSize,
       sort: sortString,
       seller: currentTab === TradesTabs.MyTokensTrades ? selectedAccount?.address : undefined
     });
-  }, [currentTab, selectedAccount?.address, sortString, isLoadingAccounts]);
+  }, [currentTab, selectedAccount?.address, isLoadingAccounts]);
 
   const onSearch = useCallback((value: string) => {
     setSearchValue(value);
@@ -105,35 +111,58 @@ export const TokensTradesPage: FC<TokensTradesPage> = ({ currentTab }) => {
     });
   }, [selectedAccount?.address, currentTab, setSortString, pageSize, searchValue]);
 
+  const onShowTradesDetailsModal = useCallback((trade: Trade) => {
+    setSelectedOfferDetails(trade);
+  }, []);
+
+  const closeDetailsModal = useCallback(() => {
+    setSelectedOfferDetails(null);
+  }, [setSelectedOfferDetails]);
+
   return (<PagePaper>
     <TradesPageWrapper>
       <StyledSearchField
-        searchValue={searchValue}
         placeholder='Collection / token'
+        searchValue={searchValue}
         onSearch={onSearch}
+        testid={`${testid}-search-field`}
       />
       <StyledTable
         onSort={onSortChange}
-        data={tradesWithTokens || []}
-        columns={tradesColumns}
-        loading={isLoadingAccounts || isFetching || isFetchingTokens}
+        data={trades || []}
+        columns={getTradesColumns({ deviceSize, onShowTradesDetailsModal })}
+        loading={isLoadingAccounts || isFetching}
+        emptyIconProps={searchValue ? { name: 'magnifier-found' } : { file: NoTradesIcon }}
       />
       {!!tradesCount && <PaginationWrapper>
         <Pagination
-          size={tradesCount}
           current={page}
-          withPerPageSelector
+          size={tradesCount}
           onPageChange={onPageChange}
           onPageSizeChange={onPageSizeChange}
+          withPerPageSelector
           withIcons
         />
       </PaginationWrapper>}
+      <TokenTradesDetailsModal trade={selectedOfferDetails} onCancel={closeDetailsModal}/>
     </TradesPageWrapper>
   </PagePaper>);
 };
 
 const TradesPageWrapper = styled.div`
-  width: 100%
+  width: 100%;
+
+  @media (max-width: 640px) {
+    .unique-modal-wrapper .unique-modal {
+      width: calc(520px - var(--prop-gap) * 3);
+    }
+  }
+
+  @media (max-width: 567px) {
+    .unique-modal-wrapper .unique-modal {
+      width: calc(288px - var(--prop-gap) * 3);
+    }
+  }
 `;
 
 const StyledSearchField = styled(SearchField)`

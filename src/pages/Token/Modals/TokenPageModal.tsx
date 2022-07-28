@@ -1,10 +1,10 @@
 import React, { FC, useEffect, useMemo, useState } from 'react';
 import { Modal } from '@unique-nft/ui-kit';
 
-import { Offer } from '../../../api/restApi/offers/types';
+import { Offer } from 'api/restApi/offers/types';
+import { NFTToken } from 'api/uniqueSdk/types';
 import { MarketType } from '../../../types/MarketTypes';
 import { SellModal } from './SellModal';
-import { NFTToken } from '../../../api/chainApi/unique/types';
 import { CancelSellFixStagesModal } from './CancelSellModal';
 import PurchaseModal from './PurchaseModal';
 import { TransferModal } from './TransferModal';
@@ -19,6 +19,7 @@ export type TTokenPageModalProps = {
   marketType: MarketType
   onClose(): void
   onFinish(): void
+  testid: string
 }
 
 export type TTokenPageModalBodyProps = {
@@ -26,9 +27,10 @@ export type TTokenPageModalBodyProps = {
   offer?: Offer
   onFinish(): void // TODO: make a type, in future we would definitly wan't to pass smth like success/error/error.message
   setIsClosable(value: boolean): void
+  testid: string
 }
 
-const TokenPageModal = ({ onClose, onFinish, marketType, offer, token }: TTokenPageModalProps) => {
+const TokenPageModal = ({ onClose, onFinish, marketType, offer, token, testid }: TTokenPageModalProps) => {
   const [isVisible, setIsVisible] = useState<boolean>(false);
   const [isClosable, setIsClosable] = useState<boolean>(true);
 
@@ -69,6 +71,7 @@ const TokenPageModal = ({ onClose, onFinish, marketType, offer, token }: TTokenP
         token={token}
         offer={offer}
         onFinish={onFinish}
+        testid={`${testid}-${marketType.toLowerCase().replaceAll(' ', '-')}-modal`}
       />
     </Modal>
   );

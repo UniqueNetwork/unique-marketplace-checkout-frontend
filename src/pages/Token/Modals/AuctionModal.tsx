@@ -1,6 +1,6 @@
 import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
-import { Button, Heading, Link, Select, Text } from '@unique-nft/ui-kit';
-import styled from 'styled-components/macro';
+import { Button, Heading, Link, Select, Text, SelectOptionProps, useNotifications } from '@unique-nft/ui-kit';
+import styled from 'styled-components';
 import { BN } from '@polkadot/util';
 
 import { TPlaceABid } from './types';
@@ -10,7 +10,6 @@ import { TTokenPageModalBodyProps } from './TokenPageModal';
 import { useAuctionBidStages } from '../../../hooks/marketplaceStages';
 import { useAccounts } from '../../../hooks/useAccounts';
 import { useFee } from '../../../hooks/useFee';
-import { useNotification } from '../../../hooks/useNotification';
 import { useApi } from '../../../hooks/useApi';
 import { formatKusamaBalance } from '../../../utils/textUtils';
 import { fromStringToBnString } from '../../../utils/bigNum';
@@ -19,11 +18,8 @@ import { StageStatus } from '../../../types/StagesTypes';
 import { Offer } from '../../../api/restApi/offers/types';
 import { useAuction } from '../../../api/restApi/auction/auction';
 import { TCalculatedBid } from '../../../api/restApi/auction/types';
-import { NotificationSeverity } from '../../../notification/NotificationContext';
-import Kusama from '../../../static/icons/logo-kusama.svg';
-import { SelectOptionProps } from '@unique-nft/ui-kit/dist/cjs/types';
 
-export const AuctionModal: FC<TTokenPageModalBodyProps> = ({ offer, setIsClosable, onFinish }) => {
+export const AuctionModal: FC<TTokenPageModalBodyProps> = ({ offer, setIsClosable, onFinish, testid }) => {
   const [status, setStatus] = useState<'ask' | 'place-bid-stage'>('ask'); // TODO: naming
   const [bidValue, setBidValue] = useState<TPlaceABid>();
 
@@ -33,7 +29,7 @@ export const AuctionModal: FC<TTokenPageModalBodyProps> = ({ offer, setIsClosabl
     setIsClosable(false);
   }, [setStatus, setBidValue, setIsClosable]);
 
-  if (status === 'ask') return (<AskBidModal offer={offer} onConfirmPlaceABid={onConfirmPlaceABid} />);
+  if (status === 'ask') return (<AskBidModal offer={offer} onConfirmPlaceABid={onConfirmPlaceABid} testid={`${testid}-bid`} />);
   if (status === 'place-bid-stage') {
     return (<AuctionStagesModal
       accountAddress={bidValue?.accountAddress}
@@ -41,14 +37,15 @@ export const AuctionModal: FC<TTokenPageModalBodyProps> = ({ offer, setIsClosabl
       onFinish={onFinish}
       offer={offer}
       setIsClosable={setIsClosable}
+      testid={`${testid}-stages`}
     />);
   }
   return null;
 };
 
-const chainOptions = [{ id: 'KSM', title: 'KSM', iconRight: { size: 18, file: Kusama } }];
+const chainOptions = [{ id: 'KSM', title: 'KSM', iconRight: { size: 18, name: 'chain-kusama' } }];
 
-export const AskBidModal: FC<{ offer?: Offer, onConfirmPlaceABid(value: TPlaceABid): void}> = ({ offer, onConfirmPlaceABid }) => {
+export const AskBidModal: FC<{ offer?: Offer, onConfirmPlaceABid(value: TPlaceABid): void, testid: string}> = ({ offer, onConfirmPlaceABid, testid }) => {
   const [chain, setChain] = useState<string | undefined>('KSM');
   const { kusamaFee } = useFee();
   const { selectedAccount } = useAccounts();
@@ -91,7 +88,7 @@ export const AskBidModal: FC<{ offer?: Offer, onConfirmPlaceABid(value: TPlaceAB
     if (!selectedAccount?.balance?.KSM || selectedAccount?.balance?.KSM.isZero()) return false;
     const bnAmount = new BN(fromStringToBnString(bidAmount, api?.market?.kusamaDecimals));
     return selectedAccount?.balance?.KSM.gte(bnAmount.sub(new BN(lastBidFromThisAccount || 0)));
-  }, [selectedAccount?.balance?.KSM, bidAmount, api?.market?.kusamaDecimals]);
+  }, [selectedAccount?.balance?.KSM, bidAmount, api?.market?.kusamaDecimals, lastBidFromThisAccount]);
 
   const onBidAmountChange = useCallback((value: string) => {
     setBidAmount(value);
@@ -143,6 +140,7 @@ export const AskBidModal: FC<{ offer?: Offer, onConfirmPlaceABid(value: TPlaceAB
       <TextStyled
         color='additional-warning-500'
         size='s'
+        testid={`${testid}-fee-warning`}
       >
         {`A fee of ~ ${kusamaFee} ${chain || ''} can be applied to the transaction`}
       </TextStyled>
@@ -160,7 +158,7 @@ export const AskBidModal: FC<{ offer?: Offer, onConfirmPlaceABid(value: TPlaceAB
 
 const AuctionStagesModal: FC<TTokenPageModalBodyProps & TPlaceABid> = ({ offer, accountAddress, onFinish, amount }) => {
   const { stages, status, initiate } = useAuctionBidStages(offer?.collectionId || 0, offer?.tokenId || 0);
-  const { push } = useNotification();
+  const { info } = useNotifications();
 
   useEffect(() => {
     if (!amount || !accountAddress) return;
@@ -172,7 +170,10 @@ const AuctionStagesModal: FC<TTokenPageModalBodyProps & TPlaceABid> = ({ offer, 
 
   useEffect(() => {
     if (status === StageStatus.success) {
-      push({ severity: NotificationSeverity.success, message: <>You made a new bid on <Link href={`/token/${collectionId || ''}/${tokenId || ''}`} title={`${prefix || ''} #${tokenId || ''}`}/></> });
+      info(
+        <>You made a new bid on <Link href={`/token/${collectionId || ''}/${tokenId || ''}`} title={`${prefix || ''} #${tokenId || ''}`}/></>,
+        { name: 'success', size: 32, color: 'var(--color-additional-light)' }
+      );
     }
   }, [status]);
 

@@ -1,22 +1,19 @@
 import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
-import { Text, Button, Heading } from '@unique-nft/ui-kit';
-import styled from 'styled-components/macro';
+import { Text, Button, Heading, useNotifications } from '@unique-nft/ui-kit';
+import styled from 'styled-components';
 import BN from 'bn.js';
 
-import { Offer } from '../../../api/restApi/offers/types';
-import { NFTToken } from '../../../api/chainApi/unique/types';
-import { AdditionalPositive100, AdditionalPositive500, Coral100, Coral500, Grey300 } from '../../../styles/colors';
-import { useOfferSubscription } from '../../../hooks/useOfferSubscription';
-import { useAccounts } from '../../../hooks/useAccounts';
-import { compareEncodedAddresses, isTokenOwner } from '../../../api/chainApi/utils/addressUtils';
+import { AdditionalPositive100, AdditionalPositive500, Coral100, Coral500, Grey300 } from 'styles/colors';
+import { useOfferSubscription } from 'hooks/useOfferSubscription';
+import { useAccounts } from 'hooks/useAccounts';
+import { compareEncodedAddresses, isTokenOwner } from 'api/uniqueSdk/utils/addressUtils';
+import { Offer } from 'api/restApi/offers/types';
+import { useAuction } from 'api/restApi/auction/auction';
+import { TCalculatedBid } from 'api/restApi/auction/types';
+import Timer from 'components/Timer';
+import AccountLink from 'components/Account/AccountLink';
 import { PriceForAuction } from '../TokenDetail/PriceForAuction';
-import { useAuction } from '../../../api/restApi/auction/auction';
-import { TCalculatedBid } from '../../../api/restApi/auction/types';
 import Bids from './Bids';
-import Timer from '../../../components/Timer';
-import { useNotification } from '../../../hooks/useNotification';
-import { NotificationSeverity } from '../../../notification/NotificationContext';
-import AccountLink from '../../../components/Account/AccountLink';
 
 interface AuctionProps {
   offer: Offer
@@ -24,13 +21,14 @@ interface AuctionProps {
   onDelistAuctionClick(): void
   onWithdrawClick(): void
   onClose(newOwnerAddress: string): void
+  testid: string
 }
 
-const Auction: FC<AuctionProps> = ({ offer: initialOffer, onPlaceABidClick, onDelistAuctionClick, onWithdrawClick, onClose }) => {
+const Auction: FC<AuctionProps> = ({ offer: initialOffer, onPlaceABidClick, onDelistAuctionClick, onWithdrawClick, onClose, testid }) => {
   const [offer, setOffer] = useState<Offer>(initialOffer);
   const { selectedAccount } = useAccounts();
   const { getCalculatedBid } = useAuction();
-  const { push } = useNotification();
+  const { info } = useNotifications();
 
   const [calculatedBid, setCalculatedBid] = useState<TCalculatedBid>();
 
@@ -88,12 +86,12 @@ const Auction: FC<AuctionProps> = ({ offer: initialOffer, onPlaceABidClick, onDe
   }, [setOffer]);
 
   const onAuctionStopped = useCallback((_offer: Offer) => {
-    push({
-      severity: NotificationSeverity.success,
-      message: 'Auction is stopped'
-    });
+    info(
+      <div data-testid={`${testid}-auction-stop-notification`}>Auction is stopped</div>,
+      { name: 'success', size: 32, color: 'var(--color-additional-light)' }
+    );
     setOffer(_offer);
-  }, [setOffer, push]);
+  }, [setOffer, info]);
 
   const onAuctionClosed = useCallback((_offer: Offer) => {
     if (offer.auction?.bids?.length) {
@@ -122,13 +120,19 @@ const Auction: FC<AuctionProps> = ({ offer: initialOffer, onPlaceABidClick, onDe
         {canDelist && <Button title={'Delist'}
           role={'danger'}
           onClick={onDelistAuctionClick}
+          testid={`${testid}-delist-button`}
         />}
         {canPlaceABid && <Button title={'Place a bid'}
           role={'primary'}
           onClick={onPlaceABidClick}
           disabled={!canPlaceABid}
+          testid={`${testid}-place-bid-button`}
         />}
-        {canWithdraw && <Button title={'Withdraw'} onClick={onWithdrawClick} />}
+        {canWithdraw && <Button
+          title={'Withdraw'}
+          onClick={onWithdrawClick}
+          testid={`${testid}-withdraw-button`}
+        />}
       </Row>}
       {offer.auction?.status === 'active' && offer?.auction?.stopAt && <TimerWrapper>
         <Timer time={offer.auction.stopAt} />

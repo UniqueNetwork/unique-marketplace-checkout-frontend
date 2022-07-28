@@ -1,15 +1,16 @@
 import React, { FC, useCallback } from 'react';
 import { Checkbox } from '@unique-nft/ui-kit';
-import styled from 'styled-components/macro';
+import styled from 'styled-components';
 import { Statuses } from './types';
 import Accordion from '../Accordion/Accordion';
 
 interface StatusFilterProps {
   value: Statuses | undefined
   onChange(value: Statuses): void
+  testid: string
 }
 
-const StatusFilter: FC<StatusFilterProps> = ({ value, onChange }) => {
+const StatusFilter: FC<StatusFilterProps> = ({ value, onChange, testid }) => {
   const { myNFTs, myBets, fixedPrice, timedAuction } = value || {};
 
   const onMyNFTsChange = useCallback((value: boolean) => {
@@ -37,6 +38,7 @@ const StatusFilter: FC<StatusFilterProps> = ({ value, onChange }) => {
       isOpen={true}
       onClear={onClear}
       isClearShow={myNFTs || fixedPrice || timedAuction || myBets}
+      testid={`${testid}-accordion`}
     >
       <StatusFilterWrapper>
         <Checkbox
@@ -44,24 +46,28 @@ const StatusFilter: FC<StatusFilterProps> = ({ value, onChange }) => {
           label={'My NFTs on sale'}
           size={'m'}
           onChange={onMyNFTsChange}
+          testid={`${testid}-myNft-checkbox`}
         />
         <Checkbox
           checked={!!fixedPrice}
           label={'Fixed price'}
           size={'m'}
           onChange={onFixedPriceChange}
+          testid={`${testid}-fixedPrice-checkbox`}
         />
         <Checkbox
           checked={!!timedAuction}
           label={'Timed auction'}
           size={'m'}
           onChange={onTimedAuctionChange}
+          testid={`${testid}-timedAuction-checkbox`}
         />
         <Checkbox
           checked={!!myBets}
           label={'My bids'}
           size={'m'}
           onChange={onMyBetsChange}
+          testid={`${testid}-myBids-checkbox`}
         />
       </StatusFilterWrapper>
     </Accordion>

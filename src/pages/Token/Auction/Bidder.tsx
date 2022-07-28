@@ -1,10 +1,10 @@
 import React, { FC } from 'react';
 import { Text } from '@unique-nft/ui-kit';
-import styled from 'styled-components/macro';
+import styled from 'styled-components';
 
 import AccountLink from '../../../components/Account/AccountLink';
 import { useAccounts } from '../../../hooks/useAccounts';
-import { compareEncodedAddresses } from '../../../api/chainApi/utils/addressUtils';
+import { compareEncodedAddresses } from 'api/uniqueSdk/utils/addressUtils';
 import DefaultAvatar from '../../../static/icons/default-avatar.svg';
 import { Avatar } from '../../../components/Avatar/Avatar';
 

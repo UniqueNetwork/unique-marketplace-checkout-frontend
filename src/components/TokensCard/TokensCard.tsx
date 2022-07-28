@@ -1,19 +1,17 @@
 import React, { FC, useMemo, useState } from 'react';
-import { Icon, Text } from '@unique-nft/ui-kit';
+import { Icon, Loader, Text } from '@unique-nft/ui-kit';
 import { Link } from 'react-router-dom';
-import styled from 'styled-components/macro';
+import styled from 'styled-components';
 
+import { NFTToken } from 'api/uniqueSdk/types';
+import { compareEncodedAddresses } from 'api/uniqueSdk/utils/addressUtils';
+import { Offer } from 'api/restApi/offers/types';
+import { useApi } from 'hooks/useApi';
+import { useAccounts } from 'hooks/useAccounts';
 import { Picture } from '..';
-import { useApi } from '../../hooks/useApi';
-import Loading from '../Loading';
-import { NFTToken } from '../../api/chainApi/unique/types';
-import { formatKusamaBalance } from '../../utils/textUtils';
-import { Primary600 } from '../../styles/colors';
-import Kusama from '../../static/icons/logo-kusama.svg';
-import { timeDifference } from '../../utils/timestampUtils';
-import { Offer } from '../../api/restApi/offers/types';
-import { compareEncodedAddresses } from '../../api/chainApi/utils/addressUtils';
-import { useAccounts } from '../../hooks/useAccounts';
+import { formatKusamaBalance } from 'utils/textUtils';
+import { timeDifference } from 'utils/timestampUtils';
+import { Primary600 } from 'styles/colors';
 import config from '../../config';
 
 export type TTokensCard = {
@@ -21,9 +19,10 @@ export type TTokensCard = {
   tokenId?: number
   collectionId?: number
   tokenImageUrl?: string
+  testid: string
 };
 
-export const TokensCard: FC<TTokensCard> = ({ collectionId, tokenId, ...props }) => {
+export const TokensCard: FC<TTokensCard> = ({ collectionId, tokenId, testid, ...props }) => {
   const [token, setToken] = useState<(NFTToken & Partial<Offer>) | undefined>(props.token);
   const [isFetching, setIsFetching] = useState<boolean>(false);
 
@@ -42,8 +41,7 @@ export const TokensCard: FC<TTokensCard> = ({ collectionId, tokenId, ...props })
       return { ...token,
         collectionName,
         prefix,
-        imageUrl: image
-      };
+        imageUrl: image };
     }
 
     if (token) {
@@ -52,9 +50,9 @@ export const TokensCard: FC<TTokensCard> = ({ collectionId, tokenId, ...props })
 
     if (tokenId && collectionId) {
       setIsFetching(true);
-      void api?.nft?.getToken(collectionId, tokenId).then((token: NFTToken) => {
+      void api?.nft?.getToken(collectionId, tokenId).then((token: NFTToken | null) => {
         setIsFetching(false);
-        setToken(token);
+        if (token) { setToken(token); }
       });
     }
     return {};
@@ -82,31 +80,55 @@ export const TokensCard: FC<TTokensCard> = ({ collectionId, tokenId, ...props })
       </PictureWrapper>
       <Description>
         <Link to={`/token/${collectionId}/${tokenId}`} title={`${prefix || ''} #${tokenId}`}>
-          <Text size='l' weight='medium'>
+          <Text
+            size='l'
+            weight='regular'
+            testid={`${testid}-tokenId`}
+          >
             {`${prefix || ''} #${tokenId || ''}`}
           </Text>
         </Link>
-        <a href={`${config.scanUrl || ''}collections/${collectionId || ''}`} target={'_blank'} rel='noreferrer'>
+        <a
+          data-testid={`${testid}-collection-${collectionId}-link`}
+          href={`${config.scanUrl || ''}collections/${collectionId || ''}`}
+          target={'_blank'}
+          rel='noreferrer'
+        >
           <Text color='primary-600' size='s'>
             {`${collectionName?.substring(0, 15) || ''} [id ${collectionId || ''}]`}
           </Text>
         </a>
         {price && <PriceWrapper>
-          <Text size='s'>{topBid ? `${formatKusamaBalance(Number(topBid))}` : `${formatKusamaBalance(price)}` }</Text>
-          <Icon file={Kusama} size={16} />
+          <Text
+            testid={`${testid}-price`}
+            size='s'
+          >{topBid ? `${formatKusamaBalance(Number(topBid))}` : `${formatKusamaBalance(price)}` }</Text>
+          <Icon name={'chain-kusama'} size={16} />
         </PriceWrapper>}
         {price && !auction && <Text size={'xs'} color={'grey-500'} >Price</Text>}
         {auction && <AuctionInfoWrapper>
-          {isTopBidder && <Text size={'xs'} color={'additional-positive-500'} >Leading bid</Text>}
-          {isBidder && !isTopBidder && <Text size={'xs'} color={'coral-500'} >Outbid</Text>}
-          {!isBidder && !isTopBidder && <Text size={'xs'} color={'grey-500'} >{
+          {isTopBidder && <Text
+            testid={`${testid}-leading-bid`}
+            size={'xs'}
+            color={'additional-positive-500'}
+          >Leading bid</Text>}
+          {isBidder && !isTopBidder && <Text
+            testid={`${testid}-outbid`}
+            size={'xs'}
+            color={'coral-500'}
+          >Outbid</Text>}
+          {!isBidder && !isTopBidder && <Text
+            testid={`${testid}-bids`}
+            size={'xs'}
+            color={'grey-500'}
+          >{
             auction.bids.length > 0 ? 'Last bid' : 'Minimum bid'
           }</Text>}
           <StyledText color={'dark'} size={'xs'}>{`${timeDifference(new Date(auction?.stopAt || '').getTime() / 1000)} left`}</StyledText>
         </AuctionInfoWrapper>}
       </Description>
 
-      {isFetching && <Loading />}
+      {isFetching && <Loader isFullPage />}
     </TokensCardStyled>
   );
 };
@@ -145,6 +167,7 @@ const PictureWrapper = styled(Link)`
     max-height: 100%;
     border-radius: 8px;
     transition: 50ms;
+    overflow: hidden;
 
     img {
       max-width: 100%;

@@ -1,6 +1,8 @@
 import React, { ChangeEvent, ReactNode, useCallback, useEffect, useRef, useState } from 'react';
-import styled from 'styled-components/macro';
+import styled from 'styled-components';
 import { AdditionalLight, Grey300, Grey500, Primary100, Primary500 } from '../../styles/colors';
+import { IconButton } from '../IconButton/IconButton';
+import { Icon, IconProps } from '@unique-nft/ui-kit';
 
 interface SelectInputOption {
   key: string
@@ -14,9 +16,12 @@ interface SelectInputProps<T = SelectInputOption> {
   value?: string | T
   onChange(value: string | T): void
   renderOption?(value: T): ReactNode | string
+  isClearable?: boolean
+  leftIcon?: IconProps
+  testid?: string
 }
 
-export function SelectInput<T = SelectInputOption>({ className, placeholder, options, value, onChange, renderOption }: SelectInputProps<T>) {
+export function SelectInput<T = SelectInputOption>({ className, placeholder, options, value, onChange, renderOption, isClearable, leftIcon, testid }: SelectInputProps<T>) {
   const [selectedValue, setSelectedValue] = useState<T>();
   const [inputValue, setInputValue] = useState<string>('');
   const [isDropdownVisible, setIsDropdownVisible] = useState<boolean>(false);
@@ -44,6 +49,10 @@ export function SelectInput<T = SelectInputOption>({ className, placeholder, opt
     return null;
   }, [renderOption]);
 
+  const onClear = useCallback(() => {
+    onChange('');
+  }, [onChange]);
+
   useEffect(() => {
     const onClickOutside = (event: MouseEvent) => {
       if (InputRef.current &&
@@ -70,29 +79,39 @@ export function SelectInput<T = SelectInputOption>({ className, placeholder, opt
   }, [value, setSelectedValue, setInputValue]);
 
   return (<SelectInputWrapper>
-    <InputWrapper className={className}>
+    <InputWrapper className={leftIcon ? `${className} left-icon` : className}>
+      {leftIcon && <Icon {...leftIcon}/>}
       {!selectedValue && !inputValue && placeholder && !isDropdownVisible && <Placeholder>{placeholder}</Placeholder>}
       {selectedValue && <div>
         {showOption(selectedValue)}
-      </div>
-      }
+      </div>}
       <input
+        data-testid={`${testid}-input`}
         type={'text'}
         value={inputValue}
         onChange={onInputChange}
         onFocus={onInputFocus}
         ref={InputRef}
       />
+      {(inputValue || (isClearable && value)) &&
+        <ClearButton
+          name={'circle-close'}
+          size={16}
+          onClick={onClear}
+          testid={`${testid}-clear-button`}
+        />
+      }
+      <Icon name={'triangle'} size={8} />
     </InputWrapper>
-    <Dropdown isOpen={isDropdownVisible} ref={DropdownRef}>
+    <Dropdown isOpen={isDropdownVisible} ref={DropdownRef} data-testid={`${testid}-dropdown`}>
       {options.map((item, index) => (
-        <OptionWrapper key={index} onClick={onOptionClick(item)} >{showOption(item)}</OptionWrapper>
+        <OptionWrapper key={index} onClick={onOptionClick(item)} data-testid={`${testid}-option-${index}`} >{showOption(item)}</OptionWrapper>
       ))}
     </Dropdown>
   </SelectInputWrapper>);
 }
 
-const SelectInputWrapper = styled.div`
+export const SelectInputWrapper = styled.div`
   position: relative;
 `;
 
@@ -111,9 +130,23 @@ const InputWrapper = styled.div`
     bottom: 0;
     border: none;
     background: transparent;
-    width: 100%;
     outline: none;
     padding: var(--gap);
+  }
+  & .icon-triangle{
+    position: absolute;
+    top: calc(50% - 4px);
+    right: calc(var(--gap) / 2);
+  }
+  &.left-icon {
+    padding-left: calc(var(--gap) * 2);
+    &>.icon {
+      position: absolute;
+      left: calc(var(--gap) / 2);
+    }
+    input {
+      left: var(--gap);
+    }
   }
 `;
 
@@ -138,9 +171,20 @@ const OptionWrapper = styled.div`
   &:hover {
     background: ${Primary100};
     color: ${Primary500};
+    .unique-text {
+      color: ${Primary500};
+    }
   }
 `;
 
 const Placeholder = styled.div`
   color: ${Grey500};
+`;
+
+const ClearButton = styled(IconButton)`
+  position: absolute;
+  left: calc(100% - calc(var(--gap) * 2.5));
+  top: 50%;
+  margin-top: -8px;
+  width: auto !important;
 `;

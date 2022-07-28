@@ -1,6 +1,6 @@
 import React, { FC, useCallback, useEffect, useState } from 'react';
 import { Button, Text } from '@unique-nft/ui-kit';
-import styled from 'styled-components/macro';
+import styled from 'styled-components';
 import { PriceRange } from './types';
 import Accordion from '../Accordion/Accordion';
 import { NumberInput } from '../NumberInput/NumberInput';
@@ -8,20 +8,30 @@ import { NumberInput } from '../NumberInput/NumberInput';
 interface PricesFilterProps {
   value: PriceRange | undefined
   onChange(value: PriceRange | undefined): void
+  testid: string
 }
 
-const PricesFilter: FC<PricesFilterProps> = ({ value, onChange }) => {
+const PricesFilter: FC<PricesFilterProps> = ({ value, onChange, testid }) => {
   const { minPrice, maxPrice } = value || {};
   const [minPriceValue, setMinPriceValue] = useState<string>();
   const [maxPriceValue, setMaxPriceValue] = useState<string>();
 
   const onApply = useCallback(() => {
     if (minPriceValue || maxPriceValue) {
-      const priceRange = {
-        minPrice: minPriceValue,
-        maxPrice: maxPriceValue
-      };
-      onChange(priceRange);
+      let minPrice = minPriceValue;
+      let maxPrice = maxPriceValue;
+
+      if (minPriceValue && maxPriceValue && Number(maxPriceValue) < Number(minPriceValue)) {
+        setMinPriceValue('0');
+        minPrice = '0';
+      }
+
+      if (maxPriceValue && Number(maxPriceValue) === 0) {
+        setMaxPriceValue('');
+        maxPrice = undefined;
+      }
+
+      onChange({ minPrice, maxPrice });
       return;
     }
     onChange(undefined);
@@ -51,14 +61,29 @@ const PricesFilter: FC<PricesFilterProps> = ({ value, onChange }) => {
       isOpen={true}
       onClear={onPricesClear}
       isClearShow={!!minPrice || !!maxPrice}
+      testid={`${testid}-accordion`}
     >
       <PriceFilterWrapper>
         <PricesRangeWrapper>
-          <NumberInput value={minPriceValue?.toString()} onChange={onChangeMinPrice} placeholder={'Min'} />
+          <NumberInput
+            value={minPriceValue?.toString()}
+            onChange={onChangeMinPrice}
+            placeholder={'Min'}
+            testid={`${testid}-minPrice`}
+          />
           <Text>to</Text>
-          <NumberInput value={maxPriceValue?.toString()} onChange={onChangeMaxPrice} placeholder={'Max'} />
+          <NumberInput
+            value={maxPriceValue?.toString()}
+            onChange={onChangeMaxPrice}
+            placeholder={'Max'}
+            testid={`${testid}-maxPrice`}
+          />
         </PricesRangeWrapper>
-        <Button title={'Apply'} onClick={onApply}/>
+        <Button
+          title={'Apply'}
+          onClick={onApply}
+          testid={`${testid}-apply-button`}
+        />
       </PriceFilterWrapper>
     </Accordion>
   );
