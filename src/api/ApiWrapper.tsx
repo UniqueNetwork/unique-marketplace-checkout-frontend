@@ -36,8 +36,6 @@ const ApiWrapper = ({ children, uniqueSdk = unique, kusamaSdk = kusama }: ChainP
       await uniqueSdk.connect(settings.blockchain.unique.wsEndpoint);
       await kusamaSdk.connect(settings.blockchain.kusama.wsEndpoint);
 
-      console.log(uniqueSdk?.isReady && kusamaSdk?.isReady);
-
       setRpcClientInitialized(uniqueSdk?.isReady && kusamaSdk?.isReady);
       setChainData(uniqueSdk?.sdk?.chainProperties());
     })().then(() => console.log('Rpc connection: success')).catch((e) => console.log('Rpc connection: failed', e));

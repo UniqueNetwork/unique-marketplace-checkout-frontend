@@ -7,15 +7,18 @@ import { IconButton } from '../IconButton/IconButton';
 interface PasswordInputProps {
   placeholder?: string
   value: string
+  maxLength?: number
   onChange(value: string): void
+  testid: string
 }
 
-export const PasswordInput: FC<PasswordInputProps> = ({ placeholder, value, onChange }) => {
+export const PasswordInput: FC<PasswordInputProps> = ({ placeholder, value, onChange, maxLength = 40, testid }) => {
   const [isVisibleValue, setIsVisibleValue] = useState<boolean>(false);
 
   const onPasswordChange = useCallback(({ target }: ChangeEvent<HTMLInputElement>) => {
+    if (target.value.length > maxLength) return;
     onChange(target.value);
-  }, [onChange]);
+  }, [onChange, maxLength]);
 
   const onVisibleValueClick = useCallback(() => {
     setIsVisibleValue(!isVisibleValue);
@@ -23,12 +26,19 @@ export const PasswordInput: FC<PasswordInputProps> = ({ placeholder, value, onCh
 
   return (
     <PasswordInputWrapper>
-      <PasswordInputStyled type={isVisibleValue ? 'text' : 'password'}
+      <PasswordInputStyled
+        data-testid={`${testid}-input`}
+        type={isVisibleValue ? 'text' : 'password'}
         onChange={onPasswordChange}
         value={value}
         placeholder={placeholder}
       />
-      {value && <IconButton name={isVisibleValue ? 'eye' : 'eye-closed'} onClick={onVisibleValueClick} size={24} />}
+      {value && <IconButton
+        name={isVisibleValue ? 'eye' : 'eye-closed'}
+        onClick={onVisibleValueClick}
+        size={24}
+        testid={`${testid}-clear-button`}
+      />}
     </PasswordInputWrapper>
   );
 };
