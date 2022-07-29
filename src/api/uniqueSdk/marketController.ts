@@ -1,5 +1,5 @@
 import { Sdk } from '@unique-nft/sdk';
-import { TokenDecoded, TokenIdArguments } from '@unique-nft/sdk/tokens';
+import { TokenIdArguments, UniqueTokenDecoded } from '@unique-nft/sdk/tokens';
 import { BN } from '@polkadot/util';
 import { CrossAccountId, EvmCollectionAbiMethods, MarketplaceAbiMethods, TokenAskType, TransactionOptions, TSignMessage, UniqueDecoratedRpc } from './types';
 import marketplaceAbi from './abi/marketPlaceAbi.json';
@@ -389,7 +389,7 @@ export class UniqueSDKMarketController {
 
     if (!isTokenOwner(from, token.owner)) throw new Error('You are not owner of this token');
 
-    const unsignedTxPayload = await this.uniqueSdk.tokens.transfer({
+    const unsignedTxPayload = await this.uniqueSdk.tokens.transfer.build({
       from,
       to,
       ...tokenIdArguments
@@ -413,7 +413,7 @@ export class UniqueSDKMarketController {
       collectionId: Number(collectionId), tokenId: Number(tokenId)
     };
 
-    const token: TokenDecoded | null = await this.uniqueSdk.tokens.get_new(tokenIdArguments);
+    const token: UniqueTokenDecoded | null = await this.uniqueSdk.tokens.get_new(tokenIdArguments);
     if (!token) throw new Error('Token for unlock not found');
     const owner = token.owner as { Substrate: string };
 
