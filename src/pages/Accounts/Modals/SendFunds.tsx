@@ -1,5 +1,5 @@
 import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
-import { Button, Heading, Modal, Text, Loader, useNotifications } from '@unique-nft/ui-kit';
+import { Button, Heading, Modal, Text, Loader, useNotifications, Dropdown, SelectOptionProps } from '@unique-nft/ui-kit';
 import { BN } from '@polkadot/util';
 import styled from 'styled-components';
 
@@ -25,15 +25,18 @@ export type TransferFundsModalProps = {
   isVisible: boolean
   senderAddress?: string
   onFinish(): void
+  testid: string
 }
 
-export const TransferFundsModal: FC<TransferFundsModalProps> = ({ isVisible, senderAddress, onFinish }) => {
+export const TransferFundsModal: FC<TransferFundsModalProps> = ({ isVisible, senderAddress, onFinish, testid }) => {
   const [status, setStatus] = useState<'ask' | 'transfer-stage'>('ask');
+  const [sender, setSender] = useState<string>('');
   const [recipient, setRecipient] = useState<string>('');
   const [amount, setAmount] = useState<string>('');
 
   const onTransfer = useCallback((_sender: string, _recipient: string, _amount: string) => {
     setRecipient(_recipient);
+    setSender(_sender);
     setAmount(_amount);
     setStatus('transfer-stage');
   }, [setStatus, setRecipient, setAmount]);
@@ -49,15 +52,17 @@ export const TransferFundsModal: FC<TransferFundsModalProps> = ({ isVisible, sen
      onFinish={onTransfer}
      senderAddress={senderAddress || ''}
      onClose={onFinish}
+     testid={`${testid}-ask`}
    />);
   }
   if (status === 'transfer-stage') {
     return (<TransferFundsStagesModal
       isVisible={isVisible}
-      sender={senderAddress || ''}
+      sender={sender || ''}
       recipient={recipient}
       amount={amount}
       onFinish={onFinishStages}
+      testid={`${testid}-stages`}
     />);
   }
   return null;
@@ -68,15 +73,22 @@ type AskSendFundsModalProps = {
   senderAddress: string
   onFinish(sender: string, recipient: string, amount: string): void
   onClose(): void
+  testid: string
 }
 
-export const AskTransferFundsModal: FC<AskSendFundsModalProps> = ({ isVisible, onFinish, senderAddress, onClose }) => {
+export const AskTransferFundsModal: FC<AskSendFundsModalProps> = ({ isVisible, onFinish, senderAddress, onClose, testid }) => {
   const { accounts, selectedAccount } = useAccounts();
+  const [sender, setSender] = useState<Account>();
   const [recipientAddress, setRecipientAddress] = useState<string | Account | undefined>();
   const [amount, setAmount] = useState<string>('');
   const { chainData, api } = useApi();
   const [kusamaFee, setKusamaFee] = useState('0');
   const [isFeeLoading, setIsFeeLoading] = useState(false);
+
+  useEffect(() => {
+    const account = accounts.find((account) => account.address === senderAddress);
+    setSender(account);
+  }, [senderAddress, accounts]);
 
   const getKusamaFee = useCallback(() => {
     setIsFeeLoading(true);
@@ -108,15 +120,9 @@ export const AskTransferFundsModal: FC<AskSendFundsModalProps> = ({ isVisible, o
     setFilteredAccounts(accountsWithQuartzAdresses);
   }, [accountsWithQuartzAdresses]);
 
-  const sender = useMemo(() => {
-    const account = accounts.find((account) => account.address === senderAddress);
-    return account;
-  }, [accounts, senderAddress]);
-
   const recipientBalance = useMemo(() => {
-    const account = accounts.find((account) => account.address === recipientAddress);
-    return account?.balance?.KSM;
-  }, [accounts, recipientAddress]);
+    return typeof recipientAddress !== 'string' && recipientAddress?.balance?.KSM;
+  }, [recipientAddress]);
 
   const onAmountChange = useCallback((value: string) => {
     setAmount(value);
@@ -124,14 +130,14 @@ export const AskTransferFundsModal: FC<AskSendFundsModalProps> = ({ isVisible, o
   }, [setAmount, getKusamaFee]);
 
   const isConfirmDisabled = useMemo(() => (
-    !recipientAddress || Number(amount) <= 0 || Number(amount) > Number(formatKusamaBalance(sender?.balance?.KSM?.toString() || 0))
+    !sender || !recipientAddress || Number(amount) <= 0 || Number(amount) > Number(formatKusamaBalance(sender?.balance?.KSM?.toString() || 0))
   ), [amount, recipientAddress, sender]);
 
   const onSend = useCallback(() => {
     if (isConfirmDisabled) return;
     const recipient = typeof recipientAddress === 'string' ? recipientAddress : recipientAddress?.address;
-    onFinish(senderAddress, recipient || '', amount.toString());
-  }, [senderAddress, recipientAddress, amount, onFinish, isConfirmDisabled]);
+    onFinish(sender?.address || '', recipient || '', amount.toString());
+  }, [sender, recipientAddress, amount, onFinish, isConfirmDisabled]);
 
   const onFilter = useCallback((input: string) => {
     setFilteredAccounts(accountsWithQuartzAdresses.filter((account) => {
@@ -157,22 +163,42 @@ export const AskTransferFundsModal: FC<AskSendFundsModalProps> = ({ isVisible, o
     onClose();
   }, [accountsWithQuartzAdresses, onClose]);
 
+  const onChangeSender = useCallback((value: SelectOptionProps) => {
+    setSender(value as unknown as Account);
+  }, []);
+
   return (<Modal isVisible={isVisible} isClosable={true} onClose={onCloseModal}>
     <Content>
       <Heading size='2'>{'Send funds'}</Heading>
     </Content>
 
     <Text size={'s'} color={'grey-500'}>{'From'}</Text>
-    <AddressWrapper>
-      <AccountCard accountName={sender?.meta.name || ''} accountAddress={senderAddress} canCopy={false} />
-    </AddressWrapper>
+    <SenderSelectWrapper>
+      <Dropdown
+        optionKey={'address'}
+        options={accounts as unknown as SelectOptionProps[]}
+        onChange={onChangeSender}
+        optionRender={(option) => (
+          <AccountCard accountName={(option as unknown as Account)?.meta.name || ''} accountAddress={(option as unknown as Account)?.address || ''} canCopy={false} />
+        )}
+        iconRight={{ name: 'triangle', size: 8 }}
+      >
+        <AddressWrapper>
+          <AccountCard accountName={sender?.meta.name || ''} accountAddress={sender?.address || ''} canCopy={false} />
+        </AddressWrapper>
+      </Dropdown>
+    </SenderSelectWrapper>
     <AmountWrapper>
-      <Text size={'s'}>{`${formatKusamaBalance(sender?.balance?.KSM?.toString() || 0)} ${tokenSymbol}`}</Text>
+      <Text
+        testid={`${testid}-balance`}
+        size={'s'}
+      >{`${formatKusamaBalance(sender?.balance?.KSM?.toString() || 0)} ${tokenSymbol}`}</Text>
     </AmountWrapper>
 
     <Text size={'s'} color={'grey-500'}>{'To'}</Text>
     <RecipientSelectWrapper >
       <SelectInput<Account>
+        testid={`${testid}-select-address`}
         options={filteredAccounts}
         value={recipientAddress}
         onChange={onChangeAddress}
@@ -182,17 +208,30 @@ export const AskTransferFundsModal: FC<AskSendFundsModalProps> = ({ isVisible, o
       />
     </RecipientSelectWrapper>
     <AmountWrapper>
-      {recipientBalance && <Text size={'s'}>{`${formatKusamaBalance(recipientBalance?.toString() || 0)} ${tokenSymbol}`}</Text> }
+      {recipientBalance && <Text
+        testid={`${testid}-recipient-balance`}
+        size={'s'}
+      >{`${formatKusamaBalance(recipientBalance?.toString() || 0)} ${tokenSymbol}`}</Text> }
     </AmountWrapper>
     <AmountInputWrapper>
-      <NumberInput value={amount} onChange={onAmountChange} placeholder={'Amount (KSM)'} />
+      <NumberInput
+        value={amount}
+        onChange={onAmountChange}
+        placeholder={'Amount (KSM)'}
+        testid={`${testid}-amount-input`}
+      />
     </AmountInputWrapper>
     {Number(amount) > Number(formatKusamaBalance(sender?.balance?.KSM?.toString() || 0)) && <LowBalanceWrapper>
       <Text size={'s'}>Your balance is too low</Text>
     </LowBalanceWrapper>}
-    <KusamaFeeMessage isFeeLoading={isFeeLoading} kusamaFee={kusamaFee} />
+    <KusamaFeeMessage
+      isFeeLoading={isFeeLoading}
+      kusamaFee={kusamaFee}
+      testid={`${testid}-fee-message`}
+    />
     <ButtonWrapper>
       <Button
+        testid={`${testid}-confirm-button`}
         disabled={isConfirmDisabled}
         onClick={onSend}
         role='primary'
@@ -205,9 +244,10 @@ export const AskTransferFundsModal: FC<AskSendFundsModalProps> = ({ isVisible, o
 type TransferFundsStagesModalProps = {
   isVisible: boolean
   onFinish: () => void
+  testid: string
 };
 
-const TransferFundsStagesModal: FC<TransferFundsStagesModalProps & TTransferFunds> = ({ isVisible, onFinish, sender, amount, recipient }) => {
+const TransferFundsStagesModal: FC<TransferFundsStagesModalProps & TTransferFunds> = ({ isVisible, onFinish, sender, amount, recipient, testid }) => {
   const { stages, status, initiate } = useTransferFundsStages(sender);
   const { info } = useNotifications();
   useEffect(() => { initiate({ sender, recipient, amount }); }, [sender, recipient, amount]);
@@ -223,7 +263,12 @@ const TransferFundsStagesModal: FC<TransferFundsStagesModalProps & TTransferFund
 
   return (<Modal isVisible={isVisible} isClosable={false}>
     <div>
-      <DefaultMarketStages stages={stages} status={status} onFinish={onFinish} />
+      <DefaultMarketStages
+        stages={stages}
+        status={status}
+        onFinish={onFinish}
+        testid={`${testid}`}
+      />
     </div>
   </Modal>);
 };
@@ -231,12 +276,17 @@ const TransferFundsStagesModal: FC<TransferFundsStagesModalProps & TTransferFund
 type KusamaFeeMessageProps = {
   isFeeLoading: boolean,
   kusamaFee: string
+  testid: string
 }
 
-const KusamaFeeMessage: FC<KusamaFeeMessageProps> = ({ isFeeLoading, kusamaFee }) => {
+const KusamaFeeMessage: FC<KusamaFeeMessageProps> = ({ isFeeLoading, kusamaFee, testid }) => {
   return (
     <KusamaFeeMessageWrapper>
-      <Text color='additional-warning-500' size='s'>
+      <Text
+        testid={`${testid}-text`}
+        color='additional-warning-500'
+        size='s'
+      >
         {isFeeLoading
           ? <Loader label='Loading fee...' />
           : <>A fee of {kusamaFee === '0' ? 'some' : `~ ${kusamaFee}`} KSM can be applied to the transaction, unless the transaction is sponsored</>}
@@ -251,6 +301,19 @@ const Content = styled.div`
   }
 `;
 
+const SenderSelectWrapper = styled.div`
+  position: relative;
+  
+  & .unique-dropdown {
+    width: 100%;
+  }
+  & .icon-triangle{
+    position: absolute;
+    top: calc(50% - 4px);
+    right: calc(var(--gap) / 2);
+  }
+`;
+
 const AddressWrapper = styled.div`
   display: flex;
   column-gap: calc(var(--gap) / 2);
@@ -258,6 +321,7 @@ const AddressWrapper = styled.div`
   border-radius: 4px;
   padding: calc(var(--gap) / 2) var(--gap);
   align-items: center;
+  cursor: pointer;
   .unique-text {
     text-overflow: ellipsis;
     overflow: hidden;
@@ -295,7 +359,6 @@ const RecipientSelectWrapper = styled.div`
   display: flex;
   flex-direction: column;
   row-gap: calc(var(--gap) / 2);
-  margin-bottom: calc(var(--gap) * 1.5);
   .unique-input-text {
     width: 100%;
   }
@@ -307,6 +370,7 @@ const AmountWrapper = styled.div`
 `;
 
 const AmountInputWrapper = styled.div`
+  margin-top: calc(var(--gap) * 1.5);
   .unique-input-text, div {
     width: 100%;
   }

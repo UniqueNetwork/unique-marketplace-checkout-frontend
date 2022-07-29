@@ -12,7 +12,7 @@ import { WarningBlock } from 'components/WarningBlock/WarningBlock';
 import useDeviceSize, { DeviceSize } from '../../../hooks/useDeviceSize';
 import { shortcutText } from '../../../utils/textUtils';
 
-export const ImportViaSeedFinalModal: FC<TCreateAccountBodyModalProps> = ({ accountProperties, onFinish, onGoBack }) => {
+export const ImportViaSeedFinalModal: FC<TCreateAccountBodyModalProps> = ({ accountProperties, onFinish, onGoBack, testid }) => {
   const deviceSize = useDeviceSize();
   const onSaveClick = useCallback(() => {
     if (!accountProperties) return;
@@ -27,7 +27,7 @@ export const ImportViaSeedFinalModal: FC<TCreateAccountBodyModalProps> = ({ acco
   return (<>
     <AddressWrapper>
       <Avatar size={24} src={DefaultAvatar} address={accountProperties?.address} />
-      <Text color={'grey-500'}>{formatAddress}</Text>
+      <Text testid={`${testid}-address`} color={'grey-500'}>{formatAddress}</Text>
     </AddressWrapper>
     <CredentialsWrapper >
       <LabelTextWrapper>
@@ -58,10 +58,12 @@ export const ImportViaSeedFinalModal: FC<TCreateAccountBodyModalProps> = ({ acco
     <ButtonWrapper>
       <StepsTextStyled size={'m'}>Step 3/3</StepsTextStyled>
       <Button
+        testid={`${testid}-previous-button`}
         onClick={onGoBack}
         title='Previous'
       />
       <Button
+        testid={`${testid}-create-button`}
         onClick={onSaveClick}
         role='primary'
         title='Create account'

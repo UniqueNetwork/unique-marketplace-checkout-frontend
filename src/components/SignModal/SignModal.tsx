@@ -9,6 +9,8 @@ import { PasswordInput } from '../PasswordInput/PasswordInput';
 import AccountCard from '../Account/Account';
 import useDeviceSize, { DeviceSize } from '../../hooks/useDeviceSize';
 
+const testid = 'sign-modal';
+
 export type TSignModalProps = {
   isVisible: boolean
   account?: Account
@@ -56,11 +58,13 @@ export const SignModal: FC<TSignModalProps> = ({ account, isVisible, onFinish, o
         placeholder={'Password'}
         onChange={setPassword}
         value={password}
+        testid={`${testid}-password`}
       />
       {passwordError && <Text color={'coral-500'} >{passwordError}</Text>}
     </CredentialsWrapper>
     <ButtonWrapper>
       <Button
+        testid={`${testid}-sign-button`}
         disabled={!password}
         onClick={onSignClick}
         role='primary'

@@ -9,9 +9,10 @@ import CardSkeleton from '../Skeleton/CardSkeleton';
 type TTokensList = {
   tokens: (NFTToken & Partial<Offer>)[]
   isLoading?: boolean
+  testid: string
 };
 
-export const TokensList: FC<TTokensList> = ({ tokens, isLoading }) => {
+export const TokensList: FC<TTokensList> = ({ tokens, isLoading, testid }) => {
   return (
     <TokensListStyled>
       {tokens?.map &&
@@ -21,6 +22,7 @@ export const TokensList: FC<TTokensList> = ({ tokens, isLoading }) => {
             tokenId={token?.id}
             collectionId={token?.collectionId}
             token={token}
+            testid={`${testid}-card`}
           />
         ))}
 

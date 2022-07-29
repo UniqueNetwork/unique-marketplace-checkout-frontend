@@ -25,13 +25,15 @@ interface IProps {
   token?: NFTToken
   offer?: Offer
   isLoading?: boolean
+  testid: string
 }
 
 export const CommonTokenDetail: FC<IProps> = ({
   children,
   token,
   offer,
-  isLoading
+  isLoading,
+  testid
 }) => {
   const {
     collectionId,
@@ -103,13 +105,20 @@ export const CommonTokenDetail: FC<IProps> = ({
     <CommonTokenDetailStyled>
       <PictureWrapper>
         {isLoading && <Skeleton />}
-        {!isLoading && <Picture alt={tokenId?.toString() || ''} src={imageUrl} video={video} />}
+        {!isLoading &&
+          <Picture
+            alt={tokenId?.toString() || ''}
+            src={imageUrl}
+            video={video}
+            testid={`${testid}-token-picture`}
+          />
+        }
       </PictureWrapper>
       <Description>
         {isLoading && <TokenSkeleton />}
         {!isLoading && <>
-          <Heading size={'1'}>{`${prefix || ''} #${tokenId}`}</Heading>
-          <ShareLink onClick={openShareModal}>
+          <Heading size={'1'} data-testid={`${testid}-token-name`}>{`${prefix || ''} #${tokenId}`}</Heading>
+          <ShareLink onClick={openShareModal} data-testid={`${testid}-share-button`}>
             <Text color='grey-500' size='m'>
               Share link
             </Text>
@@ -117,7 +126,7 @@ export const CommonTokenDetail: FC<IProps> = ({
               <Icon name={'shared'} size={24} />
             </IconWrapper>
           </ShareLink>
-          <Row>
+          <Row data-testid={`${testid}-owner-section`}>
             {isOwner && <Text color='grey-500' size='m'>You own it</Text>}
             {!isOwner && <>
               <Text color='grey-500' size='m'>
@@ -125,7 +134,7 @@ export const CommonTokenDetail: FC<IProps> = ({
               </Text>
               <Account href={`${config.scanUrl}account/${owner || '404'}`}>
                 <Avatar size={24} src={DefaultAvatar} address={owner}/>
-                <Text color='primary-600' size='m'>
+                <Text color='primary-600' size='m' data-testid={`${testid}-owner-address`}>
                   {deviceSize === DeviceSize.lg ? owner || '' : shortcutText(owner || '') }
                 </Text>
               </Account>
@@ -143,7 +152,7 @@ export const CommonTokenDetail: FC<IProps> = ({
           />
         </>}
       </Description>
-      <ShareTokenModal isVisible={shareModalVisible} onClose={closeShareModal} />
+      <ShareTokenModal isVisible={shareModalVisible} onClose={closeShareModal} testid={`${testid}-share-modal`} />
     </CommonTokenDetailStyled>
   );
 };

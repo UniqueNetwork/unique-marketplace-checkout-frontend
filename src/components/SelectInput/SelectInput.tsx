@@ -18,9 +18,10 @@ interface SelectInputProps<T = SelectInputOption> {
   renderOption?(value: T): ReactNode | string
   isClearable?: boolean
   leftIcon?: IconProps
+  testid?: string
 }
 
-export function SelectInput<T = SelectInputOption>({ className, placeholder, options, value, onChange, renderOption, isClearable, leftIcon }: SelectInputProps<T>) {
+export function SelectInput<T = SelectInputOption>({ className, placeholder, options, value, onChange, renderOption, isClearable, leftIcon, testid }: SelectInputProps<T>) {
   const [selectedValue, setSelectedValue] = useState<T>();
   const [inputValue, setInputValue] = useState<string>('');
   const [isDropdownVisible, setIsDropdownVisible] = useState<boolean>(false);
@@ -85,17 +86,26 @@ export function SelectInput<T = SelectInputOption>({ className, placeholder, opt
         {showOption(selectedValue)}
       </div>}
       <input
+        data-testid={`${testid}-input`}
         type={'text'}
         value={inputValue}
         onChange={onInputChange}
         onFocus={onInputFocus}
         ref={InputRef}
       />
-      {(inputValue || (isClearable && value)) && <ClearButton name={'circle-close'} size={16} onClick={onClear} />}
+      {(inputValue || (isClearable && value)) &&
+        <ClearButton
+          name={'circle-close'}
+          size={16}
+          onClick={onClear}
+          testid={`${testid}-clear-button`}
+        />
+      }
+      <Icon name={'triangle'} size={8} />
     </InputWrapper>
-    <Dropdown isOpen={isDropdownVisible} ref={DropdownRef}>
+    <Dropdown isOpen={isDropdownVisible} ref={DropdownRef} data-testid={`${testid}-dropdown`}>
       {options.map((item, index) => (
-        <OptionWrapper key={index} onClick={onOptionClick(item)} >{showOption(item)}</OptionWrapper>
+        <OptionWrapper key={index} onClick={onOptionClick(item)} data-testid={`${testid}-option-${index}`} >{showOption(item)}</OptionWrapper>
       ))}
     </Dropdown>
   </SelectInputWrapper>);
@@ -122,6 +132,11 @@ const InputWrapper = styled.div`
     background: transparent;
     outline: none;
     padding: var(--gap);
+  }
+  & .icon-triangle{
+    position: absolute;
+    top: calc(50% - 4px);
+    right: calc(var(--gap) / 2);
   }
   &.left-icon {
     padding-left: calc(var(--gap) * 2);
@@ -168,8 +183,7 @@ const Placeholder = styled.div`
 
 const ClearButton = styled(IconButton)`
   position: absolute;
-  //right: calc(var(--gap) * 2);
-  left: calc(100% - calc(var(--gap) * 1.5));
+  left: calc(100% - calc(var(--gap) * 2.5));
   top: 50%;
   margin-top: -8px;
   width: auto !important;

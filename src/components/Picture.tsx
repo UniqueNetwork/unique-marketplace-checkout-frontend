@@ -6,11 +6,12 @@ import { VideoAttribute } from '../api/uniqueSdk/types';
 interface PictureProps {
   src?: string
   alt: string
+  testid?: string
   size?: number
   video?: VideoAttribute
 }
 
-export const Picture: FC<PictureProps> = ({ alt, src, size, video }) => {
+export const Picture: FC<PictureProps> = ({ alt, src, size, testid = '', video }) => {
   const [imageSrc, setImageSrc] = useState<string | undefined>();
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
@@ -47,6 +48,7 @@ export const Picture: FC<PictureProps> = ({ alt, src, size, video }) => {
         controls
         autoPlay
         loop
+        data-testid={`${testid}-video`}
       ></video>
     }
     {!isLoading && imageSrc && !video &&
@@ -54,6 +56,7 @@ export const Picture: FC<PictureProps> = ({ alt, src, size, video }) => {
         alt={alt}
         src={imageSrc}
         height={size || undefined}
+        data-testid={`${testid}`}
       />}
     {!isLoading && !imageSrc && <svg
       fill={'white'}
