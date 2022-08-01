@@ -1,4 +1,4 @@
-import { Button, Heading, Tabs, Text, Select, Link } from '@unique-nft/ui-kit';
+import { Button, Heading, Tabs, Select, Link, useNotifications } from '@unique-nft/ui-kit';
 import { SelectOptionProps } from '@unique-nft/ui-kit/dist/cjs/types';
 import React, { FC, useCallback, useEffect, useState } from 'react';
 import styled from 'styled-components';
@@ -7,13 +7,11 @@ import DefaultMarketStages from './StagesModal';
 import { TTokenPageModalBodyProps } from './TokenPageModal';
 import { TAuctionProps, TFixPriceProps } from './types';
 import { useAuctionSellStages, useSellFixStages } from '../../../hooks/marketplaceStages';
-import { useNotification } from '../../../hooks/useNotification';
 import { useFee } from '../../../hooks/useFee';
 import { useAccounts } from '../../../hooks/useAccounts';
-import { NumberInput } from '../../../components/NumberInput/NumberInput';
-import { AdditionalWarning100 } from '../../../styles/colors';
 import { StageStatus } from '../../../types/StagesTypes';
-import { NotificationSeverity } from '../../../notification/NotificationContext';
+import { NumberInput } from 'components/NumberInput/NumberInput';
+import { WarningBlock } from 'components/WarningBlock/WarningBlock';
 
 const tokenSymbol = 'KSM';
 
@@ -148,12 +146,6 @@ export const AskSellModal: FC<TAskSellModalProps> = ({ onSellAuction, onSellFixP
         onChange={onPriceInputChange}
         value={priceInputValue?.toString()}
       />
-      {!selectedAccount?.isOnWhiteList && <TextStyled
-        color='additional-warning-500'
-        size='s'
-      >
-        {`A fee of ~ ${kusamaFee} ${tokenSymbol} can be applied to the transaction`}
-      </TextStyled>}
       <ButtonWrapper>
         <Button
           disabled={!priceInputValue || !Number(priceInputValue)}
@@ -233,13 +225,16 @@ type TSellAuctionStagesModal = {
 
 export const SellFixStagesModal: FC<TSellFixStagesModal> = ({ collectionId, tokenId, tokenPrefix, sellFix, onFinish }) => {
   const { stages, status, initiate } = useSellFixStages(collectionId, tokenId);
-  const { push } = useNotification();
+  const { info } = useNotifications();
 
   useEffect(() => { initiate(sellFix); }, [sellFix]);
 
   useEffect(() => {
     if (status === StageStatus.success) {
-      push({ severity: NotificationSeverity.success, message: <><Link href={`/token/${collectionId}/${tokenId}`} title={`${tokenPrefix} #${tokenId}`}/> offered for sale</> });
+      info(
+        <><Link href={`/token/${collectionId}/${tokenId}`} title={`${tokenPrefix} #${tokenId}`}/> offered for sale</>,
+        { name: 'success', size: 32, color: 'var(--color-additional-light)' }
+      );
     }
   }, [status]);
 
@@ -252,13 +247,13 @@ export const SellFixStagesModal: FC<TSellFixStagesModal> = ({ collectionId, toke
 
 export const SellAuctionStagesModal: FC<TSellAuctionStagesModal> = ({ collectionId, tokenId, tokenPrefix, auction, onFinish }) => {
   const { stages, status, initiate } = useAuctionSellStages(collectionId, tokenId);
-  const { push } = useNotification();
+  const { info } = useNotifications();
 
   useEffect(() => { initiate(auction); }, [auction]); //
 
   useEffect(() => {
     if (status === StageStatus.success) {
-      push({ severity: NotificationSeverity.success, message: <><Link href={`/token/${collectionId}/${tokenId}`} title={`${tokenPrefix} #${tokenId}`}/> is up for auction</> });
+      info(<><Link href={`/token/${collectionId}/${tokenId}`} title={`${tokenPrefix} #${tokenId}`}/> is up for auction</>, { name: 'success', size: 32, color: 'var(--color-additional-light)' });
     }
   }, [status]);
 
@@ -268,16 +263,6 @@ export const SellAuctionStagesModal: FC<TSellAuctionStagesModal> = ({ collection
     </div>
   );
 };
-
-const TextStyled = styled(Text)`
-  box-sizing: border-box;
-  display: flex;
-  padding: 8px 16px;
-  margin-bottom: 24px;
-  border-radius: 4px;
-  background-color: ${AdditionalWarning100};
-  width: 100%;
-`;
 
 const InputWrapper = styled(NumberInput)`
   margin-bottom: 32px;

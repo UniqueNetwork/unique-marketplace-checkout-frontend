@@ -1,12 +1,10 @@
 import React, { FC, useCallback, useMemo, useState } from 'react';
-import { Button, Heading, Text } from '@unique-nft/ui-kit';
+import { Button, Heading, Text, useNotifications } from '@unique-nft/ui-kit';
 import styled from 'styled-components/macro';
 
 import { TAdminPanelModalBodyProps } from './AdminPanelModal';
 import { useAdminCollections } from '../../../api/restApi/admin/collection';
 import { TextInput } from 'components/TextInput/TextInput';
-import { NotificationSeverity } from '../../../notification/NotificationContext';
-import { useNotification } from '../../../hooks/useNotification';
 
 const MAX_SAFE_ID = 2147483647;
 
@@ -15,10 +13,10 @@ const NOT_VALID_TOKEN_MESSAGE = 'List of token IDs is incorrect. It must be like
 export const SelectNFTsModal: FC<TAdminPanelModalBodyProps> = ({ collection, onFinish }) => {
   const { setAllowedTokens } = useAdminCollections();
   const [tokens, setTokens] = useState(collection?.allowedTokens || '');
-  const { push } = useNotification();
+  const { info } = useNotifications();
 
   const isValidAllowedTokens = useMemo(() => {
-    if (tokens && !/^\d+(-\d+)?(,\d+(-\d+)?)*$/.test(tokens)) {
+    if (tokens && !/^[1-9]\d*(-[1-9]\d*)?(,[1-9]\d*(-[1-9]\d*)?)*$/.test(tokens)) {
       return false;
     }
     if (tokens.split(',').some((value) => {
@@ -39,8 +37,10 @@ export const SelectNFTsModal: FC<TAdminPanelModalBodyProps> = ({ collection, onF
     if (!isValidAllowedTokens) return;
 
     await setAllowedTokens(collection?.id, tokens);
-
-    push({ message: `Add allowed tokens: ${tokens} for collection: ${collection?.id}`, severity: NotificationSeverity.success });
+    info(
+      `Add allowed tokens: ${tokens || 'all tokens'} for collection: ${collection?.id}`,
+      { name: 'success', size: 32, color: 'var(--color-additional-light)' }
+    );
     onFinish();
   }, [collection, tokens]);
 
@@ -60,6 +60,9 @@ export const SelectNFTsModal: FC<TAdminPanelModalBodyProps> = ({ collection, onF
       </Row>
       <Row>
         <Text size='s' color='grey-500'>You can enter individual numbers separated by commas and intervals separated by hyphens</Text>
+      </Row>
+      <Row>
+        <Text size='s' color='grey-500'>Without filling in the data you put up for sale all the tokens on the marketplace</Text>
       </Row>
       <InputWrapper>
         <TextInput placeholder='ID of the tokens'
@@ -82,18 +85,29 @@ export const SelectNFTsModal: FC<TAdminPanelModalBodyProps> = ({ collection, onF
 
 const Content = styled.div`
   && h2 {
-    margin-bottom: 0;
+    margin-bottom: calc(var(--gap) * 1.5);
+  }
+  @media (max-width: 567px) {
+    && h2 {
+      font-size: 24px;
+      line-height: 36px;
+      width: 100% !important;
+    }
   }
 `;
 
 const Row = styled.div`
-  margin: calc(var(--gap) * 1.5) 0;
+  margin: 4px 0;
+  .unique-text[class*=size-s] {
+    line-height: 22px;
+  }
 `;
 
 const InputWrapper = styled.div`
   display: flex;
   column-gap: calc(var(--gap) / 2);
   margin-bottom: calc(var(--gap) * 2);
+  margin-top: var(--gap);
   &>div {
     width: 100%;
     .unique-input-text {
@@ -106,4 +120,9 @@ const InputWrapper = styled.div`
 const ButtonWrapper = styled.div`
   display: flex;
   justify-content: flex-end;
+  @media (max-width: 567px) {
+    button {
+      width: 100%;
+    }
+  }
 `;

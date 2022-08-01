@@ -65,7 +65,7 @@ export const MarketPage = () => {
   const [filterState, setFilterState] = useState<FilterState | null>(parseFilterState(searchParams.get('filterState')));
   const [sortingValue, setSortingValue] = useState<string>(searchParams.get('sortingValue') || defaultSortingValue.id);
   const [searchValue, setSearchValue] = useState<string | undefined>(searchParams.get('searchValue') || '');
-  const { offers, offersCount, isFetching, fetchMore, fetch } = useOffers();
+  const { offers, offersCount, isFetching, fetchMore, fetch, attributes, attributeCounts } = useOffers();
   const { selectedAccount } = useAccounts();
   const deviceSize = useDeviceSize();
 
@@ -83,7 +83,7 @@ export const MarketPage = () => {
 
   const getFilterByState = useCallback((filterState: FilterState | null) => {
     if (!filterState) return {};
-    const { statuses, prices, collections, attributeCounts, ...otherFilter } = filterState;
+    const { statuses, prices, collections, attributeCounts, attributes, ...otherFilter } = filterState;
     const { myNFTs, myBets, timedAuction, fixedPrice } = statuses || {};
 
     return {
@@ -93,22 +93,22 @@ export const MarketPage = () => {
       ...prices,
       collectionId: collections,
       numberOfAttributes: attributeCounts,
+      attributes: attributes?.map(({ attribute }) => attribute),
       ...otherFilter
     };
   }, [selectedAccount?.address]);
 
   const onClickSeeMore = useCallback(() => {
-    // Todo: fix twice rendering
     if (!isFetching) {
-      fetchMore({
+      void fetchMore({
         page: Math.ceil(offers.length / pageSize) + 1,
         pageSize,
         ...(getFilterByState(filterState)),
-        searchText: searchValue,
+        searchText: searchValue || undefined,
         sort: [sortingValue]
       });
     }
-  }, [fetchMore, offers, pageSize, isFetching, searchValue]);
+  }, [fetchMore, offers, pageSize, isFetching, searchValue, filterState]);
 
   const onSortingChange = useCallback((value: TOption) => {
     setSortingValue(value.id);
@@ -117,7 +117,7 @@ export const MarketPage = () => {
       page: 1,
       pageSize,
       ...(getFilterByState(filterState)),
-      searchText: searchValue,
+      searchText: searchValue || undefined,
       sort: [value.id]
     });
   }, [fetch, filterState, getFilterByState, searchValue]);
@@ -129,27 +129,34 @@ export const MarketPage = () => {
       page: 1,
       pageSize,
       ...(getFilterByState(filterState)),
-      searchText: value,
+      searchText: value || undefined,
       sort: [sortingValue]
     });
   }, [fetch, sortingValue, searchValue, filterState, getFilterByState]);
 
-  const onFilterChange = useCallback((filterState: FilterState | null) => {
-    setFilterState(filterState);
+  const onFilterChange = useCallback(async (filterState: FilterState | null) => {
     setUrlParameter('filterState', filterState ? JSON.stringify(filterState) : '');
-    void fetch({
+    const { attributesCount } = await fetch({
       page: 1,
       pageSize,
       ...(getFilterByState(filterState)),
-      searchText: searchValue,
+      searchText: searchValue || undefined,
       sort: [sortingValue]
     });
+    const _selectedAttributeCounts = filterState?.attributeCounts?.filter((item) => attributesCount.findIndex(({ numberOfAttributes }) => numberOfAttributes === item) > -1);
+    setFilterState({ ...filterState, attributeCounts: _selectedAttributeCounts });
   }, [fetch, sortingValue, getFilterByState, searchValue]);
 
+  const onChangeAccount = useCallback(() => {
+    if (isFetching) return;
+    if (filterState?.statuses?.myNFTs || filterState?.statuses?.myBets) {
+      void onFilterChange(filterState);
+    }
+  }, [filterState?.statuses?.myNFTs, filterState?.statuses?.myBets]);
+
   useEffect(() => {
-    if ((!filterState?.statuses?.myNFTs && !filterState?.statuses?.myBets) || isFetching) return;
-    onFilterChange(filterState);
-  }, [filterState, selectedAccount?.address]);
+    onChangeAccount();
+  }, [selectedAccount?.address]);
 
   const filterCount = useMemo(() => {
     const { statuses, prices, collections = [], attributes = [], attributeCounts = [] } = filterState || {};
@@ -164,7 +171,12 @@ export const MarketPage = () => {
   return (<PagePaper>
     <MarketMainPageStyled>
       <LeftColumn>
-        {deviceSize !== DeviceSize.md && <Filters value={filterState} onFilterChange={onFilterChange} />}
+        {deviceSize !== DeviceSize.md && <Filters
+          value={filterState}
+          attributes={attributes}
+          attributeCounts={attributeCounts}
+          onFilterChange={onFilterChange}
+        />}
       </LeftColumn>
       <MainContent>
         <SearchAndSortingWrapper>
@@ -192,20 +204,24 @@ export const MarketPage = () => {
           threshold={200}
           useWindow={true}
         >
-          {!isFetching && !!searchValue && !offers?.length && <NoItems isSearchResult={!!searchValue} />}
+          {!isFetching && !offers?.length && <NoItems isSearchResult={!!searchValue || !!filterCount} />}
           <OffersList offers={offers || []} isLoading={isFetching} />
         </InfiniteScroll>
       </MainContent>
     </MarketMainPageStyled>
     {deviceSize <= DeviceSize.md && <MobileFilters
-      value={filterState}
       filterCount={filterCount}
       defaultSortingValue={defaultSortingValue}
       sortingValue={sortingValue}
       sortingOptions={sortingOptions}
       onFilterChange={onFilterChange}
       onSortingChange={onSortingChange}
-      filterComponent={Filters}
+      filterComponent={<Filters
+        value={filterState}
+        attributes={attributes}
+        attributeCounts={attributeCounts}
+        onFilterChange={onFilterChange}
+      />}
     />}
   </PagePaper>);
 };

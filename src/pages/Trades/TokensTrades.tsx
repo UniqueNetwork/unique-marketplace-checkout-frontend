@@ -5,12 +5,16 @@ import styled from 'styled-components';
 import { useTrades } from '../../api/restApi/trades/trades';
 import { Table } from '../../components/Table';
 import { PagePaper } from '../../components/PagePaper/PagePaper';
-import { tradesColumns } from './columns';
+import getTradesColumns from './columns';
 import { useAccounts } from '../../hooks/useAccounts';
 import { TradesTabs } from './types';
 import SearchField from '../../components/SearchField/SearchField';
 
 import NoTradesIcon from '../../static/icons/no-trades.svg';
+import useDeviceSize from '../../hooks/useDeviceSize';
+import TokenTradesDetailsModal from './TradesDetailsModal';
+import { Trade } from '../../api/restApi/trades/types';
+import { debounce } from 'utils/helpers';
 
 type TokensTradesPage = {
   currentTab: TradesTabs
@@ -22,6 +26,8 @@ export const TokensTradesPage: FC<TokensTradesPage> = ({ currentTab }) => {
   const [sortString, setSortString] = useState<string>();
   const [pageSize, setPageSize] = useState<number>(10);
   const [searchValue, setSearchValue] = useState<string>();
+  const [selectedOfferDetails, setSelectedOfferDetails] = useState<Trade | null>(null);
+  const deviceSize = useDeviceSize();
 
   const { trades, tradesCount, fetch, isFetching } = useTrades();
 
@@ -37,15 +43,17 @@ export const TokensTradesPage: FC<TokensTradesPage> = ({ currentTab }) => {
     });
   }, [currentTab, selectedAccount?.address, isLoadingAccounts]);
 
-  const onSearch = useCallback((value: string) => {
-    setSearchValue(value);
-    fetch({
-      page: 1,
-      pageSize,
-      sort: sortString,
-      searchText: value,
-      seller: currentTab === TradesTabs.MyTokensTrades ? selectedAccount?.address : undefined
-    });
+  const debouncedSearch = useCallback(() => {
+    return debounce(function (...args: string[]) {
+      setSearchValue(args[0]);
+      fetch({
+        page: 1,
+        pageSize,
+        sort: sortString,
+        searchText: args[0],
+        seller: currentTab === TradesTabs.MyTokensTrades ? selectedAccount?.address : undefined
+      });
+    }, 300);
   }, [selectedAccount?.address, currentTab, sortString, pageSize]);
 
   const onPageChange = useCallback((newPage: number) => {
@@ -89,9 +97,10 @@ export const TokensTradesPage: FC<TokensTradesPage> = ({ currentTab }) => {
     }
     const associatedSortValues: Record<string, string> = {
       price: 'Price',
-      token: 'TokenId',
-      collection: 'CollectionId',
-      tradeDate: 'TradeDate'
+      tokenId: 'TokenId',
+      tokenDescription: 'CollectionId',
+      tradeDate: 'TradeDate',
+      status: 'Status'
     };
 
     if (sortString && sortString.length) sortString += `(${associatedSortValues[newSort.field]})`;
@@ -105,17 +114,26 @@ export const TokensTradesPage: FC<TokensTradesPage> = ({ currentTab }) => {
     });
   }, [selectedAccount?.address, currentTab, setSortString, pageSize, searchValue]);
 
+  const onShowTradesDetailsModal = useCallback((trade: Trade) => {
+    setSelectedOfferDetails(trade);
+  }, []);
+
+  const closeDetailsModal = useCallback(() => {
+    setSelectedOfferDetails(null);
+  }, [setSelectedOfferDetails]);
+
   return (<PagePaper>
     <TradesPageWrapper>
       <StyledSearchField
-        placeholder='Collection / token'
+        placeholder='NFT / collection'
         searchValue={searchValue}
-        onSearch={onSearch}
+        onSearch={debouncedSearch()}
+        onSearchStringChange={debouncedSearch()}
       />
       <StyledTable
         onSort={onSortChange}
         data={trades || []}
-        columns={tradesColumns}
+        columns={getTradesColumns({ deviceSize, onShowTradesDetailsModal })}
         loading={isLoadingAccounts || isFetching}
         emptyIconProps={searchValue ? { name: 'magnifier-found' } : { file: NoTradesIcon }}
       />
@@ -129,23 +147,45 @@ export const TokensTradesPage: FC<TokensTradesPage> = ({ currentTab }) => {
           withIcons
         />
       </PaginationWrapper>}
+      <TokenTradesDetailsModal trade={selectedOfferDetails} onCancel={closeDetailsModal}/>
     </TradesPageWrapper>
   </PagePaper>);
 };
 
 const TradesPageWrapper = styled.div`
-  width: 100%
+  width: 100%;
+
+  @media (max-width: 640px) {
+    .unique-modal-wrapper .unique-modal {
+      width: calc(520px - var(--prop-gap) * 3);
+    }
+  }
+
+  @media (max-width: 567px) {
+    .unique-modal-wrapper .unique-modal {
+      width: calc(288px - var(--prop-gap) * 3);
+    }
+  }
 `;
 
 const StyledSearchField = styled(SearchField)`
   margin-bottom: calc(var(--gap) * 2);
+  @media (max-width: 567px) {
+    button {
+      display: none;
+    }
+  }
 `;
 
 const StyledTable = styled(Table)`
   && > div > div:first-child {
-    grid-column: 1 / span 2;
     & > .unique-text {
       display: none;
+    }
+  }
+  @media (max-width: 567px) {
+    & > div {
+      grid-template-columns: 1fr !important;
     }
   }
 `;

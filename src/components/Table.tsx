@@ -16,7 +16,14 @@ interface TableProps {
   emptyIconProps?: Omit<IconProps, 'size'>
 }
 
-export const Table: FC<TableProps> = ({ columns, data, loading, onSort, className, emptyIconProps }) => {
+export const Table: FC<TableProps> = ({
+  columns,
+  data,
+  loading,
+  onSort,
+  className,
+  emptyIconProps
+}) => {
   const deviceSize = useDeviceSize();
 
   const getSkeletonItem = () => ({});
@@ -29,10 +36,9 @@ export const Table: FC<TableProps> = ({ columns, data, loading, onSort, classNam
           columns={loading
             ? columns.map((column) => ({ ...column, render: getSkeletonRender(column) }))
             : columns}
-          data={loading ? Array.from({ length: 20 }).map(getSkeletonItem) : data || []}
+          data={loading ? Array.from({ length: 5 }).map(getSkeletonItem) : data || []}
           onSort={onSort}
         />
-        {!loading && !data?.length && <EmptyTable iconProps={emptyIconProps} />}
       </>)}
       {deviceSize <= DeviceSize.sm && (
         <MobileTable
@@ -40,6 +46,7 @@ export const Table: FC<TableProps> = ({ columns, data, loading, onSort, classNam
           data={!loading ? data : []}
           loading={loading}
           className={className}
+          emptyIconProps={emptyIconProps}
         />
       )}
     </TableWrapper>

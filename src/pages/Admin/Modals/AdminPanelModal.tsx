@@ -27,8 +27,10 @@ export const AdminPanelModal = ({ onClose, onFinish, collection, modalType }: TA
   const [isClosable, setIsClosable] = useState<boolean>(true);
 
   useEffect(() => {
-    if (modalType === AdminPanelModalType.default) setIsVisible(false);
-    else setIsVisible(true);
+    if (modalType === AdminPanelModalType.default) {
+      setIsVisible(false);
+      setIsClosable(true);
+    } else setIsVisible(true);
   }, [modalType]);
 
   const ModalBodyComponent = useMemo<FC<TAdminPanelModalBodyProps> | null>(() => {
@@ -68,5 +70,17 @@ export const AdminPanelModal = ({ onClose, onFinish, collection, modalType }: TA
 const AdminModalWrapper = styled.div`
   & .unique-modal-wrapper .unique-modal {
     overflow: initial;
+  }
+  @media (max-width: 767px) {
+    & .unique-modal-wrapper .unique-modal {
+      width: calc(520px - (var(--gap) * 3));
+    }
+  }
+
+  @media (max-width: 567px) {
+    & .unique-modal-wrapper .unique-modal {
+      width: calc(304px - (var(--gap) * 3));
+      padding: 24px 16px;
+    }
   }
 `;

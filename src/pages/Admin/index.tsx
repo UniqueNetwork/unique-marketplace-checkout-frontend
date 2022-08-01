@@ -1,17 +1,14 @@
 import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
-import { Button, Select, SelectOptionProps } from '@unique-nft/ui-kit';
+import { Button, Select, SelectOptionProps, useNotifications } from '@unique-nft/ui-kit';
 import styled from 'styled-components/macro';
 
 import NoItems from '../../components/NoItems';
 import { Secondary400 } from '../../styles/colors';
-import { NFTCollection } from '../../api/chainApi/unique/types';
 import { CollectionCard } from '../../components/CollectionCard/CollectionCard';
 import { AdminPanelModal } from './Modals/AdminPanelModal';
 import { AdminPanelModalType } from './Modals/types';
 import { PagePaper } from '../../components/PagePaper/PagePaper';
 import { useNavigate } from 'react-router-dom';
-import { useNotification } from '../../hooks/useNotification';
-import { NotificationSeverity } from '../../notification/NotificationContext';
 import { useAdminLoggingIn } from '../../api/restApi/admin/login';
 import { useAdminCollections } from '../../api/restApi/admin/collection';
 import CardSkeleton from '../../components/Skeleton/CardSkeleton';
@@ -68,12 +65,12 @@ export const AdminPanelPage: FC = () => {
   const [searchValue, setSearchValue] = useState<string>();
   const [hasAccess, setHasAccess] = useState<boolean>(false);
   const [modalType, setModalType] = useState(AdminPanelModalType.default);
-  const [selectedCollection, setSelectedCollection] = useState<NFTCollection>();
+  const [selectedCollection, setSelectedCollection] = useState<CollectionData>();
   const { hasAdminPermission, getJWToken } = useAdminLoggingIn();
   const { collections, isFetching, fetchCollections } = useAdminCollections();
   const { isLoading: isAccountsLoading } = useAccounts();
   const navigate = useNavigate();
-  const { push } = useNotification();
+  const { warning } = useNotifications();
 
   useEffect(() => {
     if (isAccountsLoading) return;
@@ -83,7 +80,10 @@ export const AdminPanelPage: FC = () => {
     void (async () => {
       const jwtoken = await getJWToken();
       if (!jwtoken) {
-        push({ message: 'Unable to login, please try again!', severity: NotificationSeverity.error });
+        warning(
+          'Unable to login, please try again!',
+          { name: 'warning', size: 32, color: 'var(--color-additional-light)' }
+        );
         navigate('/');
         return;
       }
@@ -119,27 +119,27 @@ export const AdminPanelPage: FC = () => {
     window.open(config.walletUrl, '_blank')?.focus();
   }, [config.walletUrl, hasAccess]);
 
-  const onManageSponsorshipClick = useCallback((collection: NFTCollection) => () => {
+  const onManageSponsorshipClick = useCallback((collection: CollectionData) => () => {
     setModalType(AdminPanelModalType.acceptSponsorship);
     setSelectedCollection(collection);
   }, []);
 
-  const onRemoveSponsorshipClick = useCallback((collection: NFTCollection) => () => {
+  const onRemoveSponsorshipClick = useCallback((collection: CollectionData) => () => {
     setModalType(AdminPanelModalType.rejectSponsorship);
     setSelectedCollection(collection);
   }, []);
 
-  const onRemoveCollectionClick = useCallback((collection: NFTCollection) => () => {
+  const onRemoveCollectionClick = useCallback((collection: CollectionData) => () => {
     setModalType(AdminPanelModalType.removeCollection);
     setSelectedCollection(collection);
   }, []);
 
-  const onManageTokensClick = useCallback((collection: NFTCollection) => () => {
+  const onManageTokensClick = useCallback((collection: CollectionData) => () => {
     setModalType(AdminPanelModalType.selectNFTs);
     setSelectedCollection(collection);
   }, []);
 
-  const onViewOnScanClick = useCallback((collection: NFTCollection) => () => {
+  const onViewOnScanClick = useCallback((collection: CollectionData) => () => {
     if (!config.scanUrl) return;
     window.open(`${config.scanUrl}collections/${collection.id}`, '_blank')?.focus();
   }, []);
@@ -222,32 +222,47 @@ export const AdminPanelPage: FC = () => {
 const MainContent = styled.div`
   position: relative;
   flex: 1;
+  margin-top: calc(var(--gap) * 0.5);
 
   > div:nth-of-type(2) {
-    margin-top: var(--gap);
+    margin-top: calc(var(--gap) * 2);
     margin-bottom: calc(var(--gap) * 2);
-  }
-
-  @media (max-width: 1024px) {
-    padding-left: 0;
   }
 `;
 
 const ControlsWrapper = styled.div`
   display: flex;
   justify-content: space-between;
+
+  @media (max-width: 1279px) {
+    flex-direction: column;
+    gap: calc(var(--gap) * 1.5);
+  }
 `;
 
 const ButtonsWrapper = styled.div`
   display: flex;
   column-gap: calc(var(--gap) / 2);
+  
+  @media (max-width: 1279px) {
+    .unique-button.size-middle {
+      padding: 8px 29px;
+    }
+    button:last-of-type {
+      width: 228px;
+    }
+  }
+
+  @media (max-width: 567px) {
+    flex-direction: column;
+    gap: calc(var(--gap) / 2);
+    button:last-of-type {
+      width: 100%;
+    }
+  }
 `;
 
 const SortSelectWrapper = styled.div`
-  @media (max-width: 1024px) {
-    display: none;
-  }
-
   .unique-select svg {
     z-index: 0;
   }
@@ -258,6 +273,48 @@ const SearchAndSortingWrapper = styled.div`
   justify-content: space-between;
   .unique-input-text {
     min-width: 436px;
+  }
+  div {
+    flex-grow: unset;
+  }
+  
+  @media (max-width: 1279px) {
+    justify-content: flex-start;
+    .unique-input-text {
+      min-width: 448px;
+    }
+    .select-wrapper {
+      width: 268px;
+    }
+  }
+  
+  @media (max-width: 1023px) {
+    .select-wrapper {
+      width: 256px;
+    }
+    .unique-input-text {
+      width: 442px;
+    }
+  }
+
+  @media (max-width: 767px) {
+    flex-direction: column;
+    gap: var(--gap);
+    .unique-input-text {
+      width: 100%;
+    }
+    .select-wrapper {
+      width: 212px;
+    }
+  }
+
+  @media (max-width: 567px) {
+    .unique-input-text {
+      min-width: 100%;
+    }
+    .unique-select, .select-wrapper {
+      width: 100%;
+    }
   }
 `;
 
@@ -271,19 +328,19 @@ const CollectionListStyled = styled.div`
   gap: 32px;
 
   @media (max-width: 1919px) {
-    grid-template-columns: 1fr 1fr 1fr 1fr;
+    grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
   }
 
   @media (max-width: 1439px) {
-    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
   }
 
   @media (max-width: 1023px) {
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr 1fr 1fr;
   }
 
-  @media (max-width: 768px) {
-    grid-template-columns: 1fr;
+  @media (max-width: 767px) {
+    grid-template-columns: 1fr 1fr;
   }
 
   @media (max-width: 567px) {

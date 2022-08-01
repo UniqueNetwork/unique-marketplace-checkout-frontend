@@ -1,26 +1,23 @@
 import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
-import { Button, Heading, Link, Select, Text } from '@unique-nft/ui-kit';
+import { Button, Heading, Link, Select, Text, SelectOptionProps, useNotifications } from '@unique-nft/ui-kit';
 import styled from 'styled-components';
 import { BN } from '@polkadot/util';
 
 import { TPlaceABid } from './types';
 import DefaultMarketStages from './StagesModal';
-import { AdditionalWarning100 } from '../../../styles/colors';
 import { TTokenPageModalBodyProps } from './TokenPageModal';
 import { useAuctionBidStages } from '../../../hooks/marketplaceStages';
 import { useAccounts } from '../../../hooks/useAccounts';
 import { useFee } from '../../../hooks/useFee';
-import { useNotification } from '../../../hooks/useNotification';
 import { useApi } from '../../../hooks/useApi';
 import { formatKusamaBalance } from '../../../utils/textUtils';
 import { fromStringToBnString } from '../../../utils/bigNum';
-import { NumberInput } from '../../../components/NumberInput/NumberInput';
+import { NumberInput } from 'components/NumberInput/NumberInput';
 import { StageStatus } from '../../../types/StagesTypes';
 import { Offer } from '../../../api/restApi/offers/types';
 import { useAuction } from '../../../api/restApi/auction/auction';
 import { TCalculatedBid } from '../../../api/restApi/auction/types';
-import { NotificationSeverity } from '../../../notification/NotificationContext';
-import { SelectOptionProps } from '@unique-nft/ui-kit/dist/cjs/types';
+import { WarningBlock } from 'components/WarningBlock/WarningBlock';
 
 export const AuctionModal: FC<TTokenPageModalBodyProps> = ({ offer, setIsClosable, onFinish }) => {
   const [status, setStatus] = useState<'ask' | 'place-bid-stage'>('ask'); // TODO: naming
@@ -90,7 +87,7 @@ export const AskBidModal: FC<{ offer?: Offer, onConfirmPlaceABid(value: TPlaceAB
     if (!selectedAccount?.balance?.KSM || selectedAccount?.balance?.KSM.isZero()) return false;
     const bnAmount = new BN(fromStringToBnString(bidAmount, api?.market?.kusamaDecimals));
     return selectedAccount?.balance?.KSM.gte(bnAmount.sub(new BN(lastBidFromThisAccount || 0)));
-  }, [selectedAccount?.balance?.KSM, bidAmount, api?.market?.kusamaDecimals]);
+  }, [selectedAccount?.balance?.KSM, bidAmount, api?.market?.kusamaDecimals, lastBidFromThisAccount]);
 
   const onBidAmountChange = useCallback((value: string) => {
     setBidAmount(value);
@@ -139,12 +136,9 @@ export const AskBidModal: FC<{ offer?: Offer, onConfirmPlaceABid(value: TPlaceAB
       <CautionTextWrapper>
         {!isEnoughBalance && <Text color={'coral-500'}>Your balance is too low to place a bid</Text>}
       </CautionTextWrapper>
-      <TextStyled
-        color='additional-warning-500'
-        size='s'
-      >
+      <WarningBlock>
         {`A fee of ~ ${kusamaFee} ${chain || ''} can be applied to the transaction`}
-      </TextStyled>
+      </WarningBlock>
       <ButtonWrapper>
         <Button
           disabled={!isAmountValid || !isEnoughBalance || isFetchingCalculatedbid}
@@ -159,7 +153,7 @@ export const AskBidModal: FC<{ offer?: Offer, onConfirmPlaceABid(value: TPlaceAB
 
 const AuctionStagesModal: FC<TTokenPageModalBodyProps & TPlaceABid> = ({ offer, accountAddress, onFinish, amount }) => {
   const { stages, status, initiate } = useAuctionBidStages(offer?.collectionId || 0, offer?.tokenId || 0);
-  const { push } = useNotification();
+  const { info } = useNotifications();
 
   useEffect(() => {
     if (!amount || !accountAddress) return;
@@ -171,7 +165,10 @@ const AuctionStagesModal: FC<TTokenPageModalBodyProps & TPlaceABid> = ({ offer, 
 
   useEffect(() => {
     if (status === StageStatus.success) {
-      push({ severity: NotificationSeverity.success, message: <>You made a new bid on <Link href={`/token/${collectionId || ''}/${tokenId || ''}`} title={`${prefix || ''} #${tokenId || ''}`}/></> });
+      info(
+        <>You made a new bid on <Link href={`/token/${collectionId || ''}/${tokenId || ''}`} title={`${prefix || ''} #${tokenId || ''}`}/></>,
+        { name: 'success', size: 32, color: 'var(--color-additional-light)' }
+      );
     }
   }, [status]);
 
@@ -202,17 +199,6 @@ const InputStyled = styled(NumberInput)`
     border-left: 0 solid;
     height: 38px;
   }
-`;
-
-const TextStyled = styled(Text)`
-  margin-top: calc(var(--gap) / 2);
-  box-sizing: border-box;
-  display: flex;
-  padding: 8px 16px;
-  margin-bottom: 24px;
-  border-radius: 4px;
-  background-color: ${AdditionalWarning100};
-  width: 100%;
 `;
 
 const ButtonWrapper = styled.div`

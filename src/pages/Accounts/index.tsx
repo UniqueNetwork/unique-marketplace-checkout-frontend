@@ -22,13 +22,12 @@ import config from '../../config';
 import { TWithdrawBid } from '../../api/restApi/auction/types';
 import { TextInput } from '../../components/TextInput/TextInput';
 import { AdditionalLight, BlueGrey300, Primary100, Primary500 } from '../../styles/colors';
-import AccountTooltip from './Tooltips/AccountTooltip';
-import IconWithHint from './Tooltips/WithdrawTooltip';
+import IconWithHint from 'components/IconWithHint/IconWithHint';
 import ConfirmModal from 'components/ConfirmModal';
 import { AccountInfo } from './types';
 import BalanceCell from './BalanceCell';
 import GetKSMModal from 'components/GetKSMModal/GetKSMModal';
-import NoAccountsIcon from '../../static/icons/no-accounts.svg';
+import NoAccountsIcon from 'static/icons/no-accounts.svg';
 
 const tokenSymbol = 'KSM';
 
@@ -50,14 +49,13 @@ const getAccountsColumns = ({
     onShowGetKsmModal
   }: AccountsColumnsProps): TableColumnProps[] => [
   {
-    title: 'Account',
+    title: (<>Accounts<IconWithHint placement={'right-start'}>
+      <>Substrate account addresses (Kusama, Quartz, Polkadot, Unique, etc.) may be represented by a different address
+        character sequence, but they can be converted between each other because they share the same public key. You
+        can see all transformations for any given address on <StyledLink href='https://quartz.subscan.io/' target='_blank' rel='noreferrer'>Subscan</StyledLink>.</>
+    </IconWithHint></>),
     width: '25%',
     field: 'accountInfo',
-    iconRight: {
-      name: 'question',
-      size: 20,
-      color: Primary500
-    },
     render(accountInfo: AccountInfo) {
       if (accountInfo.deposit && !isSmallDevice) return <></>;
       return (
@@ -110,7 +108,7 @@ const getAccountsColumns = ({
         return (
           <DepositActionsWrapper>
             <Button title={'Withdraw'} onClick={onShowWithdrawDepositModal(accountInfo.address)} role={'primary'} />
-            <IconWithHint />
+            <IconWithHint placement={'bottom-end'}>Learn more in <StyledLink href='/FAQ' target='_blank' rel='noreferrer'>FAQ</StyledLink></IconWithHint>
           </DepositActionsWrapper>
         );
       }
@@ -127,7 +125,7 @@ const getAccountsColumns = ({
           </ActionsWrapper>
           {(accountInfo.deposit && isSmallDevice) && <DepositActionsWrapper>
             <Button title={'Withdraw'} onClick={onShowWithdrawDepositModal(accountInfo.address)} role={'primary'} />
-            <IconWithHint />
+            <IconWithHint placement={'bottom-end'}>Learn more in <StyledLink href='/FAQ' target='_blank' rel='noreferrer'>FAQ</StyledLink></IconWithHint>
           </DepositActionsWrapper>}
         </>
       );
@@ -311,7 +309,6 @@ export const AccountsPage = () => {
         </SearchInputWrapper>
       </Row>
       <TableWrapper>
-        <AccountTooltip/>
         <Table
           columns={getAccountsColumns({
             isSmallDevice: deviceSize === DeviceSize.sm,
@@ -330,7 +327,7 @@ export const AccountsPage = () => {
       <ImportViaSeedAccountModal isVisible={currentModal === AccountModal.importViaSeed} onFinish={onChangeAccountsFinish} onClose={onModalClose} />
       <ImportViaJSONAccountModal isVisible={currentModal === AccountModal.importViaJSON} onFinish={onChangeAccountsFinish} onClose={onModalClose} />
       <ImportViaQRCodeAccountModal isVisible={currentModal === AccountModal.importViaQRCode} onFinish={onChangeAccountsFinish} onClose={onModalClose} />
-      <TransferFundsModal isVisible={currentModal === AccountModal.sendFunds} onFinish={onModalClose} senderAddress={selectedAddress} />
+      <TransferFundsModal isVisible={currentModal === AccountModal.sendFunds} onFinish={onChangeAccountsFinish} senderAddress={selectedAddress} />
       <WithdrawDepositModal
         isVisible={currentModal === AccountModal.withdrawDeposit}
         onFinish={onChangeAccountsFinish}
@@ -357,6 +354,19 @@ const AccountPageWrapper = styled.div`
   width: 100%;
   .unique-table-data-row {
     height: fit-content;
+  }
+
+  @media (max-width: 640px) {
+    .unique-modal-wrapper .unique-modal {
+      width: calc(520px - var(--prop-gap) * 3);
+    }
+  }
+
+  @media (max-width: 567px) {
+    .unique-modal-wrapper .unique-modal {
+      width: calc(288px - var(--prop-gap) * 2);
+      padding: 24px 16px;
+    }
   }
 `;
 
@@ -528,5 +538,14 @@ const DropdownMenuItem = styled.div`
   &:active {
     background: ${BlueGrey300};
     color: ${Primary100};
+  }
+`;
+
+const StyledLink = styled.a`
+  color: ${AdditionalLight};
+  text-decoration: underline;
+  
+  &&:hover {
+    text-decoration: none;
   }
 `;

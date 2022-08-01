@@ -1,5 +1,5 @@
 import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
-import { Button, Heading, Modal, Text } from '@unique-nft/ui-kit';
+import { Button, Heading, Modal, Text, Loader, useNotifications } from '@unique-nft/ui-kit';
 import styled from 'styled-components';
 
 import { TTransferFunds } from './types';
@@ -11,13 +11,13 @@ import DefaultMarketStages from '../../Token/Modals/StagesModal';
 import { useTransferFundsStages } from 'hooks/accountStages/useTransferFundsStages';
 import { formatKusamaBalance } from 'utils/textUtils';
 import { StageStatus } from 'types/StagesTypes';
-import { NotificationSeverity } from 'notification/NotificationContext';
-import { useNotification } from 'hooks/useNotification';
 import { NumberInput } from 'components/NumberInput/NumberInput';
 import AccountCard from 'components/Account/Account';
 import { toChainFormatAddress } from 'api/chainApi/utils/addressUtils';
 import { useApi } from 'hooks/useApi';
-import { useFee } from '../../../hooks/useFee';
+import { BN } from '@polkadot/util';
+import { fromStringToBnString } from 'utils/bigNum';
+import { debounce } from 'utils/helpers';
 
 const tokenSymbol = 'KSM';
 
@@ -71,11 +71,28 @@ type AskSendFundsModalProps = {
 }
 
 export const AskTransferFundsModal: FC<AskSendFundsModalProps> = ({ isVisible, onFinish, senderAddress, onClose }) => {
-  const { accounts } = useAccounts();
+  const { accounts, selectedAccount } = useAccounts();
   const [recipientAddress, setRecipientAddress] = useState<string | Account | undefined>();
   const [amount, setAmount] = useState<string>('');
-  const { chainData } = useApi();
-  const { kusamaFee } = useFee();
+  const { chainData, api } = useApi();
+  const [kusamaFee, setKusamaFee] = useState('0');
+  const [isFeeLoading, setIsFeeLoading] = useState(false);
+
+  const getKusamaFee = useCallback(() => {
+    setIsFeeLoading(true);
+    return debounce(() => {
+      if (!selectedAccount || !api?.market) return;
+      const recipient = typeof recipientAddress === 'string' ? recipientAddress : recipientAddress?.address;
+      api?.market?.getKusamaFee(selectedAccount.address, recipient, new BN(fromStringToBnString(amount)))
+      .then((fee) => {
+        setKusamaFee(formatKusamaBalance(fee.toString()));
+      }).catch((e) => {
+        console.log(e);
+      }).finally(() => {
+        setIsFeeLoading(false);
+      });
+    }, 300);
+  }, [api?.market, recipientAddress, selectedAccount, amount]);
 
   const formatAddress = useCallback((address: string) => {
     return toChainFormatAddress(address, chainData?.properties.ss58Format || 0);
@@ -103,7 +120,8 @@ export const AskTransferFundsModal: FC<AskSendFundsModalProps> = ({ isVisible, o
 
   const onAmountChange = useCallback((value: string) => {
     setAmount(value);
-  }, [setAmount]);
+    getKusamaFee()();
+  }, [setAmount, getKusamaFee]);
 
   const isConfirmDisabled = useMemo(() => (
     !recipientAddress || Number(amount) <= 0 || Number(amount) > Number(formatKusamaBalance(sender?.balance?.KSM?.toString() || 0))
@@ -123,6 +141,7 @@ export const AskTransferFundsModal: FC<AskSendFundsModalProps> = ({ isVisible, o
 
   const onChangeAddress = useCallback((input) => {
     setRecipientAddress(input);
+    getKusamaFee()();
     if (typeof input === 'string') {
       onFilter(input);
     } else {
@@ -134,6 +153,7 @@ export const AskTransferFundsModal: FC<AskSendFundsModalProps> = ({ isVisible, o
     setRecipientAddress('');
     setAmount('');
     setFilteredAccounts(accountsWithQuartzAdresses);
+    setKusamaFee('0');
     onClose();
   }, [accountsWithQuartzAdresses, onClose]);
 
@@ -170,12 +190,7 @@ export const AskTransferFundsModal: FC<AskSendFundsModalProps> = ({ isVisible, o
     {Number(amount) > Number(formatKusamaBalance(sender?.balance?.KSM?.toString() || 0)) && <LowBalanceWrapper>
       <Text size={'s'}>Your balance is too low</Text>
     </LowBalanceWrapper>}
-    <TextStyled
-      color='additional-warning-500'
-      size='s'
-    >
-      A fee of ~ {kusamaFee} KSM can be applied to the transaction, unless the transaction is sponsored
-    </TextStyled>
+    <KusamaFeeMessage isFeeLoading={isFeeLoading} kusamaFee={kusamaFee} />
     <ButtonWrapper>
       <Button
         disabled={isConfirmDisabled}
@@ -194,20 +209,40 @@ type TransferFundsStagesModalProps = {
 
 const TransferFundsStagesModal: FC<TransferFundsStagesModalProps & TTransferFunds> = ({ isVisible, onFinish, sender, amount, recipient }) => {
   const { stages, status, initiate } = useTransferFundsStages(sender);
-  const { push } = useNotification();
+  const { info } = useNotifications();
   useEffect(() => { initiate({ sender, recipient, amount }); }, [sender, recipient, amount]);
 
   useEffect(() => {
     if (status === StageStatus.success) {
-      push({ severity: NotificationSeverity.success, message: 'Funds transfer completed' });
+      info(
+        'Funds transfer completed',
+        { name: 'success', size: 32, color: 'var(--color-additional-light)' }
+      );
     }
-  }, [push, status]);
+  }, [info, status]);
 
   return (<Modal isVisible={isVisible} isClosable={false}>
     <div>
       <DefaultMarketStages stages={stages} status={status} onFinish={onFinish} />
     </div>
   </Modal>);
+};
+
+type KusamaFeeMessageProps = {
+  isFeeLoading: boolean,
+  kusamaFee: string
+}
+
+const KusamaFeeMessage: FC<KusamaFeeMessageProps> = ({ isFeeLoading, kusamaFee }) => {
+  return (
+    <KusamaFeeMessageWrapper>
+      <Text color='additional-warning-500' size='s'>
+        {isFeeLoading
+          ? <Loader label='Loading fee...' />
+          : <>A fee of {kusamaFee === '0' ? 'some' : `~ ${kusamaFee}`} KSM can be applied to the transaction, unless the transaction is sponsored</>}
+      </Text>
+    </KusamaFeeMessageWrapper>
+  );
 };
 
 const Content = styled.div`
@@ -235,7 +270,7 @@ const AddressOptionWrapper = styled.div`
   column-gap: calc(var(--gap) / 2);
 `;
 
-const TextStyled = styled(Text)`
+const KusamaFeeMessageWrapper = styled.div`
   box-sizing: border-box;
   display: flex;
   padding: 8px 16px;
@@ -243,12 +278,17 @@ const TextStyled = styled(Text)`
   border-radius: 4px;
   background-color: ${AdditionalWarning100};
   width: 100%;
+
+  .unique-loader {
+    display: flex;
+  }
 `;
 
 const ButtonWrapper = styled.div`
   display: flex;
   justify-content: flex-end;
   column-gap: var(--gap);
+  margin-top: calc(var(--gap) * 1.5);
 `;
 
 const RecipientSelectWrapper = styled.div`

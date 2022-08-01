@@ -1,24 +1,22 @@
 import React, { FC, useCallback, useEffect, useState } from 'react';
-import { Button, Heading, Text } from '@unique-nft/ui-kit';
+import { Button, Heading, Text, useNotifications } from '@unique-nft/ui-kit';
 import styled from 'styled-components/macro';
 
 import { TAdminPanelModalBodyProps } from './AdminPanelModal';
 import { NFTCollection } from '../../../api/chainApi/unique/types';
 import { BlueGrey100 } from '../../../styles/colors';
-import { Avatar } from '../../../components/Avatar/Avatar';
 import { useAdminCollections } from '../../../api/restApi/admin/collection';
 import { SelectInput } from '../../../components/SelectInput/SelectInput';
 import { CollectionData } from '../../../api/restApi/admin/types';
 import { useApi } from '../../../hooks/useApi';
-import { useNotification } from '../../../hooks/useNotification';
-import { NotificationSeverity } from '../../../notification/NotificationContext';
+import { CollectionCover } from '../../../components/CollectionCover/CollectionCover';
 
 export const AddCollectionModal: FC<TAdminPanelModalBodyProps> = ({ onFinish }) => {
   const [selectedCollection, setSelectedCollection] = useState<CollectionData | string | undefined>();
   const { appendCollection, collections, fetchCollections } = useAdminCollections();
   const [collectionItems, setCollectionItems] = useState<CollectionData[]>([]);
   const { api } = useApi();
-  const { push } = useNotification();
+  const { info, error } = useNotifications();
 
   useEffect(() => {
     void fetchCollections();
@@ -32,33 +30,39 @@ export const AddCollectionModal: FC<TAdminPanelModalBodyProps> = ({ onFinish }) 
     if (!selectedCollection) return;
     const collectionId = typeof selectedCollection === 'string' ? Number(selectedCollection) : selectedCollection.id;
     if (collections.find(({ id }) => id.toString() === collectionId.toString())?.status === 'Enabled') {
-      push({ message: `Collection [ID ${collectionId}] has already enabled`, severity: NotificationSeverity.error });
+      error(
+        `Collection [ID ${collectionId}] has already enabled`,
+        { name: 'warning', size: 16, color: 'var(--color-additional-light)' }
+      );
       return;
     }
     await appendCollection(collectionId);
 
-    push({ message: `Collection [ID ${collectionId}] successfully enabled`, severity: NotificationSeverity.success });
+    info(
+      `Collection [ID ${collectionId}] successfully enabled`,
+      { name: 'success', size: 32, color: 'var(--color-additional-light)' }
+    );
     onFinish();
   }, [selectedCollection, collections]);
 
-  const onChangeSelectedCollection = useCallback(async (collection: NFTCollection | string) => {
+  const getCollection = useCallback(async (collection: string) => {
+    if (!api?.collection) return;
+    const collectionData = await api.collection.getCollection(Number(collection));
+
+    setCollectionItems([
+      ...(collectionData && collectionData.tokenPrefix ? [collectionData] : []),
+      ...collections.filter(({ id, status }) => status === 'Disabled' && id.toString().includes(collection) && id !== collectionData?.id)
+    ]);
+  }, [api, collections]);
+
+  const onChangeSelectedCollection = useCallback((collection: NFTCollection | string) => {
     if (typeof collection === 'string') {
       if (!/^\d{0,9}$/.test(collection) && collection !== '') return;
-      if (!api?.collection) return;
 
-      const collectionData = await api.collection.getCollection(Number(collection));
-
-      setCollectionItems((items) => [
-        ...items.filter(({ id }) => id === collectionData.id),
-        ...collections.filter(({ id, status }) => status === 'Disabled' && id.toString().includes(collection))
-      ]);
-
-      if (collectionData && collectionData.tokenPrefix) {
-        setSelectedCollection(collectionData);
-      }
+      void getCollection(collection);
     }
     setSelectedCollection(collection as unknown as CollectionData);
-  }, [setCollectionItems, collections]);
+  }, [getCollection]);
 
   return (<>
     <Content>
@@ -73,7 +77,7 @@ export const AddCollectionModal: FC<TAdminPanelModalBodyProps> = ({ onFinish }) 
         leftIcon={{ name: 'magnify', size: 16 }}
         onChange={onChangeSelectedCollection}
         renderOption={(option) => <CollectionOption>
-          <Avatar src={option.coverImageUrl} size={24} type={'circle'} />
+          <CollectionCover src={option.coverImageUrl} size={24} type={'circle'} />
           <Text>{`${option?.name || option?.collectionName} [ID ${option?.id}]`}</Text>
         </CollectionOption>}
       />
@@ -81,7 +85,7 @@ export const AddCollectionModal: FC<TAdminPanelModalBodyProps> = ({ onFinish }) 
     {selectedCollection && typeof selectedCollection !== 'string' && <>
       <Text size={'m'}>You have selected collection</Text>
       <CollectionNameStyled>
-        <Avatar src={selectedCollection.coverImageUrl} size={24} type={'circle'} />
+        <CollectionCover src={selectedCollection.coverImageUrl} size={24} type={'circle'} />
         <Text>{`${selectedCollection?.name || selectedCollection?.collectionName} [ID ${selectedCollection?.id}]`}</Text>
       </CollectionNameStyled>
     </>}
@@ -96,13 +100,15 @@ export const AddCollectionModal: FC<TAdminPanelModalBodyProps> = ({ onFinish }) 
   </>);
 };
 
-const ModalWrapper = styled.div`
-  
-`;
-
 const Content = styled.div`
   && h2 {
     margin-bottom: 0;
+  }
+  @media (max-width: 567px) {
+    && h2 {
+      font-size: 24px;
+      line-height: 36px;
+    }
   }
 `;
 
@@ -136,4 +142,7 @@ const CollectionNameStyled = styled.div`
 const ButtonWrapper = styled.div`
   display: flex;
   justify-content: flex-end;
+  button {
+    width: 110px;
+  }
 `;
