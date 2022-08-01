@@ -23,6 +23,7 @@ import { MyTokensFilterState } from './Filters/types';
 import SearchField from '../../components/SearchField/SearchField';
 import useDeviceSize, { DeviceSize } from '../../hooks/useDeviceSize';
 import { setUrlParameter, parseFilterState } from '../../utils/helpers';
+import { BoxedNumberWithDefault, LocalizedStringWithDefault } from '@unique-nft/sdk/tokens';
 import { useCollections } from '../../hooks/useCollections';
 
 type TOption = SelectOptionProps & {
@@ -179,10 +180,10 @@ export const NFTPage = () => {
       let filteredByAttributes = true;
       if (filterState?.attributes && filterState.attributes.length > 0) {
         filteredByAttributes = filterState?.attributes.some((attributeItem) => {
-          const attribute = Object.values(token.attributes || {}).find((attribute) => attribute.name === attributeItem.key);
+          const attribute = Object.values(token.attributes || {}).find((attribute) => attribute.name._ === attributeItem.key);
           return attribute &&
-            attribute.isArray && (attribute.value as string[])
-            .some((_attribute) => _attribute === attributeItem.attribute);
+            attribute.isArray && (attribute.value as (BoxedNumberWithDefault | LocalizedStringWithDefault)[])
+              .some((_attribute) => _attribute._ === attributeItem.attribute);
         });
       }
       let filteredBySearchValue = true;
