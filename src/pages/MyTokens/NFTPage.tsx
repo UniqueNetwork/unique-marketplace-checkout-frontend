@@ -4,23 +4,26 @@ import BN from 'bn.js';
 import { Select, Text } from '@unique-nft/ui-kit';
 import { BN_MAX_INTEGER } from '@polkadot/util';
 
-import { TokensList } from '../../components';
+import { NFTToken } from 'api/uniqueSdk/types';
+import { useOffers } from 'api/restApi/offers/offers';
+import { Offer } from 'api/restApi/offers/types';
+import { TokensList } from 'components';
+import { MobileFilters } from 'components/Filters/MobileFilter';
+import { PagePaper } from 'components/PagePaper/PagePaper';
+import NoItems from 'components/NoItems';
+
 import { Secondary400 } from '../../styles/colors';
-import { useApi } from '../../hooks/useApi';
-import { NFTToken } from '../../api/chainApi/unique/types';
+import { useApi } from 'hooks/useApi';
+import { useAccounts } from 'hooks/useAccounts';
 import { Filters } from './Filters/Filters';
-import { useAccounts } from '../../hooks/useAccounts';
-import { useOffers } from '../../api/restApi/offers/offers';
-import { Offer } from '../../api/restApi/offers/types';
-import { MobileFilters } from '../../components/Filters/MobileFilter';
-import { PagePaper } from '../../components/PagePaper/PagePaper';
-import NoItems from '../../components/NoItems';
+
 import { fromStringToBnString } from '../../utils/bigNum';
 import { SelectOptionProps } from '@unique-nft/ui-kit/dist/cjs/types';
 import { MyTokensFilterState } from './Filters/types';
 import SearchField from '../../components/SearchField/SearchField';
 import useDeviceSize, { DeviceSize } from '../../hooks/useDeviceSize';
 import { setUrlParameter, parseFilterState } from '../../utils/helpers';
+import { BoxedNumberWithDefault, LocalizedStringWithDefault } from '@unique-nft/sdk/tokens';
 
 type TOption = SelectOptionProps & {
   direction: 'asc' | 'desc';
@@ -100,7 +103,7 @@ export const NFTPage = () => {
     setIsFetchingTokens(true);
     void (async () => {
       await fetch({ page: 1, pageSize, seller: selectedAccount?.address });
-      const _tokens = await api.nft?.getAccountTokens(selectedAccount.address) as NFTToken[];
+      const _tokens = await api.nft?.getAccountMarketableTokens(selectedAccount.address) as NFTToken[];
 
       setTokens(_tokens);
       setIsFetchingTokens(false);
@@ -154,15 +157,17 @@ export const NFTPage = () => {
       if (filterState?.attributeCounts && filterState.attributeCounts.length > 0) {
         filteredByAttributeCounts = filterState?.attributeCounts.some((attributeCount) => {
           const _count = Object.values(token.attributes || {})
-            .reduce((acc, attribute) => acc + (Array.isArray(attribute) ? attribute.length : 0), 0);
+            .reduce<number>((acc, attribute) => acc + (Array.isArray(attribute) ? attribute.length : 0), 0);
           return _count === attributeCount;
         });
       }
       let filteredByAttributes = true;
       if (filterState?.attributes && filterState.attributes.length > 0) {
         filteredByAttributes = filterState?.attributes.some((attributeItem) => {
-          return token.attributes?.[attributeItem.key] && Array.isArray(token.attributes[attributeItem.key]) && (token.attributes[attributeItem.key] as string[])
-            .some((_attribute) => _attribute === attributeItem.attribute);
+          const attribute = Object.values(token.attributes || {}).find((attribute) => attribute.name._ === attributeItem.key);
+          return attribute &&
+            attribute.isArray && (attribute.value as (BoxedNumberWithDefault | LocalizedStringWithDefault)[])
+              .some((_attribute) => _attribute._ === attributeItem.attribute);
         });
       }
       let filteredBySearchValue = true;
