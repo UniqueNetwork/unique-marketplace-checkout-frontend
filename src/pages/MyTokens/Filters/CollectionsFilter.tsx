@@ -1,18 +1,13 @@
-import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
+import React, { FC, useCallback, useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { Checkbox, Text } from '@unique-nft/ui-kit';
-import { useCollections } from 'hooks/useCollections';
 import { useApi } from 'hooks/useApi';
 import Accordion from 'components/Accordion/Accordion';
 import AttributeCountsFilter from 'components/Filters/AttributeCountsFilter';
 import AttributesFilter from 'components/Filters/AttributesFilter';
 import CheckboxSkeleton from 'components/Skeleton/CheckboxSkeleton';
 import { AttributeItem } from 'components/Filters/types';
-import { useAttributes } from 'api/restApi/offers/attributes';
-import { useAttributeCounts } from 'api/restApi/offers/attributeCounts';
 import { CollectionCover } from 'components/CollectionCover/CollectionCover';
-import { Avatar } from '../../../components/Avatar/Avatar';
-// import { AttributeItem } from './types';
 import { NFTCollection, NFTToken } from 'api/uniqueSdk/types';
 import { Attribute, AttributeCount } from 'api/restApi/offers/types';
 import { getAttributesCountFromTokens, getAttributesFromTokens } from './utils/attributes';
@@ -23,6 +18,7 @@ interface CollectionsFilterProps {
   onAttributesChange?(value: { key: string, attribute: string }[]): void
   onAttributeCountsChange?(value: number[]): void
   testid: string
+  featuredTokens: NFTToken[]
   tokens: NFTToken[]
   collections: NFTCollection[]
   isFetchingTokens: boolean
@@ -34,9 +30,10 @@ const CollectionsFilter: FC<CollectionsFilterProps> = ({
   onAttributesChange,
   onAttributeCountsChange,
   testid,
-  tokens,
+  featuredTokens,
   collections: myCollections,
-  isFetchingTokens
+  isFetchingTokens,
+  tokens
 }) => {
   const [attributes, setAttributes] = useState<Record<string, Attribute[]>>({});
   const [attributeCounts, setAttributeCounts] = useState<AttributeCount[]>([]);
@@ -44,83 +41,16 @@ const CollectionsFilter: FC<CollectionsFilterProps> = ({
   const { settings } = useApi();
 
   useEffect(() => {
-    console.log('tokens', tokens);
-    console.log('setAttributeCounts');
     if (!isFetchingTokens && tokens.length > 0) {
       setAttributeCounts(getAttributesCountFromTokens(tokens));
     }
   }, [isFetchingTokens, tokens]);
 
   useEffect(() => {
-    console.log('setAttributes');
-    if (!isFetchingTokens && tokens.length > 0 && selectedCollections.length === 1) {
-      setAttributes(getAttributesFromTokens(tokens));
+    if (!isFetchingTokens && featuredTokens.length > 0 && selectedCollections.length === 1) {
+      setAttributes(getAttributesFromTokens(featuredTokens));
     }
-  }, [isFetchingTokens, tokens, selectedCollections.length]);
-
-  console.log('attributeCounts', attributeCounts);
-  console.log('attributes', attributes);
-
-  // useEffect(() => {
-  //   if (myCollections.length > 0 && !isAttributeCountsFetching) fetchAttributeCounts(myCollections.map((collection) => collection.id));
-  // }, [myCollections]);
-  //
-  // useEffect(() => {
-  //   if (selectedCollections.length === 1 && !isAttributesFetching) fetchAttributes(selectedCollections[0]);
-  //   if (selectedCollections.length > 1) resetAttributes();
-  // }, [selectedCollections]);
-  // useEffect(() => {
-  //   if (settings && settings.blockchain.unique.collectionIds.length > 0 && attributeCounts.length === 0) {
-  //     fetchAttributeCounts(selectedCollections?.length ? selectedCollections : settings?.blockchain.unique.collectionIds || []);
-  //   }
-  // }, [settings?.blockchain.unique.collectionIds]);
-
-  // const myAttributesCount = useMemo(() => {
-  //   // count attributes in each token
-  //   const countTokenAttributes = tokens.map((token) => {
-  //     if (!token?.attributes) return 0;
-  //     // let count = 0;
-  //     // if (token?.attributes?.Traits) count = token?.attributes?.Traits.length
-  //     // return token?.attributes?.Gender ? ++count : count;
-  //     return 0;
-  //   });
-  //   // count tokens with the same amount of attributes, result be like { 7: 2, 6: 1 }
-  //   const counterMap: any = {};
-  //   countTokenAttributes.forEach((count) => {
-  //     if (counterMap[count]) counterMap[count]++;
-  //     else counterMap[count] = 1;
-  //   });
-  //   // convert to format [{ "numberOfAttributes": 7,"amount": 2 }, { "numberOfAttributes": 6,"amount": 1 }]
-  //   const result: AttributeCount[] = [];
-  //   for (const attributesCount of Object.keys(counterMap)) {
-  //     result.push({ numberOfAttributes: Number(attributesCount), amount: counterMap[attributesCount] });
-  //   }
-  //   return result;
-  // }, [tokens]);
-  //
-  // const myAttributes = useMemo<Record<string, Attribute[]>>(() => {
-  //   if (selectedCollections.length === 1) {
-  //     // get list of all attributes for all tokens
-  //     const allAttributes: string[] = [];
-  //     tokens.forEach((token) => {
-  //       // if (token?.attributes?.Traits) {
-  //       //   allAttributes = [...allAttributes, ...token.attributes.Traits];
-  //       // }
-  //     });
-  //     // count every attribute
-  //     const counterMap: any = {};
-  //     allAttributes.forEach((attribute) => {
-  //       if (counterMap[attribute]) counterMap[attribute]++;
-  //       else counterMap[attribute] = 1;
-  //     });
-  //     const result: Attribute[] = [];
-  //     for (const attribute of Object.keys(counterMap)) {
-  //       result.push({ key: attribute, count: counterMap[attribute] });
-  //     }
-  //     return { Traits: result };
-  //   }
-  //   return { Traits: [] };
-  // }, [tokens, selectedCollections]);
+  }, [isFetchingTokens, featuredTokens, selectedCollections.length]);
 
   const onCollectionSelect = useCallback((collectionId: number) => (value: boolean) => {
     let _selectedCollections;
@@ -132,24 +62,11 @@ const CollectionsFilter: FC<CollectionsFilterProps> = ({
 
     // since traits are shown only if one collection is selected -> we should always reset them
     onChange(_selectedCollections, [], []);
-
-    // if (_selectedCollections.length === 1) fetchAttributes(_selectedCollections[0]);
-    // else resetAttributes();
-
-    // const _attributeCounts = await fetchAttributeCounts(_selectedCollections.length > 0 ? _selectedCollections : settings?.blockchain.unique.collectionIds || []);
-    // const _selectedAttributeCounts = selectedAttributeCounts.filter((item) => _attributeCounts.findIndex(({ numberOfAttributes }) => numberOfAttributes === item) > -1);
-    //
-    // // since attributes are shown only if one collection is selected -> we should always reset them
-    // onChange(_selectedCollections, [], _selectedAttributeCounts);
   }, [selectedCollections, selectedAttributeCounts, onAttributesChange, onChange, settings?.blockchain.unique.collectionIds]);
 
   const onCollectionsClear = useCallback(() => {
     onChange([], [], []);
-    // onChange([]);
-    // fetchAttributeCounts(settings?.blockchain.unique.collectionIds || []);
   }, [onChange]);
-
-  // console.log('attributeCounts filter', attributeCounts);
 
   return (<>
     <Accordion title={'Collections'}

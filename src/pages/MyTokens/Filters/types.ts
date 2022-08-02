@@ -29,6 +29,7 @@ export type FiltersProps<T = FilterState> = {
     value: T | null
     onFilterChange: FilterChangeHandler<T>
     tokens: NFTToken[]
+    featuredTokens: NFTToken[]
     collections: NFTCollection[]
     isFetchingTokens: boolean
     testid: string

@@ -4,11 +4,9 @@ import { Button, IconProps, Select, Tabs } from '@unique-nft/ui-kit';
 import { SelectOptionProps } from '@unique-nft/ui-kit/dist/cjs/types';
 
 import { AdditionalLight } from 'styles/colors';
-import { NFTCollection, NFTToken } from 'api/uniqueSdk/types';
 import { FilterChangeHandler, MyTokensFilterState } from './types';
 
 type MobileFiltersProps<T> = {
-  value: T | null
   filterCount: number
   defaultSortingValue: SelectOptionProps
   sortingValue: string
@@ -20,15 +18,12 @@ type MobileFiltersProps<T> = {
   onFilterChange: FilterChangeHandler<T>
   onSortingChange(value: SelectOptionProps): void
   filterComponent?: ReactElement | null
-  tokens: NFTToken[]
-  collections: NFTCollection[]
-  isFetchingTokens: boolean
   testid: string
 }
 
 const tabs = ['Filter', 'Sort'];
 
-export function MobileFilters<T = MyTokensFilterState>({ value, filterCount, filterComponent, defaultSortingValue, sortingValue, sortingOptions, onFilterChange, onSortingChange, tokens, isFetchingTokens, collections, testid }: MobileFiltersProps<T>) {
+export function MobileFilters<T = MyTokensFilterState>({ filterCount, filterComponent, defaultSortingValue, sortingValue, sortingOptions, onFilterChange, onSortingChange, testid }: MobileFiltersProps<T>) {
   const [isVisible, setIsVisible] = useState(false);
   const [activeTabIndex, setActiveTabIndex] = useState(0);
 

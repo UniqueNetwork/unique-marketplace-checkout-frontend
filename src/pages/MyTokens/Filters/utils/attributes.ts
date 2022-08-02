@@ -36,7 +36,7 @@ export const getAttributesFromTokens = (tokens: NFTToken[]) => {
         if (attributesMap[name._.toLowerCase()]) {
           if (Array.isArray(value)) {
             attributesMap[name._.toLowerCase()] = [...attributesMap[name._.toLowerCase()], ...value.map((attr) => attr._)];
-          } else if (attributes[i].type !== 'string') {
+          } else if (attributes[i].isEnum) {
             attributesMap[name._.toLowerCase()].push(value._ || value);
           }
         } else {
@@ -65,25 +65,26 @@ export const getAttributesFromTokens = (tokens: NFTToken[]) => {
   return attributesForFilter;
 };
 
-export const getAttributesCountFromTokens = (tokens: NFTToken[]) => {
-  // count attributes in each token
-  const countTokenAttributes = tokens.map(({ attributes }) => {
-    let count = 0;
-    if (attributes) {
-      for (const i in attributes) {
-        const value = attributes[i].value;
-        if (Array.isArray(value)) {
-          count += value.length;
-        } else {
-          count++;
-        }
+export function countTokenAttributes(attributes: DecodedAttributes | undefined): number {
+  let count = 0;
+  if (attributes) {
+    for (const i in attributes) {
+      const value = attributes[i].value;
+      if (Array.isArray(value)) {
+        count += value.length;
+      } else {
+        count++;
       }
     }
-    return count;
-  });
+  }
+  return count;
+}
+
+export const getAttributesCountFromTokens = (tokens: NFTToken[]) => {
+  const countTokensAttributes: number[] = tokens.map(({ attributes }) => countTokenAttributes(attributes));
   // count tokens with the same amount of attributes, result be like { 7: 2, 6: 1 }
   const counterMap: { [key: number]: number } = {};
-  countTokenAttributes.forEach((count) => {
+  countTokensAttributes.forEach((count) => {
     if (counterMap[count]) counterMap[count]++;
     else counterMap[count] = 1;
   });
