@@ -1,11 +1,11 @@
 import React, { ReactElement, useCallback, useState } from 'react';
 import styled from 'styled-components/macro';
-import { Button, Select, Tabs } from '@unique-nft/ui-kit';
-import { IconProps, SelectOptionProps } from '@unique-nft/ui-kit/dist/cjs/types';
+import { Button, IconProps, Select, Tabs } from '@unique-nft/ui-kit';
+import { SelectOptionProps } from '@unique-nft/ui-kit/dist/cjs/types';
 
-import { FilterChangeHandler, FiltersProps, FilterState } from './types';
-import { AdditionalLight } from '../../../styles/colors';
-import { NFTCollection, NFTToken } from '../../../api/chainApi/unique/types';
+import { AdditionalLight } from 'styles/colors';
+import { NFTCollection, NFTToken } from 'api/uniqueSdk/types';
+import { FilterChangeHandler, MyTokensFilterState } from './types';
 
 type MobileFiltersProps<T> = {
   value: T | null
@@ -19,15 +19,16 @@ type MobileFiltersProps<T> = {
   }[]
   onFilterChange: FilterChangeHandler<T>
   onSortingChange(value: SelectOptionProps): void
-  filterComponent?: (props: FiltersProps<T>) => ReactElement | null
+  filterComponent?: ReactElement | null
   tokens: NFTToken[]
   collections: NFTCollection[]
   isFetchingTokens: boolean
+  testid: string
 }
 
 const tabs = ['Filter', 'Sort'];
 
-export function MobileFilters<T = FilterState>({ value, filterCount, filterComponent, defaultSortingValue, sortingValue, sortingOptions, onFilterChange, onSortingChange, tokens, isFetchingTokens, collections }: MobileFiltersProps<T>) {
+export function MobileFilters<T = MyTokensFilterState>({ value, filterCount, filterComponent, defaultSortingValue, sortingValue, sortingOptions, onFilterChange, onSortingChange, tokens, isFetchingTokens, collections, testid }: MobileFiltersProps<T>) {
   const [isVisible, setIsVisible] = useState(false);
   const [activeTabIndex, setActiveTabIndex] = useState(0);
 
@@ -63,7 +64,7 @@ export function MobileFilters<T = FilterState>({ value, filterCount, filterCompo
       <Tabs
         activeIndex={activeTabIndex}
       >
-        {(filterComponent && filterComponent({ value, onFilterChange, tokens, isFetchingTokens, collections })) || <></>}
+        {filterComponent || <></>}
         <SortStyled>
           <Select
             onChange={onSortingChange}

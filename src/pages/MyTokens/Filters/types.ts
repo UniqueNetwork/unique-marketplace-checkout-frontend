@@ -1,8 +1,13 @@
-import { PriceRange, Statuses } from '../../../components/Filters/types';
 import { Dispatch, SetStateAction } from 'react';
-import { NFTCollection, NFTToken } from '../../../api/chainApi/unique/types';
+import { Statuses } from 'components/Filters/types';
+import { NFTCollection, NFTToken } from 'api/uniqueSdk/types';
 
 export type MyTokensStatuses = Record<'onSell' | 'fixedPrice' | 'timedAuction' | 'notOnSale', boolean | undefined>;
+
+export type PriceRange = {
+    minPrice?: string
+    maxPrice?: string
+};
 
 export type MyTokensFilterState = Omit<FilterState, 'statuses'> & {
     statuses?: MyTokensStatuses | undefined
@@ -26,4 +31,19 @@ export type FiltersProps<T = FilterState> = {
     tokens: NFTToken[]
     collections: NFTCollection[]
     isFetchingTokens: boolean
+    testid: string
+}
+
+export type TFilterAttribute = {
+    key: string
+    count: number
+}
+
+export type TFilterAttributes = {
+    [key: string]: TFilterAttribute[]
+}
+
+export type TFilterAttributeCount = {
+    numberOfAttributes: number
+    amount: number
 }

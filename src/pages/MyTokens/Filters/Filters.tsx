@@ -2,8 +2,7 @@ import React, { FC, useCallback } from 'react';
 import styled from 'styled-components';
 
 import PricesFilter from '../../../components/Filters/PricesFilter';
-import { AttributeItem, FiltersProps, PriceRange } from '../../../components/Filters/types';
-import { MyTokensFilterState, MyTokensStatuses } from './types';
+import { AttributeItem, FiltersProps, PriceRange, MyTokensFilterState, MyTokensStatuses } from './types';
 import StatusFilter from './StatusFilter';
 import CollectionsFilter from './CollectionsFilter';
 

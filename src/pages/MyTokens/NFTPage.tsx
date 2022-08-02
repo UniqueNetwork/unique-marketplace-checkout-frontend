@@ -4,11 +4,11 @@ import BN from 'bn.js';
 import { Select, Text } from '@unique-nft/ui-kit';
 import { BN_MAX_INTEGER } from '@polkadot/util';
 
-import { AttributesDecoded, NFTToken } from 'api/uniqueSdk/types';
+import { NFTToken } from 'api/uniqueSdk/types';
 import { useOffers } from 'api/restApi/offers/offers';
-import { Offer, OfferTokenAttribute } from 'api/restApi/offers/types';
+import { Offer } from 'api/restApi/offers/types';
 import { TokensList } from 'components';
-import { MobileFilters } from 'components/Filters/MobileFilter';
+import { MobileFilters } from './Filters/MobileFilter';
 import { PagePaper } from 'components/PagePaper/PagePaper';
 import NoItems from 'components/NoItems';
 
@@ -25,6 +25,7 @@ import useDeviceSize, { DeviceSize } from '../../hooks/useDeviceSize';
 import { setUrlParameter, parseFilterState } from '../../utils/helpers';
 import { BoxedNumberWithDefault, LocalizedStringWithDefault } from '@unique-nft/sdk/tokens';
 import { useCollections } from '../../hooks/useCollections';
+import { toTokenAttributes } from './Filters/utils/attributes';
 
 type TOption = SelectOptionProps & {
   direction: 'asc' | 'desc';
@@ -32,15 +33,6 @@ type TOption = SelectOptionProps & {
   id: string;
   title: string;
 }
-
-const toTokenAttributes = (offerAttributes: OfferTokenAttribute[]) => {
-  const result: AttributesDecoded = {};
-  offerAttributes.map(({ key, value }) => {
-    result[key] = value;
-    return result;
-  });
-  return result;
-};
 
 const sortingOptions: TOption[] = [
   {
@@ -111,12 +103,52 @@ export const NFTPage = () => {
 
   useEffect(() => {
     if (!api?.nft || !selectedAccount?.address) return;
+
     setIsFetchingTokens(true);
     void (async () => {
-      await fetch({ page: 1, pageSize, seller: selectedAccount?.address });
+      const { attributes, attributesCount } = await fetch({ page: 1, pageSize, seller: selectedAccount?.address });
       const _tokens = await api.nft?.getAccountMarketableTokens(selectedAccount.address) as NFTToken[];
 
       setTokens(_tokens);
+      // const { attributesForFilter, attributesCountForFilter } = getAttributesAndCountsFromTokens(_tokens, true);
+      // // merge token attributes and offer attributes
+      // for (const offerAttributeName in attributes) {
+      //   if (attributesForFilter[offerAttributeName]) {
+      //     attributes[offerAttributeName].forEach((offerAttrValue: { key: string, count: number }) => {
+      //       let offerAttrValueFound = false;
+      //       attributesForFilter[offerAttributeName].forEach((tokenAttrValue) => {
+      //         if (offerAttrValue.key === tokenAttrValue.key) {
+      //           tokenAttrValue.count += offerAttrValue.count;
+      //           offerAttrValueFound = true;
+      //         }
+      //       });
+      //       if (!offerAttrValueFound) {
+      //         attributesForFilter[offerAttributeName].push(offerAttrValue);
+      //       }
+      //     });
+      //   } else {
+      //     attributesForFilter[offerAttributeName] = attributes[offerAttributeName];
+      //   }
+      // }
+
+      // // merge token attributes count and offer attributes count
+      // attributesCount.forEach((offerAttrCount: AttributeCount) => {
+      //   let offerAttrCountFound = false;
+      //   attributesCountForFilter.forEach((tokenAttrCount) => {
+      //     if (tokenAttrCount.numberOfAttributes === offerAttrCount.numberOfAttributes) {
+      //       tokenAttrCount.amount += offerAttrCount.amount;
+      //       offerAttrCountFound = true;
+      //     }
+      //   });
+      //   if (!offerAttrCountFound) {
+      //     attributesCountForFilter.push(offerAttrCount);
+      //   }
+      // });
+
+      // console.log('attributesForFilter', attributesForFilter);
+      console.log('attributes', attributes);
+      // console.log('attributesCountForFilter', attributesCountForFilter);
+      console.log(' attributesCount', attributesCount);
       setIsFetchingTokens(false);
     })();
   }, [api?.nft, selectedAccount?.address, setIsFetchingTokens, fetch]);
@@ -220,6 +252,9 @@ export const NFTPage = () => {
     return tokensWithOffers;
   }, [tokens, offers, filter, selectOption]);
 
+  console.log('tokens', tokens);
+  console.log('offers', offers);
+
   const filterCount = useMemo(() => {
     const { statuses, prices, collections = [], attributes = [], attributeCounts = [] } = filterState || {};
     const statusesCount: number = Object.values(statuses || {}).filter((status) => status).length;
@@ -272,7 +307,8 @@ export const NFTPage = () => {
           <TokensList testid={`${testid}-tokens`} tokens={featuredTokens} isLoading={isFetchingTokens || isFetchingOffers || isLoading} />
         </TokensListWrapper>
       </MainContent>
-      {deviceSize <= DeviceSize.md && <MobileFilters<MyTokensFilterState>
+      {deviceSize <= DeviceSize.md && <MobileFilters
+        value={filterState}
         filterCount={filterCount}
         defaultSortingValue={defaultSortingValue}
         sortingValue={sortingValue}
@@ -284,6 +320,9 @@ export const NFTPage = () => {
           value={filterState}
           onFilterChange={setFilterState}
           testid={`${testid}-filters`}
+          tokens={featuredTokens}
+          collections={myCollections}
+          isFetchingTokens={isFetchingTokens}
         />}
         tokens={featuredTokens}
         collections={myCollections}
