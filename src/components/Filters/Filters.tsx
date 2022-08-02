@@ -30,9 +30,6 @@ export const Filters: FC<FiltersProps> = ({ value, attributes, attributeCounts, 
     onFilterChange({ ...value, attributeCounts });
   }, [value, onFilterChange]);
 
-  console.log('attributes', attributes);
-  console.log('attributeCounts', attributeCounts);
-
   return <FiltersStyled>
     <StatusFilter value={value?.statuses} onChange={onStatusFilterChange} testid={`${testid}-status`} />
     <PricesFilter value={value?.prices} onChange={onPricesFilterChange} testid={`${testid}-prices`} />
