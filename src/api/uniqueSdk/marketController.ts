@@ -399,10 +399,14 @@ export class UniqueSDKMarketController {
 
     if (!signature) throw new Error('Signing failed');
 
-    await this.uniqueSdk.extrinsics.submitWaitCompleted({
-      signerPayloadJSON: unsignedTxPayload.signerPayloadJSON,
-      signature
-    });
+    if (options.send) {
+      await options?.send?.(signature);
+    } else {
+      await this.uniqueSdk.extrinsics.submitWaitCompleted({
+        signerPayloadJSON: unsignedTxPayload.signerPayloadJSON,
+        signature
+      });
+    }
   }
 
   // purchase
