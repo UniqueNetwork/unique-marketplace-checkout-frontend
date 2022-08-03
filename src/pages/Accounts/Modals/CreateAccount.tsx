@@ -47,16 +47,15 @@ export const CreateAccountModal: FC<TAccountModalProps> = ({ isVisible, onFinish
     setStage(stage - 1);
   }, [stage]);
 
-  useEffect(() => {
-    if (!isVisible) {
-      setAccountProperties(undefined);
-      setStage(CreateAccountModalStages.AskSeed);
-    }
+  const onCloseModal = useCallback(() => {
+    setAccountProperties(undefined);
+    setStage(CreateAccountModalStages.AskSeed);
+    onClose();
   }, [isVisible]);
 
   if (!ModalBodyComponent) return null;
 
-  return (<Modal isVisible={isVisible} isClosable={true} onClose={onClose}>
+  return (<Modal isVisible={isVisible} isClosable={true} onClose={onCloseModal}>
     <Content>
       <Heading size='2'>Create substrate account</Heading>
     </Content>
