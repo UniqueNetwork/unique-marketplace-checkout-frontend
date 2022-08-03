@@ -17,8 +17,13 @@ a{
   overflow: visible;
 }
 
+/* fix tooltip with clickable content */
 .unique-tooltip {
-  z-index: 1000;
+  span {
+    z-index: 101; 
+  }
 }
+
+
 
 `;
