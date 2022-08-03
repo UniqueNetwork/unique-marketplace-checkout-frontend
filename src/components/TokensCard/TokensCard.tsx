@@ -95,7 +95,7 @@ export const TokensCard: FC<TTokensCard> = ({ collectionId, tokenId, testid, ...
           rel='noreferrer'
         >
           <Text color='primary-600' size='s'>
-            {`${collectionName?.substring(0, 15) || ''} [id ${collectionId || ''}]`}
+            {`${collectionName?.substring(0, 25) || ''} [id ${collectionId || ''}]`}
           </Text>
         </a>
         {price && <PriceWrapper>
