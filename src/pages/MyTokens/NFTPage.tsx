@@ -120,7 +120,6 @@ export const NFTPage = () => {
 
   useEffect(() => {
     const option = sortingOptions.find((option) => { return option.id === sortingValue; });
-
     setSelectOption(option);
   }, [sortingValue, setSelectOption]);
 
