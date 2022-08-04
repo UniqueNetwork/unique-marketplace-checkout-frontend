@@ -364,7 +364,7 @@ export class UniqueSDKMarketController {
 
     if (!signature) throw new Error('Signing failed');
     if (options.send) {
-      await options?.send?.(signature);
+      await options.send(signature);
     } else {
       await this.kusamaSdk.extrinsics.submitWaitCompleted({
         signerPayloadJSON: unsignedTxPayload.signerPayloadJSON,
@@ -403,7 +403,7 @@ export class UniqueSDKMarketController {
     if (!signature) throw new Error('Signing failed');
 
     if (options.send) {
-      await options?.send?.(signature);
+      await options.send(signature);
     } else {
       await this.uniqueSdk.extrinsics.submitWaitCompleted({
         signerPayloadJSON: unsignedTxPayload.signerPayloadJSON,
