@@ -156,6 +156,10 @@ export const TokensTradesPage: FC<TokensTradesPage> = ({ currentTab, testid }) =
 
 const TradesPageWrapper = styled.div`
   width: 100%;
+  .unique-pagination-wrapper .per-page-selector-wrapper,
+  .unique-select .select-wrapper {
+    font-size: 16px;
+  }
 
   @media (max-width: 640px) {
     .unique-modal-wrapper .unique-modal {
