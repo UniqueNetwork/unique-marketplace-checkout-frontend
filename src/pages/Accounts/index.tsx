@@ -147,6 +147,7 @@ const getAccountsColumns = ({
 ];
 
 const caretDown = { name: 'carret-down', size: 16, color: AdditionalLight };
+const caretUp = { name: 'carret-up', size: 16, color: AdditionalLight };
 
 enum AccountModal {
   create,
@@ -171,6 +172,7 @@ export const AccountsPage = () => {
   const [searchString, setSearchString] = useState<string>('');
   const [currentModal, setCurrentModal] = useState<AccountModal | undefined>();
   const [selectedAddress, setSelectedAddress] = useState<string>();
+  const [isDropdownOpened, setIsDropdownOpened] = useState(false);
   const deviceSize = useDeviceSize();
   const { chainData } = useApi();
 
@@ -313,12 +315,13 @@ export const AccountsPage = () => {
             <DropdownMenuItem onClick={onImportViaJSONClick} data-testid={`${testid}-json-file-button`}>Backup JSON file</DropdownMenuItem>
             <DropdownMenuItem onClick={onImportViaQRClick} data-testid={`${testid}-qr-button`}>QR-code</DropdownMenuItem>
           </DropdownMenu>}
+          onOpenChange={setIsDropdownOpened}
         >
           <AddAccountButton
             testid={`${testid}-add-via-button`}
             title={'Add account via'}
             role={'primary'}
-            iconRight={caretDown}
+            iconRight={isDropdownOpened ? caretUp : caretDown}
           />
         </DropdownStyled>
         <SearchInputWrapper>
