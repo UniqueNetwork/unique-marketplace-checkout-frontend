@@ -25,39 +25,35 @@ export const toTokenAttributes = (offerAttributes: OfferTokenAttribute[]) => {
 };
 
 export const getAttributesFromTokens = (tokens: NFTToken[]) => {
+  // All attributes from available tokens
   const attributesMap: { [key: string]: any[] } = {};
+  // ???
   const attributesForFilter: { [key: string]: Array<{ key: string, count: number }>} = {};
 
   tokens.forEach(({ attributes }) => {
-    if (attributes) {
-      for (const i in attributes) {
-        const name = attributes[i].name;
-        const value = attributes[i].value;
-        if (attributesMap[name._.toLowerCase()]) {
-          if (Array.isArray(value)) {
-            attributesMap[name._.toLowerCase()] = [...attributesMap[name._.toLowerCase()], ...value.map((attr) => attr._)];
-          } else if (attributes[i].isEnum) {
-            attributesMap[name._.toLowerCase()].push(value._ || value);
-          }
-        } else {
-          if (Array.isArray(value)) {
-            attributesMap[name._.toLowerCase()] = value.map((attr) => attr._);
-          } else if (attributes[i].isEnum) {
-            attributesMap[name._.toLowerCase()] = [value._ || value];
-          }
-        }
+    if (!attributes) { return; }
+    // Calculate filters to show
+    for (const i in attributes) {
+      const { name, value } = attributes[i];
+      const attributeName = name._.toLocaleLowerCase();
+
+      if (Array.isArray(value)) {
+        attributesMap[attributeName] = [attributesMap[attributeName] ? [...attributesMap[attributeName]] : [], ...value.map((attr) => attr._)];
       }
-      for (const attrName in attributesMap) {
-        const counterMap: any = {};
-        attributesMap[attrName].map((attrValue) => {
-          if (counterMap[attrValue]) counterMap[attrValue]++;
-          else counterMap[attrValue] = 1;
-          return attrValue;
-        });
-        attributesForFilter[attrName] = [];
-        for (const attribute of Object.keys(counterMap)) {
-          attributesForFilter[attrName].push({ key: attribute, count: counterMap[attribute] });
-        }
+      if (attributes[i].isEnum) {
+        attributesMap[attributeName] = [attributesMap[attributeName] ? [...attributesMap[attributeName]] : [], value._ || value];
+      }
+    }
+    // Calculate counts
+    for (const attrName in attributesMap) {
+      const counterMap: { [key: string]: number } = {};
+      attributesMap[attrName].forEach((attrValue) => {
+        if (counterMap[attrValue]) counterMap[attrValue]++;
+        else counterMap[attrValue] = 1;
+      });
+      attributesForFilter[attrName] = [];
+      for (const attribute of Object.keys(counterMap)) {
+        attributesForFilter[attrName].push({ key: attribute, count: counterMap[attribute] });
       }
     }
   });
