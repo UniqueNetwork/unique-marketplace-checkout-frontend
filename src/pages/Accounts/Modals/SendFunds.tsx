@@ -97,7 +97,7 @@ export const AskTransferFundsModal: FC<AskSendFundsModalProps> = ({ isVisible, o
       const recipient = typeof recipientAddress === 'string' ? recipientAddress : recipientAddress?.address;
       api?.market?.getKusamaFee(selectedAccount.address, recipient, new BN(fromStringToBnString(amount)))
       .then((fee) => {
-        setKusamaFee(formatKusamaBalance(fee?.toString() || '0'));
+        setKusamaFee(fee || '0');
       }).catch((e) => {
         console.log(e);
       }).finally(() => {
@@ -105,6 +105,10 @@ export const AskTransferFundsModal: FC<AskSendFundsModalProps> = ({ isVisible, o
       });
     }, 300);
   }, [api?.market, recipientAddress, selectedAccount, amount]);
+
+  useEffect(() => {
+    if (recipientAddress) getKusamaFee()();
+  }, [recipientAddress, getKusamaFee]);
 
   const formatAddress = useCallback((address: string) => {
     return toChainFormatAddress(address, chainData?.SS58Prefix || 0);
@@ -147,7 +151,6 @@ export const AskTransferFundsModal: FC<AskSendFundsModalProps> = ({ isVisible, o
 
   const onChangeAddress = useCallback((input) => {
     setRecipientAddress(input);
-    getKusamaFee()();
     if (typeof input === 'string') {
       onFilter(input);
     } else {
