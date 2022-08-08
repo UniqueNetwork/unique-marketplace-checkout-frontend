@@ -134,7 +134,7 @@ export const WalletManager: FC = () => {
         manageBalanceLinkTitle='Manage my balance'
         networks={[]}
         onAccountChange={widgetAccountChange}
-        onCopyAddressClick={onCopyAddress}
+        // onCopyAddressClick={onCopyAddress}
         onManageBalanceClick={onCreateAccountClick}
         onNetworkChange={function noRefCheck() { }}
         selectedAccount={widgetSelectedAccount}

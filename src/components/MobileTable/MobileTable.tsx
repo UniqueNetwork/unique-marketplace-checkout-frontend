@@ -25,14 +25,14 @@ const MobileTable: FC<MobileTableProps> = ({
 
   if (!loading && data?.length === 0) children = <EmptyTable iconProps={emptyIconProps} />;
   else if (!loading) {
-    children = <>{data?.map((item, index) => (
+    children = <>{data?.map((item, rowIndex) => (
       <MobileTableRow
-        key={index}
+        key={rowIndex}
       >
-        {columns?.map((column) => (
+        {columns?.map((column, columnIndex) => (
           <div key={`column-${column.field || ''}`}>
             {typeof column?.title === 'object' ? <>{column.title}</> : <Text color={'grey-500'}>{`${column?.title || ''}`}</Text>}
-            {column.render && <>{column.render(item[column.field as keyof TableRowProps], item)}</>}
+            {column.render && <>{column.render(item[column.field as keyof TableRowProps], item, { rowIndex, columnIndex })}</>}
             {!column.render && <Text>{item[column.field as keyof TableRowProps]?.toString() || ''}</Text>}
           </div>
         ))}
