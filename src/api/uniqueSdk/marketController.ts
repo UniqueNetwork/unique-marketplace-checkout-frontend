@@ -363,11 +363,14 @@ export class UniqueSDKMarketController {
     const signature = await options.sign?.(unsignedTxPayload);
 
     if (!signature) throw new Error('Signing failed');
-
-    await this.kusamaSdk.extrinsics.submitWaitCompleted({
-      signerPayloadJSON: unsignedTxPayload.signerPayloadJSON,
-      signature
-    });
+    if (options.send) {
+      await options.send(signature);
+    } else {
+      await this.kusamaSdk.extrinsics.submitWaitCompleted({
+        signerPayloadJSON: unsignedTxPayload.signerPayloadJSON,
+        signature
+      });
+    }
   }
 
   transferBidBalance(address: string, amount: string, options: TransactionOptions): Promise<void> {
@@ -399,10 +402,14 @@ export class UniqueSDKMarketController {
 
     if (!signature) throw new Error('Signing failed');
 
-    await this.uniqueSdk.extrinsics.submitWaitCompleted({
-      signerPayloadJSON: unsignedTxPayload.signerPayloadJSON,
-      signature
-    });
+    if (options.send) {
+      await options.send(signature);
+    } else {
+      await this.uniqueSdk.extrinsics.submitWaitCompleted({
+        signerPayloadJSON: unsignedTxPayload.signerPayloadJSON,
+        signature
+      });
+    }
   }
 
   // purchase
