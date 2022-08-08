@@ -90,11 +90,11 @@ export const AskTransferFundsModal: FC<AskSendFundsModalProps> = ({ isVisible, o
     setSender(account);
   }, [senderAddress, accounts]);
 
-  const getKusamaFee = useCallback(() => {
+  const getKusamaFee = useCallback((newRecipientAddress, amount) => {
     setIsFeeLoading(true);
     return debounce(() => {
       if (!selectedAccount || !api?.market) return;
-      const recipient = typeof recipientAddress === 'string' ? recipientAddress : recipientAddress?.address;
+      const recipient = typeof newRecipientAddress === 'string' ? newRecipientAddress : newRecipientAddress?.address;
       api?.market?.getKusamaFee(selectedAccount.address, recipient, new BN(fromStringToBnString(amount)))
       .then((fee) => {
         setKusamaFee(fee || '0');
@@ -104,11 +104,7 @@ export const AskTransferFundsModal: FC<AskSendFundsModalProps> = ({ isVisible, o
         setIsFeeLoading(false);
       });
     }, 300);
-  }, [api?.market, recipientAddress, selectedAccount, amount]);
-
-  useEffect(() => {
-    if (recipientAddress) getKusamaFee()();
-  }, [recipientAddress, getKusamaFee]);
+  }, [api?.market, selectedAccount]);
 
   const formatAddress = useCallback((address: string) => {
     return toChainFormatAddress(address, chainData?.SS58Prefix || 0);
@@ -130,8 +126,8 @@ export const AskTransferFundsModal: FC<AskSendFundsModalProps> = ({ isVisible, o
 
   const onAmountChange = useCallback((value: string) => {
     setAmount(value);
-    getKusamaFee()();
-  }, [setAmount, getKusamaFee]);
+    getKusamaFee(recipientAddress, value)();
+  }, [setAmount, getKusamaFee, recipientAddress]);
 
   const isConfirmDisabled = useMemo(() => (
     !sender || !recipientAddress || Number(amount) <= 0 || Number(amount) > Number(formatKusamaBalance(sender?.balance?.KSM?.toString() || 0))
@@ -149,14 +145,15 @@ export const AskTransferFundsModal: FC<AskSendFundsModalProps> = ({ isVisible, o
     }));
   }, [accountsWithQuartzAdresses]);
 
-  const onChangeAddress = useCallback((input) => {
-    setRecipientAddress(input);
-    if (typeof input === 'string') {
-      onFilter(input);
+  const onChangeAddress = useCallback((value: string | Account) => {
+    setRecipientAddress(value);
+    getKusamaFee(value, amount)();
+    if (typeof value === 'string') {
+      onFilter(value);
     } else {
       setFilteredAccounts(accountsWithQuartzAdresses);
     }
-  }, [accountsWithQuartzAdresses, onFilter]);
+  }, [accountsWithQuartzAdresses, onFilter, amount, getKusamaFee]);
 
   const onCloseModal = useCallback(() => {
     setRecipientAddress('');
