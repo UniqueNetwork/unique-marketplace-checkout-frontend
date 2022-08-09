@@ -384,8 +384,37 @@ export class UniqueSDKMarketController {
     }
   }
 
-  transferBidBalance(address: string, amount: string, options: TransactionOptions): Promise<void> {
-    return this.transferBalance(address, this.auctionAddress, amount, options);
+  async transferBidBalance(address: string, amount: string, options: TransactionOptions): Promise<void> {
+    const unsignedTxPayload = await this.kusamaSdk.extrinsics.build({
+      section: 'balances',
+      method: 'transferKeepAlive',
+      args: [this.auctionAddress, Number(amount) * Math.pow(10, this.kusamaDecimals)],
+      address,
+      isImmortal: false
+    });
+
+    const signature = await options.sign?.(unsignedTxPayload);
+
+    if (!signature) throw new Error('Signing failed');
+    if (options.send) {
+      const { signerPayloadJSON } = unsignedTxPayload;
+      const { method, version } = signerPayloadJSON;
+
+      const extrinsic = this.kusamaSdk.api.registry.createType('Extrinsic', {
+        method,
+        version
+      });
+
+      const submittable = this.kusamaSdk.api.tx(extrinsic);
+
+      submittable.addSignature(address, signature, signerPayloadJSON);
+      await options.send(submittable);
+    } else {
+      await this.kusamaSdk.extrinsics.submitWaitCompleted({
+        signerPayloadJSON: unsignedTxPayload.signerPayloadJSON,
+        signature
+      });
+    }
   }
 
   transferToAuction(owner: string, collectionId: string, tokenId: string, options: TransactionOptions): Promise<void> {
