@@ -30,3 +30,7 @@ export const formatKusamaBalance = (balance: string | number, decimals = 12) => 
     maximumFractionDigits: decimals
   });
 };
+
+export const kusamaBalanceToNumber = (balance: string | number, decimals = 12) => {
+  return Number(formatKusamaBalance(balance, decimals).replaceAll(',', ''));
+};

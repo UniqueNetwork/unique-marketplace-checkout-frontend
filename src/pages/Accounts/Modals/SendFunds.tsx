@@ -12,7 +12,7 @@ import { SelectInput } from 'components/SelectInput/SelectInput';
 import { NumberInput } from 'components/NumberInput/NumberInput';
 import AccountCard from 'components/Account/Account';
 import { StageStatus } from 'types/StagesTypes';
-import { formatKusamaBalance } from 'utils/textUtils';
+import { formatKusamaBalance, kusamaBalanceToNumber } from 'utils/textUtils';
 import { fromStringToBnString } from 'utils/bigNum';
 import { debounce } from 'utils/helpers';
 import { AdditionalWarning100, Coral700 } from 'styles/colors';
@@ -130,7 +130,7 @@ export const AskTransferFundsModal: FC<AskSendFundsModalProps> = ({ isVisible, o
   }, [setAmount, getKusamaFee, recipientAddress]);
 
   const isConfirmDisabled = useMemo(() => (
-    !sender || !recipientAddress || Number(amount) <= 0 || Number(amount) > Number(formatKusamaBalance(sender?.balance?.KSM?.toString() || 0))
+    !sender || !recipientAddress || Number(amount) <= 0 || Number(amount) > kusamaBalanceToNumber(sender?.balance?.KSM?.toString() || 0)
   ), [amount, recipientAddress, sender]);
 
   const onSend = useCallback(() => {
@@ -223,7 +223,7 @@ export const AskTransferFundsModal: FC<AskSendFundsModalProps> = ({ isVisible, o
         testid={`${testid}-amount-input`}
       />
     </AmountInputWrapper>
-    {Number(amount) > Number(formatKusamaBalance(sender?.balance?.KSM?.toString() || 0)) && <LowBalanceWrapper>
+    {Number(amount) > kusamaBalanceToNumber(sender?.balance?.KSM?.toString() || 0) && <LowBalanceWrapper>
       <Text size={'s'}>Your balance is too low</Text>
     </LowBalanceWrapper>}
     <KusamaFeeMessage
