@@ -43,15 +43,15 @@ export const getAttributesFromTokens = (tokens: NFTToken[]) => {
       }
     }
     // Calculate counts
-    for (const attrName in attributesMap) {
+    for (const attrGroupName in attributesMap) {
       const counterMap: { [key: string]: number } = {};
-      attributesMap[attrName].forEach((attrValue) => {
+      attributesMap[attrGroupName].forEach((attrValue) => {
         if (counterMap[attrValue]) counterMap[attrValue]++;
         else counterMap[attrValue] = 1;
       });
-      attributesForFilter[attrName] = [];
+      attributesForFilter[attrGroupName] = [];
       for (const attribute of Object.keys(counterMap)) {
-        attributesForFilter[attrName].push({ key: attribute, count: counterMap[attribute] });
+        attributesForFilter[attrGroupName].push({ key: attribute, count: counterMap[attribute] });
       }
     }
   });
@@ -60,15 +60,14 @@ export const getAttributesFromTokens = (tokens: NFTToken[]) => {
 };
 
 export function countTokenAttributes(attributes: DecodedAttributes | undefined): number {
+  if (!attributes) return 0;
   let count = 0;
-  if (attributes) {
-    for (const i in attributes) {
-      const value = attributes[i].value;
-      if (Array.isArray(value)) {
-        count += value.length;
-      } else {
-        count++;
-      }
+  for (const i in attributes) {
+    const { value } = attributes[i];
+    if (Array.isArray(value)) {
+      count += value.length;
+    } else {
+      count++;
     }
   }
   return count;

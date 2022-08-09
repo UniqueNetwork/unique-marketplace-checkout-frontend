@@ -1,7 +1,6 @@
 import React, { FC, useCallback, useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { Checkbox, Text } from '@unique-nft/ui-kit';
-import { useApi } from 'hooks/useApi';
 import Accordion from 'components/Accordion/Accordion';
 import AttributeCountsFilter from 'components/Filters/AttributeCountsFilter';
 import AttributesFilter from 'components/Filters/AttributesFilter';
@@ -38,7 +37,6 @@ const CollectionsFilter: FC<CollectionsFilterProps> = ({
   const [attributes, setAttributes] = useState<Record<string, Attribute[]>>({});
   const [attributeCounts, setAttributeCounts] = useState<AttributeCount[]>([]);
   const { collections: selectedCollections = [], attributes: selectedAttributes = [], attributeCounts: selectedAttributeCounts = [] } = value || {};
-  const { settings } = useApi();
 
   useEffect(() => {
     if (!isFetchingTokens && tokens.length > 0) {
@@ -62,7 +60,7 @@ const CollectionsFilter: FC<CollectionsFilterProps> = ({
 
     // since traits are shown only if one collection is selected -> we should always reset them
     onChange(_selectedCollections, [], []);
-  }, [selectedCollections, selectedAttributeCounts, onAttributesChange, onChange, settings?.blockchain.unique.collectionIds]);
+  }, [selectedCollections, onChange]);
 
   const onCollectionsClear = useCallback(() => {
     onChange([], [], []);
