@@ -34,32 +34,11 @@ type TOption = SelectOptionProps & {
 
 const sortingOptions: TOption[] = [
   {
-    direction: 'asc',
-    field: 'price',
-    iconRight: { color: Secondary400, name: 'arrow-up', size: 16 },
-    id: 'asc(Price)',
-    title: 'Price'
-  },
-  {
     direction: 'desc',
-    field: 'price',
+    field: 'creationDate',
     iconRight: { color: Secondary400, name: 'arrow-down', size: 16 },
-    id: 'desc(Price)',
-    title: 'Price'
-  },
-  {
-    direction: 'asc',
-    field: 'id',
-    iconRight: { color: Secondary400, name: 'arrow-up', size: 16 },
-    id: 'asc(TokenId)',
-    title: 'Token ID'
-  },
-  {
-    direction: 'desc',
-    field: 'id',
-    iconRight: { color: Secondary400, name: 'arrow-down', size: 16 },
-    id: 'desc(TokenId)',
-    title: 'Token ID'
+    id: 'desc(CreationDate)',
+    title: 'Listing date'
   },
   {
     direction: 'asc',
@@ -70,16 +49,37 @@ const sortingOptions: TOption[] = [
   },
   {
     direction: 'desc',
-    field: 'creationDate',
+    field: 'price',
     iconRight: { color: Secondary400, name: 'arrow-down', size: 16 },
-    id: 'desc(CreationDate)',
-    title: 'Listing date'
+    id: 'desc(Price)',
+    title: 'Price'
+  },
+  {
+    direction: 'asc',
+    field: 'price',
+    iconRight: { color: Secondary400, name: 'arrow-up', size: 16 },
+    id: 'asc(Price)',
+    title: 'Price'
+  },
+  {
+    direction: 'desc',
+    field: 'id',
+    iconRight: { color: Secondary400, name: 'arrow-down', size: 16 },
+    id: 'desc(TokenId)',
+    title: 'Token ID'
+  },
+  {
+    direction: 'asc',
+    field: 'id',
+    iconRight: { color: Secondary400, name: 'arrow-up', size: 16 },
+    id: 'asc(TokenId)',
+    title: 'Token ID'
   }
 ];
 
 const pageSize = 1000;
 
-const defaultSortingValue = sortingOptions[sortingOptions.length - 1];
+const defaultSortingValue = sortingOptions[0];
 
 const testid = 'my-tokens-page';
 

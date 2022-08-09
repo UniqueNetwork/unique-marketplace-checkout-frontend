@@ -24,24 +24,9 @@ type TOption = SelectOptionProps &{
 
 const sortingOptions: TOption[] = [
   {
-    iconRight: { color: Secondary400, name: 'arrow-up', size: 16 },
-    id: 'asc(Price)',
-    title: 'Price'
-  },
-  {
     iconRight: { color: Secondary400, name: 'arrow-down', size: 16 },
-    id: 'desc(Price)',
-    title: 'Price'
-  },
-  {
-    iconRight: { color: Secondary400, name: 'arrow-up', size: 16 },
-    id: 'asc(TokenId)',
-    title: 'Token ID'
-  },
-  {
-    iconRight: { color: Secondary400, name: 'arrow-down', size: 16 },
-    id: 'desc(TokenId)',
-    title: 'Token ID'
+    id: 'desc(CreationDate)',
+    title: 'Listing date'
   },
   {
     iconRight: { color: Secondary400, name: 'arrow-up', size: 16 },
@@ -50,14 +35,29 @@ const sortingOptions: TOption[] = [
   },
   {
     iconRight: { color: Secondary400, name: 'arrow-down', size: 16 },
-    id: 'desc(CreationDate)',
-    title: 'Listing date'
+    id: 'desc(Price)',
+    title: 'Price'
+  },
+  {
+    iconRight: { color: Secondary400, name: 'arrow-up', size: 16 },
+    id: 'asc(Price)',
+    title: 'Price'
+  },
+  {
+    iconRight: { color: Secondary400, name: 'arrow-down', size: 16 },
+    id: 'desc(TokenId)',
+    title: 'Token ID'
+  },
+  {
+    iconRight: { color: Secondary400, name: 'arrow-up', size: 16 },
+    id: 'asc(TokenId)',
+    title: 'Token ID'
   }
 ];
 
 const pageSize = 20;
 
-const defaultSortingValue = sortingOptions[sortingOptions.length - 1];
+const defaultSortingValue = sortingOptions[0];
 
 const testid = 'market-page';
 
