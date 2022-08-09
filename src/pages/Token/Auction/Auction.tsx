@@ -180,7 +180,7 @@ const Divider = styled.div`
 const TopBidderTextStyled = styled(Text)`
   margin-top: calc(var(--gap) / 2);
   box-sizing: border-box;
-  display: flex;
+  display: block !important;
   padding: 8px 16px;
   margin-bottom: 24px;
   border-radius: 4px;
@@ -202,7 +202,7 @@ const BidderTextStyled = styled(Text)`
 `;
 
 const LeadingBidWrapper = styled.div`
-  margin-bottom: var(--gap);
+  margin-bottom: calc(var(--gap) * 1.5);
   display: flex;
   align-items: center;
   column-gap: calc(var(--gap) / 2);

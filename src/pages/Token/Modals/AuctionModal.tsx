@@ -227,7 +227,7 @@ const ButtonWrapper = styled.div`
 
 const CautionTextWrapper = styled.div`
   display: flex;
-  min-height: calc(var(--gap) * 1.5);
+  min-height: calc(var(--gap) * 2);
 `;
 
 const Content = styled.div`
