@@ -288,7 +288,7 @@ export const AccountsPage = () => {
     setCurrentModal(undefined);
     await fetchAccounts();
     await fetchAccountsWithDeposits();
-  }, []);
+  }, [fetchAccounts, fetchAccountsWithDeposits]);
 
   const onModalClose = useCallback(() => {
     setCurrentModal(undefined);

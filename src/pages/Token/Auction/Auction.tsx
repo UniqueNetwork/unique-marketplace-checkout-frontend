@@ -122,7 +122,7 @@ const Auction: FC<AuctionProps> = ({ offer: initialOffer, onPlaceABidClick, onDe
           onClick={onDelistAuctionClick}
           testid={`${testid}-delist-button`}
         />}
-        {canPlaceABid && <Button title={'Place a bid'}
+        {canPlaceABid && <PlaceABidButton title={'Place a bid'}
           role={'primary'}
           onClick={onPlaceABidClick}
           disabled={!canPlaceABid}
@@ -142,10 +142,13 @@ const Auction: FC<AuctionProps> = ({ offer: initialOffer, onPlaceABidClick, onDe
       <Divider />
       <Heading size={'4'}>Offers</Heading>
       {isTopBidder && <TopBidderTextStyled >You are Top Bidder</TopBidderTextStyled>}
+      {!isBidder && topBid && <LeadingBidWrapper>
+        <Text color={'grey-500'}>Highest Bidder</Text><AccountLink accountAddress={topBid?.bidderAddress || ''} />
+      </LeadingBidWrapper>}
       {!isTopBidder && isBidder && <Row>
         <BidderTextStyled >You are outbid</BidderTextStyled>
         <LeadingBidWrapper>
-          <Text>{'Leading bid'}</Text><AccountLink accountAddress={topBid?.bidderAddress || ''} />
+          <Text color={'grey-500'}>Leading bid</Text><AccountLink accountAddress={topBid?.bidderAddress || ''} />
         </LeadingBidWrapper>
       </Row>}
       <Bids offer={offer} />
@@ -203,4 +206,11 @@ const LeadingBidWrapper = styled.div`
   display: flex;
   align-items: center;
   column-gap: calc(var(--gap) / 2);
+`;
+
+const PlaceABidButton = styled(Button)`
+  width: 200px;
+  @media (max-width: 320px) {
+    width: 140px;
+  }
 `;
