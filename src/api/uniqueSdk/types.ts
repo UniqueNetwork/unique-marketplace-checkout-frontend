@@ -26,7 +26,7 @@ export type TransactionOptions = {
   sign: (unsignedTxPayload: UnsignedTxPayload) => Promise<`0x${string}` | null>
   signMessage?: (message: string) => Promise<`0x${string}` | null>
   // if not provided, signed.send() will be called instead
-  send?: (signature: string) => Promise<any | void>
+  send?: (tx: TTransaction | string) => Promise<any | void>
 };
 
 export interface NFTCollectionSponsorship {

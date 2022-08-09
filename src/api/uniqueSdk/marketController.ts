@@ -403,7 +403,18 @@ export class UniqueSDKMarketController {
     if (!signature) throw new Error('Signing failed');
 
     if (options.send) {
-      await options.send(signature);
+      const { signerPayloadJSON } = unsignedTxPayload;
+      const { method, version } = signerPayloadJSON;
+
+      const extrinsic = this.uniqueSdk.api.registry.createType('Extrinsic', {
+        method,
+        version
+      });
+
+      const submittable = this.uniqueSdk.api.tx(extrinsic);
+
+      submittable.addSignature(from, signature, signerPayloadJSON);
+      await options.send(submittable);
     } else {
       await this.uniqueSdk.extrinsics.submitWaitCompleted({
         signerPayloadJSON: unsignedTxPayload.signerPayloadJSON,

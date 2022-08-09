@@ -23,7 +23,7 @@ export const useSellFixStages = (collectionId: number, tokenId: number) => {
           send:
             async (signature) => {
               try {
-                await addToWhitelist({ account: params.txParams.accountAddress }, signature);
+                await addToWhitelist({ account: params.txParams.accountAddress }, signature as string);
               } catch (e) {
                 console.error('Adding to whitelist failed');
               }

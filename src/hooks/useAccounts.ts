@@ -53,7 +53,7 @@ export const useAccounts = () => {
     return pair;
   }, [selectedAccount]);
 
-  const signMessage = useCallback(async (message: string, account?: Account | string): Promise<string> => {
+  const signMessage = useCallback(async (message: string, account?: Account | string): Promise<`0x${string}`> => {
     let _account = account || selectedAccount;
     if (typeof _account === 'string') {
       _account = accounts.find((account) => account.address === _account);
