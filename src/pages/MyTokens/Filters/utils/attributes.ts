@@ -1,7 +1,6 @@
 import { Attribute, AttributeCount, OfferTokenAttribute } from 'api/restApi/offers/types';
 import { NFTToken } from 'api/uniqueSdk/types';
 import { AttributeType, DecodedAttributes } from '@unique-nft/sdk/tokens';
-import { TFilterAttributes } from '../types';
 
 export const sortAttributeCounts = (attributeCountA: AttributeCount, attributeCountB: AttributeCount) => attributeCountA.numberOfAttributes > attributeCountB.numberOfAttributes ? 1 : -1;
 
@@ -27,7 +26,7 @@ export const toTokenAttributes = (offerAttributes: OfferTokenAttribute[]) => {
 export const getAttributesFromTokens = (tokens: NFTToken[]) => {
   // All attributes from available tokens
   const attributesMap: { [key: string]: any[] } = {};
-  // ???
+  // attributes formatted for Filter component
   const attributesForFilter: { [key: string]: Array<{ key: string, count: number }>} = {};
 
   tokens.forEach(({ attributes }) => {
@@ -38,10 +37,9 @@ export const getAttributesFromTokens = (tokens: NFTToken[]) => {
       const attributeName = name._.toLocaleLowerCase();
 
       if (Array.isArray(value)) {
-        attributesMap[attributeName] = [attributesMap[attributeName] ? [...attributesMap[attributeName]] : [], ...value.map((attr) => attr._)];
-      }
-      if (attributes[i].isEnum) {
-        attributesMap[attributeName] = [attributesMap[attributeName] ? [...attributesMap[attributeName]] : [], value._ || value];
+        attributesMap[attributeName] = attributesMap[attributeName] ? [...attributesMap[attributeName], ...value.map((attr) => attr._)] : value.map((attr) => attr._);
+      } else if (attributes[i].isEnum) {
+        attributesMap[attributeName] = attributesMap[attributeName] ? [...attributesMap[attributeName], value._ || value] : [value._ || value];
       }
     }
     // Calculate counts
@@ -92,43 +90,3 @@ export const getAttributesCountFromTokens = (tokens: NFTToken[]) => {
 
   return attributesCountForFilter;
 };
-
-export function mergeAttributes(tokenAttributes: TFilterAttributes, offerAttributes: TFilterAttributes) {
-  const result = { ...tokenAttributes };
-  for (const offerAttributeName in offerAttributes) {
-    if (result[offerAttributeName]) {
-      offerAttributes[offerAttributeName].forEach((offerAttrValue) => {
-        let offerAttrValueFound = false;
-        result[offerAttributeName].forEach((tokenAttrValue) => {
-          if (offerAttrValue.key === tokenAttrValue.key) {
-            tokenAttrValue.count += offerAttrValue.count;
-            offerAttrValueFound = true;
-          }
-        });
-        if (!offerAttrValueFound) {
-          result[offerAttributeName].push(offerAttrValue);
-        }
-      });
-    } else {
-      result[offerAttributeName] = offerAttributes[offerAttributeName];
-    }
-  }
-  return result;
-}
-
-export function mergeAttributesCount(tokenCountAttributes: AttributeCount[], offerCountAttributes: AttributeCount[]) {
-  const result = { ...tokenCountAttributes };
-  offerCountAttributes.forEach((offerAttrCount: AttributeCount) => {
-    let offerAttrCountFound = false;
-    result.forEach((tokenAttrCount) => {
-      if (tokenAttrCount.numberOfAttributes === offerAttrCount.numberOfAttributes) {
-        tokenAttrCount.amount += offerAttrCount.amount;
-        offerAttrCountFound = true;
-      }
-    });
-    if (!offerAttrCountFound) {
-      result.push(offerAttrCount);
-    }
-  });
-  return result;
-}
