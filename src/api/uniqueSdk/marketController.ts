@@ -367,12 +367,12 @@ export class UniqueSDKMarketController {
       const { signerPayloadJSON } = unsignedTxPayload;
       const { method, version } = signerPayloadJSON;
 
-      const extrinsic = this.uniqueSdk.api.registry.createType('Extrinsic', {
+      const extrinsic = this.kusamaSdk.api.registry.createType('Extrinsic', {
         method,
         version
       });
 
-      const submittable = this.uniqueSdk.api.tx(extrinsic);
+      const submittable = this.kusamaSdk.api.tx(extrinsic);
 
       submittable.addSignature(address, signature, signerPayloadJSON);
       await options.send(submittable);
