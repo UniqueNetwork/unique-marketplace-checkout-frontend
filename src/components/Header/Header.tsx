@@ -19,11 +19,11 @@ export const Header: FC<HeaderProps> = ({ activeItem }) => {
   const { lessThanThreshold: showMobileMenu } =
     useScreenWidthFromThreshold(1279);
   const [mobileMenuIsOpen, toggleMobileMenu] = useState(false);
-  const { selectedAccount } = useAccounts();
+  const { selectedAccount, isLoading } = useAccounts();
   const { hasAdminPermission } = useAdminLoggingIn();
 
   const mobileMenuToggler = useCallback(() => {
-    if (selectedAccount) toggleMobileMenu((prevState) => !prevState);
+    toggleMobileMenu((prevState) => !prevState);
   }, [selectedAccount]);
 
   const deviceSize = useDeviceSize();
@@ -44,7 +44,7 @@ export const Header: FC<HeaderProps> = ({ activeItem }) => {
             <DesktopMenuLink to='/' active={activeItem === 'Market'}>
               Market
             </DesktopMenuLink>
-            <DesktopMenuLink to='myTokens' active={activeItem === 'My tokens'} disabled={!selectedAccount}>
+            <DesktopMenuLink to='myTokens' active={activeItem === 'My tokens'} disabled={!selectedAccount && !isLoading}>
               My tokens
             </DesktopMenuLink>
             <DesktopMenuLink to='trades' active={activeItem === 'Trades'}>
@@ -73,7 +73,7 @@ export const Header: FC<HeaderProps> = ({ activeItem }) => {
             to='myTokens'
             active={activeItem === 'My tokens'}
             onClick={mobileMenuToggler}
-            disabled={!selectedAccount}
+            disabled={!selectedAccount && !isLoading}
           >
             My tokens
           </MobileMenuLink>
