@@ -126,13 +126,12 @@ const InputWrapper = styled.div`
     position: absolute;
     top: 0;
     left: 0;
-    right: 0;
+    right: calc(var(--gap) * 2);
     bottom: 0;
     border: none;
     background: transparent;
     outline: none;
     padding: calc(var(--gap) / 2) var(--gap);
-    width: 100%;
   }
   & .icon-triangle{
     position: absolute;
