@@ -87,7 +87,12 @@ export class UniqueSDKMarketController {
     if ((new BN(availableBalance.raw)).lt(needed)) {
       throw new Error(`Your KSM balance is too low: ${availableBalance.formatted} KSM. You need at least: ${formatKsm(needed, this.kusamaDecimals, this.minPrice)} KSM`);
     }
-    return this.transferBalance(address, this.escrowAddress, formatKsm(needed, this.kusamaDecimals, 0), options);
+    await this.transferBalance(address, this.escrowAddress, formatKsm(needed, this.kusamaDecimals, 0), options);
+
+    await repeatCheckForTransactionFinish(async () => {
+        return price.lte(await this.getUserDeposit(address));
+      }
+    );
   }
 
   // purchase
