@@ -26,10 +26,10 @@ export const useAuctionSellStages = (collectionId: number, tokenId: number) => {
             ...params.options,
             signMessage,
             send:
-              (signedTx) => {
+              ({ signature, signerPayloadJSON }) => {
                 const startPrice = fromStringToBnString(params.txParams.startingPrice.toString(), api?.market?.kusamaDecimals);
                 const priceStep = fromStringToBnString(params.txParams.minimumStep.toString(), api?.market?.kusamaDecimals);
-                return startAuction({ tx: signedTx, days: params.txParams.duration, startPrice, priceStep });
+                return startAuction({ signerPayloadJSON, signature, days: params.txParams.duration, startPrice, priceStep });
               }
             }
           )

@@ -101,7 +101,7 @@ export class UniqueSDKMarketController {
     try {
       const signaturePhrase = 'allowedlist';
       const signature = await signMessage(signaturePhrase);
-      if (options.send) await options.send(signature);
+      if (options.send) await options.send({ signature });
     } catch (e) {
       console.error('Signing failed', e);
       return;
@@ -365,17 +365,8 @@ export class UniqueSDKMarketController {
     if (!signature) throw new Error('Signing failed');
     if (options.send) {
       const { signerPayloadJSON } = unsignedTxPayload;
-      const { method, version } = signerPayloadJSON;
 
-      const extrinsic = this.kusamaSdk.api.registry.createType('Extrinsic', {
-        method,
-        version
-      });
-
-      const submittable = this.kusamaSdk.api.tx(extrinsic);
-
-      submittable.addSignature(address, signature, signerPayloadJSON);
-      await options.send(submittable);
+      await options.send({ signerPayloadJSON, signature });
     } else {
       await this.kusamaSdk.extrinsics.submitWaitCompleted({
         signerPayloadJSON: unsignedTxPayload.signerPayloadJSON,
@@ -398,17 +389,8 @@ export class UniqueSDKMarketController {
     if (!signature) throw new Error('Signing failed');
     if (options.send) {
       const { signerPayloadJSON } = unsignedTxPayload;
-      const { method, version } = signerPayloadJSON;
 
-      const extrinsic = this.kusamaSdk.api.registry.createType('Extrinsic', {
-        method,
-        version
-      });
-
-      const submittable = this.kusamaSdk.api.tx(extrinsic);
-
-      submittable.addSignature(address, signature, signerPayloadJSON);
-      await options.send(submittable);
+      await options.send({ signerPayloadJSON, signature });
     } else {
       await this.kusamaSdk.extrinsics.submitWaitCompleted({
         signerPayloadJSON: unsignedTxPayload.signerPayloadJSON,
@@ -444,17 +426,8 @@ export class UniqueSDKMarketController {
 
     if (options.send) {
       const { signerPayloadJSON } = unsignedTxPayload;
-      const { method, version } = signerPayloadJSON;
 
-      const extrinsic = this.uniqueSdk.api.registry.createType('Extrinsic', {
-        method,
-        version
-      });
-
-      const submittable = this.uniqueSdk.api.tx(extrinsic);
-
-      submittable.addSignature(from, signature, signerPayloadJSON);
-      await options.send(submittable);
+      await options.send({ signerPayloadJSON, signature });
     } else {
       await this.uniqueSdk.extrinsics.submitWaitCompleted({
         signerPayloadJSON: unsignedTxPayload.signerPayloadJSON,
