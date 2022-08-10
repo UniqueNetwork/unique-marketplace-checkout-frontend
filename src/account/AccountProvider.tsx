@@ -3,13 +3,14 @@ import React, { FC, useCallback, useEffect, useMemo, useRef, useState } from 're
 import { Account, AccountProvider, AccountSigner } from './AccountContext';
 import { SignModal } from '../components/SignModal/SignModal';
 import { KeyringPair } from '@polkadot/keyring/types';
-import { web3Accounts, web3Enable, web3AccountsSubscribe } from '@polkadot/extension-dapp';
+import { web3Accounts, web3Enable, web3AccountsSubscribe, web3EnablePromise } from '@polkadot/extension-dapp';
 import { sleep } from '../utils/helpers';
 import keyring from '@polkadot/ui-keyring';
 import { BN } from '@polkadot/util';
 import { Codec } from '@polkadot/types/types';
 import { useApi } from '../hooks/useApi';
 import { getWithdrawBids } from '../api/restApi/auction/auction';
+import { Unsubcall } from '@polkadot/extension-inject/types';
 
 export const DefaultAccountKey = 'unique_market_account_address';
 
@@ -26,6 +27,12 @@ const AccountWrapper: FC = ({ children }) => {
   const changeAccount = useCallback((account: Account) => {
     localStorage.setItem(DefaultAccountKey, account.address);
     setSelectedAccount(account);
+  }, []);
+
+  const clearSelectedAccount = useCallback(() => {
+    localStorage.removeItem(DefaultAccountKey);
+    setSelectedAccount(undefined);
+    setAccounts([]);
   }, []);
 
   const [isSignModalVisible, setIsSignModalVisible] = useState<boolean>(false);
@@ -52,35 +59,10 @@ const AccountWrapper: FC = ({ children }) => {
     onSignCallback.current && onSignCallback.current(signature);
   }, []);
 
-  const getExtensionAccounts = useCallback(async () => {
-    // this call fires up the authorization popup
-    let extensions = await web3Enable('my cool dapp');
-    if (extensions.length === 0) {
-      console.log('Extension not found, retry in 1s');
-      await sleep(1000);
-      extensions = await web3Enable('my cool dapp');
-      if (extensions.length === 0) {
-        return [];
-      }
-    }
-
-    return (await web3Accounts()).map((account) => ({ ...account, signerType: AccountSigner.extension })) as Account[];
-  }, []);
-
   const getLocalAccounts = useCallback(() => {
     const keyringAccounts = keyring.getAccounts();
     return keyringAccounts.map((account) => ({ address: account.address, meta: account.meta, signerType: AccountSigner.local } as Account));
   }, []);
-
-  const getAccounts = useCallback(async () => {
-    // this call fires up the authorization popup
-    const extensionAccounts = await getExtensionAccounts();
-    const localAccounts = getLocalAccounts();
-
-    const allAccounts: Account[] = [...extensionAccounts, ...localAccounts];
-
-    return allAccounts;
-  }, [getExtensionAccounts, getLocalAccounts]);
 
   const getAccountBalance = useCallback(async (account: Account) => {
     // const balances = await rpcClient?.rawKusamaRpcApi?.derive.balances?.all(account.address);
@@ -132,7 +114,6 @@ const AccountWrapper: FC = ({ children }) => {
     if (allAccounts?.length) {
       const accountsWithBalance = await getAccountsBalances(allAccounts);
       const accountsWithWhiteListStatus = await getAccountsWhiteListStatus(accountsWithBalance);
-
       setAccounts(accountsWithWhiteListStatus);
 
       await subscribeBalancesChanges(accountsWithWhiteListStatus);
@@ -146,10 +127,54 @@ const AccountWrapper: FC = ({ children }) => {
         changeAccount(allAccounts[0]);
       }
     } else {
+      clearSelectedAccount();
       setFetchAccountsError('No accounts in extension');
     }
     setIsLoading(false);
   }, [kusamaSdk, getAccountsBalances, getAccountsWhiteListStatus]);
+
+  useEffect(() => {
+    let unsubscribe: Unsubcall;
+    if (web3EnablePromise) { // if polkadot extension is enabled
+      const listenExtensionChanges = async () => {
+        unsubscribe = await web3AccountsSubscribe(() => {
+          fetchAccounts();
+        });
+      };
+
+      listenExtensionChanges();
+      return () => {
+        unsubscribe && unsubscribe();
+      };
+    }
+  }, [web3EnablePromise, fetchAccounts]);
+
+  const getExtensionAccounts = useCallback(async () => {
+    if (!web3EnablePromise) {
+      // this call fires up the authorization popup
+      let extensions = await web3Enable('my cool dapp');
+      if (extensions.length === 0) {
+        console.log('Extension not found, retry in 1s');
+        await sleep(1000);
+        extensions = await web3Enable('my cool dapp');
+        if (extensions.length === 0) {
+          return [];
+        }
+      }
+    }
+
+    return (await web3Accounts()).map((account) => ({ ...account, signerType: AccountSigner.extension })) as Account[];
+  }, []);
+
+  const getAccounts = useCallback(async () => {
+    // this call fires up the authorization popup
+    const extensionAccounts = await getExtensionAccounts();
+    const localAccounts = getLocalAccounts();
+
+    const allAccounts: Account[] = [...extensionAccounts, ...localAccounts];
+
+    return allAccounts;
+  }, [getExtensionAccounts, getLocalAccounts]);
 
   const fetchAccountsWithDeposits = useCallback(async () => {
     setIsLoadingDeposits(true);
