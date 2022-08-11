@@ -24,7 +24,6 @@ import SearchField from '../../components/SearchField/SearchField';
 import useDeviceSize, { DeviceSize } from '../../hooks/useDeviceSize';
 import { setUrlParameter, parseFilterState } from '../../utils/helpers';
 import { BoxedNumberWithDefault, LocalizedStringWithDefault } from '@unique-nft/sdk/tokens';
-import { useNavigate } from 'react-router-dom';
 
 type TOption = SelectOptionProps & {
   direction: 'asc' | 'desc';
@@ -94,15 +93,10 @@ export const NFTPage = () => {
   const [tokens, setTokens] = useState<NFTToken[]>([]);
   const [isFetchingTokens, setIsFetchingTokens] = useState<boolean>(false);
   const deviceSize = useDeviceSize();
-  const navigate = useNavigate();
 
   const { offers, isFetching: isFetchingOffers, fetch } = useOffers();
 
   const { api } = useApi();
-
-  useEffect(() => {
-    if (!isLoading && !selectedAccount) navigate('/');
-  }, [isLoading, selectedAccount]);
 
   useEffect(() => {
     if (!api?.nft || !selectedAccount?.address) return;

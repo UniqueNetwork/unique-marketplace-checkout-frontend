@@ -29,7 +29,7 @@ const AccountWrapper: FC = ({ children }) => {
     setSelectedAccount(account);
   }, []);
 
-  const clearSelectedAccount = useCallback(() => {
+  const clearAllAccounts = useCallback(() => {
     localStorage.removeItem(DefaultAccountKey);
     setSelectedAccount(undefined);
     setAccounts([]);
@@ -59,10 +59,37 @@ const AccountWrapper: FC = ({ children }) => {
     onSignCallback.current && onSignCallback.current(signature);
   }, []);
 
+  const getExtensionAccounts = useCallback(async () => {
+    if (!web3EnablePromise) {
+      // this call fires up the authorization popup
+      let extensions = await web3Enable('my cool dapp');
+      if (extensions.length === 0) {
+        console.log('Extension not found, retry in 1s');
+        await sleep(1000);
+        extensions = await web3Enable('my cool dapp');
+        if (extensions.length === 0) {
+          return [];
+        }
+      }
+    }
+
+    return (await web3Accounts()).map((account) => ({ ...account, signerType: AccountSigner.extension })) as Account[];
+  }, []);
+
   const getLocalAccounts = useCallback(() => {
     const keyringAccounts = keyring.getAccounts();
     return keyringAccounts.map((account) => ({ address: account.address, meta: account.meta, signerType: AccountSigner.local } as Account));
   }, []);
+
+  const getAccounts = useCallback(async () => {
+    // this call fires up the authorization popup
+    const extensionAccounts = await getExtensionAccounts();
+    const localAccounts = getLocalAccounts();
+
+    const allAccounts: Account[] = [...extensionAccounts, ...localAccounts];
+
+    return allAccounts;
+  }, [getExtensionAccounts, getLocalAccounts]);
 
   const getAccountBalance = useCallback(async (account: Account) => {
     // const balances = await rpcClient?.rawKusamaRpcApi?.derive.balances?.all(account.address);
@@ -127,7 +154,7 @@ const AccountWrapper: FC = ({ children }) => {
         changeAccount(allAccounts[0]);
       }
     } else {
-      clearSelectedAccount();
+      clearAllAccounts();
       setFetchAccountsError('No accounts in extension');
     }
     setIsLoading(false);
@@ -148,33 +175,6 @@ const AccountWrapper: FC = ({ children }) => {
       };
     }
   }, [web3EnablePromise, fetchAccounts]);
-
-  const getExtensionAccounts = useCallback(async () => {
-    if (!web3EnablePromise) {
-      // this call fires up the authorization popup
-      let extensions = await web3Enable('my cool dapp');
-      if (extensions.length === 0) {
-        console.log('Extension not found, retry in 1s');
-        await sleep(1000);
-        extensions = await web3Enable('my cool dapp');
-        if (extensions.length === 0) {
-          return [];
-        }
-      }
-    }
-
-    return (await web3Accounts()).map((account) => ({ ...account, signerType: AccountSigner.extension })) as Account[];
-  }, []);
-
-  const getAccounts = useCallback(async () => {
-    // this call fires up the authorization popup
-    const extensionAccounts = await getExtensionAccounts();
-    const localAccounts = getLocalAccounts();
-
-    const allAccounts: Account[] = [...extensionAccounts, ...localAccounts];
-
-    return allAccounts;
-  }, [getExtensionAccounts, getLocalAccounts]);
 
   const fetchAccountsWithDeposits = useCallback(async () => {
     setIsLoadingDeposits(true);
