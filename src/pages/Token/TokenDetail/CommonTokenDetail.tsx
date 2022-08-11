@@ -120,7 +120,7 @@ export const CommonTokenDetail: FC<IProps> = ({
           <Heading size={'1'} data-testid={`${testid}-token-name`}>{`${prefix || ''} #${tokenId}`}</Heading>
           <ShareLink onClick={openShareModal} data-testid={`${testid}-share-button`}>
             <Text color='grey-500' size='m'>
-              Share link
+              Share
             </Text>
             <IconWrapper>
               <Icon name={'shared'} size={24} />
@@ -203,6 +203,14 @@ const PictureWrapper = styled.div`
   div[class^=Skeleton] {
     position: absolute;
   }
+
+  @media (max-width: 1024px) {
+    width: 326px;
+  }
+  
+  @media (max-width: 768px) {
+    width: 224px;
+  }
   
   .picture {
     position: absolute;
@@ -226,8 +234,13 @@ const PictureWrapper = styled.div`
       height: auto;
     }
 
+    @media (max-width: 1024px) {
+      width: 326px;
+    }
+
+
     @media (max-width: 768px) {
-      min-width: 224px;
+      width: 224px;
     }
 
     @media (max-width: 567px) {
