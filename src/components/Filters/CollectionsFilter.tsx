@@ -7,7 +7,6 @@ import CheckboxSkeleton from '../Skeleton/CheckboxSkeleton';
 import { AttributeItem } from './types';
 import AttributesFilter from './AttributesFilter';
 import AttributeCountsFilter from './AttributeCountsFilter';
-import { useApi } from '../../hooks/useApi';
 import { Attribute, AttributeCount } from '../../api/restApi/offers/types';
 import { CollectionCover } from '../CollectionCover/CollectionCover';
 
@@ -24,7 +23,6 @@ interface CollectionsFilterProps {
 const CollectionsFilter: FC<CollectionsFilterProps> = ({ value, attributes, attributeCounts, onChange, onAttributesChange, onAttributeCountsChange, testid }) => {
   const { collections, isFetching } = useCollections();
   const { collections: selectedCollections = [], attributes: selectedAttributes = [], attributeCounts: selectedAttributeCounts = [] } = value || {};
-  const { settings } = useApi();
 
   const onCollectionSelect = useCallback((collectionId: number) => (value: boolean) => {
     let _selectedCollections;
@@ -34,7 +32,7 @@ const CollectionsFilter: FC<CollectionsFilterProps> = ({ value, attributes, attr
       _selectedCollections = selectedCollections.filter((item) => item !== collectionId);
     }
     onChange(_selectedCollections);
-  }, [selectedCollections, selectedAttributeCounts, onAttributesChange, onChange, settings?.blockchain.unique.collectionIds]);
+  }, [selectedCollections, onChange]);
 
   const onCollectionsClear = useCallback(() => {
     onChange([]);

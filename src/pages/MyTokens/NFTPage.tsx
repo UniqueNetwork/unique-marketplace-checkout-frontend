@@ -3,27 +3,28 @@ import styled from 'styled-components';
 import BN from 'bn.js';
 import { Select, Text } from '@unique-nft/ui-kit';
 import { BN_MAX_INTEGER } from '@polkadot/util';
+import { BoxedNumberWithDefault, LocalizedStringWithDefault } from '@unique-nft/sdk/tokens';
+import { SelectOptionProps } from '@unique-nft/ui-kit/dist/cjs/types';
 
 import { NFTToken } from 'api/uniqueSdk/types';
 import { useOffers } from 'api/restApi/offers/offers';
 import { Offer } from 'api/restApi/offers/types';
 import { TokensList } from 'components';
-import { MobileFilters } from 'components/Filters/MobileFilter';
 import { PagePaper } from 'components/PagePaper/PagePaper';
 import NoItems from 'components/NoItems';
-
-import { Secondary400 } from '../../styles/colors';
+import SearchField from 'components/SearchField/SearchField';
+import { Secondary400 } from 'styles/colors';
 import { useApi } from 'hooks/useApi';
 import { useAccounts } from 'hooks/useAccounts';
-import { Filters } from './Filters/Filters';
+import useDeviceSize, { DeviceSize } from 'hooks/useDeviceSize';
+import { fromStringToBnString } from 'utils/bigNum';
+import { setUrlParameter, parseFilterState } from 'utils/helpers';
+import { useCollections } from 'hooks/useCollections';
 
-import { fromStringToBnString } from '../../utils/bigNum';
-import { SelectOptionProps } from '@unique-nft/ui-kit/dist/cjs/types';
+import { MobileFilters } from './Filters/MobileFilter';
+import { Filters } from './Filters/Filters';
 import { MyTokensFilterState } from './Filters/types';
-import SearchField from '../../components/SearchField/SearchField';
-import useDeviceSize, { DeviceSize } from '../../hooks/useDeviceSize';
-import { setUrlParameter, parseFilterState } from '../../utils/helpers';
-import { BoxedNumberWithDefault, LocalizedStringWithDefault } from '@unique-nft/sdk/tokens';
+import { countTokenAttributes, toTokenAttributes } from './Filters/utils/attributes';
 
 type TOption = SelectOptionProps & {
   direction: 'asc' | 'desc';
@@ -93,6 +94,7 @@ export const NFTPage = () => {
   const [tokens, setTokens] = useState<NFTToken[]>([]);
   const [isFetchingTokens, setIsFetchingTokens] = useState<boolean>(false);
   const deviceSize = useDeviceSize();
+  const { collections } = useCollections();
 
   const { offers, isFetching: isFetchingOffers, fetch } = useOffers();
 
@@ -100,6 +102,7 @@ export const NFTPage = () => {
 
   useEffect(() => {
     if (!api?.nft || !selectedAccount?.address) return;
+
     setIsFetchingTokens(true);
     void (async () => {
       await fetch({ page: 1, pageSize, seller: selectedAccount?.address });
@@ -110,9 +113,13 @@ export const NFTPage = () => {
     })();
   }, [api?.nft, selectedAccount?.address, setIsFetchingTokens, fetch]);
 
+  const myCollections = useMemo(() => {
+    const myTokensCollectionIds = [...tokens, ...offers].map((token) => token.collectionId);
+    return collections.filter((collection) => myTokensCollectionIds.includes(collection.id));
+  }, [collections, tokens, offers]);
+
   useEffect(() => {
     const option = sortingOptions.find((option) => { return option.id === sortingValue; });
-
     setSelectOption(option);
   }, [sortingValue, setSelectOption]);
 
@@ -156,18 +163,17 @@ export const NFTPage = () => {
       let filteredByAttributeCounts = true;
       if (filterState?.attributeCounts && filterState.attributeCounts.length > 0) {
         filteredByAttributeCounts = filterState?.attributeCounts.some((attributeCount) => {
-          const _count = Object.values(token.attributes || {})
-            .reduce<number>((acc, attribute) => acc + (Array.isArray(attribute) ? attribute.length : 0), 0);
-          return _count === attributeCount;
+          return countTokenAttributes(token.attributes) === attributeCount;
         });
       }
       let filteredByAttributes = true;
       if (filterState?.attributes && filterState.attributes.length > 0) {
         filteredByAttributes = filterState?.attributes.some((attributeItem) => {
-          const attribute = Object.values(token.attributes || {}).find((attribute) => attribute.name._ === attributeItem.key);
-          return attribute &&
-            attribute.isArray && (attribute.value as (BoxedNumberWithDefault | LocalizedStringWithDefault)[])
-              .some((_attribute) => _attribute._ === attributeItem.attribute);
+          const attribute = Object.values(token.attributes || {}).find((attribute) => attribute.name._.toLowerCase() === attributeItem.key.toLowerCase());
+          return (attribute && attribute.isArray)
+            ? (attribute.value as (BoxedNumberWithDefault | LocalizedStringWithDefault)[])
+              .some((_attribute) => _attribute._ === attributeItem.attribute)
+            : ((attribute?.value as LocalizedStringWithDefault)?._ === attributeItem.attribute);
         });
       }
       let filteredBySearchValue = true;
@@ -182,26 +188,31 @@ export const NFTPage = () => {
     [filterState, searchString, api?.market?.kusamaDecimals]
   );
 
-  const featuredTokens: (NFTToken & Partial<Offer>)[] = useMemo(() => {
-    const tokensWithOffers: (NFTToken & Partial<Offer>)[] = [
+  const tokensWithOffers: (NFTToken & Partial<Offer>)[] = useMemo(() => {
+    return [
       ...(offers?.map<NFTToken & Partial<Offer>>((offer) => ({
         id: offer.tokenId,
         collectionName: offer.tokenDescription?.collectionName || '',
         prefix: offer.tokenDescription?.prefix || '',
         imageUrl: offer.tokenDescription?.image || '',
+        attributes: toTokenAttributes(offer.tokenDescription?.attributes),
         ...offer
       })) || []),
       ...tokens
-    ].filter(filter);
+    ];
+  }, [tokens, offers]);
+
+  const featuredTokens: (NFTToken & Partial<Offer>)[] = useMemo(() => {
+    const filteredTokens: (NFTToken & Partial<Offer>)[] = tokensWithOffers.filter(filter);
 
     if (selectOption) {
-      return tokensWithOffers.sort((tokenA, tokenB) => {
+      return filteredTokens.sort((tokenA, tokenB) => {
         const order = selectOption.direction === 'asc' ? 1 : -1;
         return (tokenA[selectOption.field] || '') > (tokenB[selectOption.field] || '') ? order : -order;
       });
     }
-    return tokensWithOffers;
-  }, [tokens, offers, filter, selectOption]);
+    return filteredTokens;
+  }, [tokensWithOffers, filter, selectOption]);
 
   const filterCount = useMemo(() => {
     const { statuses, prices, collections = [], attributes = [], attributeCounts = [] } = filterState || {};
@@ -216,7 +227,17 @@ export const NFTPage = () => {
   return (<PagePaper>
     <MarketMainPageStyled>
       <LeftColumn>
-        {deviceSize !== DeviceSize.md && <Filters value={filterState} onFilterChange={setFilterState} testid={`${testid}-filters`} />}
+        {deviceSize !== DeviceSize.md &&
+          <Filters
+            value={filterState}
+            onFilterChange={setFilterState}
+            tokens={tokensWithOffers}
+            featuredTokens={featuredTokens}
+            collections={myCollections}
+            isFetchingTokens={isFetchingTokens}
+            testid={`${testid}-filters`}
+          />
+        }
       </LeftColumn>
       <MainContent>
         <SearchAndSortingWrapper>
@@ -246,7 +267,7 @@ export const NFTPage = () => {
           <TokensList testid={`${testid}-tokens`} tokens={featuredTokens} isLoading={isFetchingTokens || isFetchingOffers || isLoading} />
         </TokensListWrapper>
       </MainContent>
-      {deviceSize <= DeviceSize.md && <MobileFilters<MyTokensFilterState>
+      {deviceSize <= DeviceSize.md && <MobileFilters
         filterCount={filterCount}
         defaultSortingValue={defaultSortingValue}
         sortingValue={sortingValue}
@@ -258,6 +279,10 @@ export const NFTPage = () => {
           value={filterState}
           onFilterChange={setFilterState}
           testid={`${testid}-filters`}
+          tokens={tokensWithOffers}
+          featuredTokens={featuredTokens}
+          collections={myCollections}
+          isFetchingTokens={isFetchingTokens}
         />}
       />}
     </MarketMainPageStyled>
