@@ -133,9 +133,14 @@ export const AskTransferFundsModal: FC<AskSendFundsModalProps> = ({ isVisible, o
     getKusamaFee(recipientAddress, value)();
   }, [setAmount, getKusamaFee, recipientAddress]);
 
-  const isConfirmDisabled = useMemo(() => (
-    !sender || !recipientAddress || Number(amount) <= 0 || Number(amount) > Number(formatKusamaBalance(sender?.balance?.KSM?.toString() || 0))
-  ), [amount, recipientAddress, sender, isValidRecipientAddress]);
+  const isAmountGreaterThanBalance = useMemo(() => {
+    const amountBN = new BN(fromStringToBnString(amount));
+    return amountBN.gt(sender?.balance?.KSM || new BN(0));
+  }, [amount, sender?.balance?.KSM]);
+
+  const isConfirmDisabled = useMemo(() => {
+    return !sender || !recipientAddress || Number(amount) <= 0 || isAmountGreaterThanBalance;
+  }, [amount, recipientAddress, sender, isAmountGreaterThanBalance, isValidRecipientAddress]);
 
   const onSend = useCallback(() => {
     if (isConfirmDisabled) return;
@@ -244,7 +249,7 @@ export const AskTransferFundsModal: FC<AskSendFundsModalProps> = ({ isVisible, o
         testid={`${testid}-amount-input`}
       />
     </AmountInputWrapper>
-    {Number(amount) > Number(formatKusamaBalance(sender?.balance?.KSM?.toString() || 0)) && <LowBalanceWrapper>
+    {isAmountGreaterThanBalance && <LowBalanceWrapper>
       <Text size={'s'}>Your balance is too low</Text>
     </LowBalanceWrapper>}
     <KusamaFeeMessage
