@@ -47,21 +47,22 @@ const chainOptions = [{ id: 'KSM', title: 'KSM', iconRight: { size: 18, name: 'c
 
 export const AskBidModal: FC<{ offer?: Offer, onConfirmPlaceABid(value: TPlaceABid): void, testid: string}> = ({ offer, onConfirmPlaceABid, testid }) => {
   const [chain, setChain] = useState<string | undefined>('KSM');
-  const { kusamaFee } = useFee();
+  const { kusamaFee, getKusamaFee } = useFee();
   const { selectedAccount } = useAccounts();
-  const { api } = useApi();
+  const { api, settings } = useApi();
   const [calculatedBid, setCalculatedBid] = useState<TCalculatedBid>();
   const [isFetchingCalculatedbid, setIsFetchingCalculatedBid] = useState<boolean>(true);
   const { getCalculatedBid } = useAuction();
 
   const fetchCalculatedBid = useCallback(async () => {
-    if (!offer || !selectedAccount) return;
+    if (!offer || !selectedAccount || !settings) return;
     setIsFetchingCalculatedBid(true);
     const _calculatedBid = await getCalculatedBid({
       collectionId: offer?.collectionId || 0,
       tokenId: offer?.tokenId || 0,
       bidderAddress: selectedAccount?.address || ''
     });
+    await getKusamaFee(settings.auction.address, new BN(_calculatedBid?.minBidderAmount || 0));
     setCalculatedBid(_calculatedBid);
     setIsFetchingCalculatedBid(false);
   }, [offer, selectedAccount?.address]);
@@ -92,6 +93,8 @@ export const AskBidModal: FC<{ offer?: Offer, onConfirmPlaceABid(value: TPlaceAB
 
   const onBidAmountChange = useCallback((value: string) => {
     setBidAmount(value);
+    if (!settings) return;
+    getKusamaFee(settings.auction.address, new BN(fromStringToBnString(value, api?.market?.kusamaDecimals)));
   }, [setBidAmount]);
 
   const isAmountValid = useMemo(() => {
@@ -224,7 +227,7 @@ const ButtonWrapper = styled.div`
 
 const CautionTextWrapper = styled.div`
   display: flex;
-  min-height: calc(var(--gap) * 1.5);
+  min-height: calc(var(--gap) * 2);
 `;
 
 const Content = styled.div`

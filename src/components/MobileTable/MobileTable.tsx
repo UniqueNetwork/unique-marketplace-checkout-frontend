@@ -43,14 +43,8 @@ const MobileTable: FC<MobileTableProps> = ({
   }
 
   return (
-    <MobileTableWrapper className={className}>{children}</MobileTableWrapper>
+    <div className={className}>{children}</div>
   );
 };
-
-const MobileTableWrapper = styled.div`
-  && {
-    margin: var(--gap) 0;  
-  }
-`;
 
 export default MobileTable;
