@@ -51,6 +51,7 @@ const Bids: FC<BidsProps> = ({ offer }) => {
       {!!offer.auction?.bids?.length && <Table
         data={bids}
         columns={getColumns(tokenSymbol)}
+        idColumnName={'bidValue'}
       />}
     </BidsWrapper>
   );

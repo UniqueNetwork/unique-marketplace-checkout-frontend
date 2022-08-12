@@ -81,16 +81,16 @@ const getAccountsColumns = ({
   {
     title: 'Balance',
     width: '25%',
-    field: 'accountInfo',
-    render(accountInfo: AccountInfo) {
+    field: 'balance',
+    render(data, { accountInfo }: (Account & { accountInfo: AccountInfo })) {
       return (<BalanceCell accountInfo={accountInfo} isSmallDevice={isSmallDevice} tokenSymbol={tokenSymbol} />);
     }
   },
   {
     title: 'Block explorer',
     width: '25%',
-    field: 'accountInfo',
-    render(accountInfo: AccountInfo) {
+    field: 'blockExplorer',
+    render(data, { accountInfo }: (Account & { accountInfo: AccountInfo })) {
       if (accountInfo.deposit && !isSmallDevice) return <></>;
       return (
         <LinksWrapper>
@@ -111,8 +111,8 @@ const getAccountsColumns = ({
   {
     title: isSmallDevice ? '' : 'Actions',
     width: '25%',
-    field: 'accountInfo',
-    render(accountInfo: AccountInfo) {
+    field: 'actions',
+    render(data, { accountInfo }: (Account & { accountInfo: AccountInfo })) {
       if (accountInfo.deposit && !isSmallDevice) {
         return (
           <DepositActionsWrapper>
@@ -347,6 +347,7 @@ export const AccountsPage = () => {
           data={filteredAccounts}
           loading={isLoading || isLoadingDeposits}
           emptyIconProps={searchString ? { name: 'magnifier-found' } : { file: NoAccountsIcon }}
+          idColumnName={'address'}
         />
       </TableWrapper>
       <CreateAccountModal

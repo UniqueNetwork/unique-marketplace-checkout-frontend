@@ -157,6 +157,7 @@ export const TokensTradesPage: FC<TokensTradesPage> = ({ currentTab, testid }) =
         columns={getTradesColumns({ deviceSize, onShowTradesDetailsModal })}
         loading={(isLoadingAccounts || isFetching) && showSkeleton}
         emptyIconProps={searchValue ? { name: 'magnifier-found' } : { file: NoTradesIcon }}
+        idColumnName={'offerId'}
       />
       {(!!tradesCount && deviceSize === DeviceSize.lg) && <PaginationWrapper>
         <Pagination

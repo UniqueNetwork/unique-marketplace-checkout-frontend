@@ -12,6 +12,7 @@ interface MobileTableProps {
   data?: TableRowProps[]
   loading?: boolean
   emptyIconProps?: Omit<IconProps, 'size'>
+  idColumnName: string
 }
 
 const MobileTable: FC<MobileTableProps> = ({
@@ -19,7 +20,8 @@ const MobileTable: FC<MobileTableProps> = ({
   data,
   loading,
   className,
-  emptyIconProps
+  emptyIconProps,
+  idColumnName
 }) => {
   let children = <MobileTableSkeleton columns={columns || []} />;
 
@@ -27,7 +29,7 @@ const MobileTable: FC<MobileTableProps> = ({
   else if (!loading) {
     children = <>{data?.map((item, rowIndex) => (
       <MobileTableRow
-        key={rowIndex}
+        key={item[idColumnName] as string}
       >
         {columns?.map((column, columnIndex) => (
           <div key={`column-${column.field || ''}`}>
