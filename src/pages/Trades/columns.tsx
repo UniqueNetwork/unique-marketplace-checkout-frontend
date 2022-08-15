@@ -20,7 +20,7 @@ type ColumnProps = {
 
 const getTradesColumns = ({ deviceSize, onShowTradesDetailsModal }: ColumnProps): TableColumnProps[] => [
   {
-    title: 'NFT',
+    title: (<Header>NFT</Header>),
     width: '11.84%',
     isSortable: true,
     render(tokenId: number, { collectionId, tokenDescription }: Trade): React.ReactNode {
@@ -29,8 +29,8 @@ const getTradesColumns = ({ deviceSize, onShowTradesDetailsModal }: ColumnProps)
     field: 'tokenId'
   },
   {
-    title: 'Collection',
-    width: '11.84%',
+    title: (<Header>Collection</Header>),
+    width: '12%',
     isSortable: true,
     render(tokenDescription: TokenDescription, { collectionId }: Trade): React.ReactNode {
       const collectionName = tokenDescription.collectionName || '';
@@ -46,14 +46,14 @@ const getTradesColumns = ({ deviceSize, onShowTradesDetailsModal }: ColumnProps)
     field: 'tokenDescription'
   },
   {
-    title: 'Time',
-    width: '11.2%',
+    title: (<Header>Time</Header>),
+    width: '11.7%',
     isSortable: true,
     render: (time: number) => <TimeCell><Text color={BlueGrey600}>{timestampTableFormat(new Date(time).valueOf())}</Text></TimeCell>,
     field: 'tradeDate'
   },
   {
-    title: 'Price',
+    title: (<Header>Price</Header>),
     width: '14.48%',
     isSortable: true,
     render: (value: string) => <Text color={BlueGrey600}>{`${formatKusamaBalance(value)} ${tokenSymbol}`}</Text>,
@@ -67,14 +67,14 @@ const getTradesColumns = ({ deviceSize, onShowTradesDetailsModal }: ColumnProps)
     field: 'status'
   },
   {
-    title: 'Seller',
-      width: '17.02%',
+    title: (<Header>Seller</Header>),
+      width: '16.35%',
     render: (data: string) => <AddressComponent text={data} />,
     field: 'seller'
   },
   {
-    title: 'Buyer',
-    width: '17.02%',
+    title: (<Header>Buyer</Header>),
+    width: '15.6%',
     render: (data: string) => <AddressComponent text={data} />,
     field: 'buyer'
   },
@@ -106,6 +106,18 @@ const LinkWrapper = styled.span`
     overflow-wrap: break-word;
     white-space: pre-wrap;
   }
+`;
+
+const Header = styled.span`
+  font-size: 16px;
+  line-height: 24px;
+  color: ${Grey500};
+`;
+
+const HeaderAddress = styled(Header)`
+  width: 100%;
+  display: flex;
+  justify-content: center;
 `;
 
 const HeaderCutted = styled.div`
