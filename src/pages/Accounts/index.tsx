@@ -166,7 +166,6 @@ export const AccountsPage = () => {
     fetchAccounts,
     isLoading,
     isLoadingDeposits,
-    fetchAccountsWithDeposits,
     deleteLocalAccount
   } = useAccounts();
   const [searchString, setSearchString] = useState<string>('');
@@ -175,11 +174,6 @@ export const AccountsPage = () => {
   const [isDropdownOpened, setIsDropdownOpened] = useState(false);
   const deviceSize = useDeviceSize();
   const { chainData } = useApi();
-
-  useEffect(() => {
-    if (isLoading) return;
-    void fetchAccountsWithDeposits();
-  }, [isLoading]);
 
   const formatAddress = useCallback((address: string) => {
     return toChainFormatAddress(address, chainData?.SS58Prefix || 0);
@@ -289,8 +283,7 @@ export const AccountsPage = () => {
   const onChangeAccountsFinish = useCallback(async () => {
     setCurrentModal(undefined);
     await fetchAccounts();
-    await fetchAccountsWithDeposits();
-  }, [fetchAccounts, fetchAccountsWithDeposits]);
+  }, [fetchAccounts]);
 
   const onModalClose = useCallback(() => {
     setCurrentModal(undefined);

@@ -131,6 +131,20 @@ const AccountWrapper: FC = ({ children }) => {
     unsubscribesBalancesChanges.current = unsubscribes.reduce<Record<string, Codec>>((acc, item) => ({ ...acc, ...item }), {});
   }, [kusamaSdk, setAccounts]);
 
+  const fetchAccountsWithDeposits = useCallback(async (fetchedAccounts: Account[]) => {
+    setIsLoadingDeposits(true);
+    const _accounts = await Promise.all(fetchedAccounts.map(async (account) => ({
+      ...account,
+      deposits: {
+        bids: (await getWithdrawBids({ owner: account.address })).data || { withdraw: [], leader: [] },
+        sponsorshipFee: await api?.market?.getUserDeposit(account.address)
+      }
+    })));
+    setAccounts(_accounts);
+    setIsLoadingDeposits(false);
+    return _accounts;
+  }, [api?.market]);
+
   const fetchAccounts = useCallback(async () => {
     // if (!rpcClient?.isKusamaApiConnected) return;
     if (!kusamaSdk) return;
@@ -153,12 +167,13 @@ const AccountWrapper: FC = ({ children }) => {
       } else {
         changeAccount(allAccounts[0]);
       }
+      await fetchAccountsWithDeposits(accountsWithWhiteListStatus);
     } else {
       clearAllAccounts();
       setFetchAccountsError('No accounts in extension');
     }
     setIsLoading(false);
-  }, [kusamaSdk, getAccountsBalances, getAccountsWhiteListStatus]);
+  }, [kusamaSdk, getAccountsBalances, getAccountsWhiteListStatus, fetchAccountsWithDeposits]);
 
   useEffect(() => {
     let unsubscribe: Unsubcall;
@@ -175,20 +190,6 @@ const AccountWrapper: FC = ({ children }) => {
       };
     }
   }, [web3EnablePromise, fetchAccounts]);
-
-  const fetchAccountsWithDeposits = useCallback(async () => {
-    setIsLoadingDeposits(true);
-    const _accounts = await Promise.all(accounts.map(async (account) => ({
-      ...account,
-      deposits: {
-        bids: (await getWithdrawBids({ owner: account.address })).data || { withdraw: [], leader: [] },
-        sponsorshipFee: await api?.market?.getUserDeposit(account.address)
-      }
-    })));
-    setAccounts(_accounts);
-    setIsLoadingDeposits(false);
-    return _accounts;
-  }, [accounts]);
 
   const value = useMemo(() => ({
     isLoading,
