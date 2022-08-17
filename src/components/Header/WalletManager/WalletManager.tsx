@@ -24,7 +24,7 @@ function widgetAvatarRender(accountAddress: string) {
 }
 
 export const WalletManager: FC = () => {
-  const { selectedAccount, accounts, isLoading, fetchAccounts, changeAccount } = useAccounts();
+  const { selectedAccount, accounts, isLoading, fetchAccounts, changeAccount, fetchAccountsWithDeposits } = useAccounts();
   const [isOpen, setIsOpen] = useState(false);
   const [isGetKsmOpened, setIsGetKsmOpened] = useState(false);
   const navigate = useNavigate();
@@ -60,6 +60,11 @@ export const WalletManager: FC = () => {
       await fetchAccounts();
     })();
   }, [fetchAccounts]);
+
+  useEffect(() => {
+    if (isLoading) return;
+    void fetchAccountsWithDeposits();
+  }, [isLoading]);
 
   const onCreateAccountClick = useCallback(() => {
     navigate('/accounts');

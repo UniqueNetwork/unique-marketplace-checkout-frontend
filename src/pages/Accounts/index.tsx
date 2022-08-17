@@ -176,11 +176,6 @@ export const AccountsPage = () => {
   const deviceSize = useDeviceSize();
   const { chainData } = useApi();
 
-  useEffect(() => {
-    if (isLoading) return;
-    void fetchAccountsWithDeposits();
-  }, [isLoading]);
-
   const formatAddress = useCallback((address: string) => {
     return toChainFormatAddress(address, chainData?.SS58Prefix || 0);
   }, [chainData?.SS58Prefix]);
