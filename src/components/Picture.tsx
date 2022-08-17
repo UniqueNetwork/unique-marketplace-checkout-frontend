@@ -1,7 +1,14 @@
-import React, { FC, useEffect, useState } from 'react';
+import React, { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { BlueGrey100 } from '../styles/colors';
 import Skeleton from './Skeleton/Skeleton';
 import { VideoAttribute } from '../api/uniqueSdk/types';
+
+interface VideoProps {
+  autoplay?: boolean
+  controls?: boolean
+  loop?: boolean
+  muted?: boolean
+}
 
 interface PictureProps {
   src?: string
@@ -9,11 +16,23 @@ interface PictureProps {
   testid?: string
   size?: number
   video?: VideoAttribute
+  videoProps?: VideoProps
+  isPlaying?: boolean
 }
 
-export const Picture: FC<PictureProps> = ({ alt, src, size, testid = '', video }) => {
+export const Picture: FC<PictureProps> = ({
+  alt,
+  src,
+  size,
+  testid = '',
+  video,
+  videoProps,
+  isPlaying
+}) => {
   const [imageSrc, setImageSrc] = useState<string | undefined>();
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const { autoplay = true, controls = true, loop = true, muted = true } = useMemo(() => videoProps || {}, [videoProps]);
+  const videoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
     if (!src || !src.trim()) {
@@ -37,17 +56,27 @@ export const Picture: FC<PictureProps> = ({ alt, src, size, testid = '', video }
     image.src = src;
   }, [src]);
 
+  useEffect(() => {
+    if (isPlaying && videoRef.current?.paused) {
+      void videoRef.current.play();
+    } else if (!isPlaying && !videoRef.current?.paused) {
+      void videoRef.current?.pause();
+    }
+  }, [isPlaying]);
+
   return (<div className={'picture'}>
     {isLoading && <Skeleton width={'100%'} height={'100%'} />}
     {!isLoading && video &&
       <video
+        ref={videoRef}
         width='100%'
         height='100%'
         src={video.fullUrl || video.url}
-        poster={imageSrc}
-        controls
-        autoPlay
-        loop
+        poster={imageSrc || undefined}
+        controls={controls}
+        autoPlay={autoplay}
+        loop={loop}
+        muted={muted}
         data-testid={`${testid}-video`}
       ></video>
     }
