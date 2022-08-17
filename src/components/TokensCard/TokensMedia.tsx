@@ -1,10 +1,11 @@
 import React, { FC, useCallback, useState } from 'react';
-import { Picture } from '../Picture';
-import { Icon } from '@unique-nft/ui-kit';
-import { Secondary600 } from 'styles/colors';
+import { BlueGrey200, BlueGrey500, BlueGrey100 } from 'styles/colors';
 import { VideoAttribute } from 'api/uniqueSdk/types';
 import styled from 'styled-components';
 import { Link } from 'react-router-dom';
+import playIcon from 'static/icons/play.svg';
+import pauseIcon from 'static/icons/pause.svg';
+import { Picture } from '../Picture';
 
 interface ITokensMedia {
   to: string
@@ -34,7 +35,7 @@ export const TokensMedia: FC<ITokensMedia> = ({ to, imageUrl, tokenId, video, te
       />
       {video &&
         <div className={'play-button'} onClick={togglePlay}>
-          <Icon name={'triangle'} size={16} color={Secondary600}/>
+          <img src={isPlaying ? pauseIcon : playIcon} alt='icon' />
         </div>
       }
     </PictureWrapper>
@@ -82,16 +83,31 @@ const PictureWrapper = styled(Link)<{ isPlaying: boolean }>`
     align-items: center;
     border-radius: 50%;
     display: flex;
-    height: 44px;
+    height: 32px;
     justify-content: center;
     bottom: 8px;
     right: 8px;
-    width: 44px;
+    width: 32px;
     z-index: 1;
     position: absolute;
-    background-color: rgba(255, 255, 255, 0.9);
+    background-color: #FFFFFF;
     backdrop-filter: blur(8px);
-    transform: rotate(270deg);
+    border: 1px solid ${BlueGrey200};
+    img {
+      width: 11px;
+      height: 13px;
+    }
+  }
+  
+  @media (max-width: 768px) {
+    .play-button {
+      height: 64px;
+      width: 64px;
+      img {
+        width: 22px;
+        height: 26px;
+      }
+    }
   }
 
   &:hover .picture {
@@ -99,8 +115,8 @@ const PictureWrapper = styled(Link)<{ isPlaying: boolean }>`
     text-decoration: none;
   }
   
-  &:hover .play-button {
-    background-color: rgba(255, 255, 255, 0.8);
-    opacity: 80%;
+  .play-button:hover {
+    background-color: ${BlueGrey100};
+    border: 1px solid ${BlueGrey500};
   }
 `;
