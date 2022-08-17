@@ -166,7 +166,6 @@ export const AccountsPage = () => {
     fetchAccounts,
     isLoading,
     isLoadingDeposits,
-    fetchAccountsWithDeposits,
     deleteLocalAccount
   } = useAccounts();
   const [searchString, setSearchString] = useState<string>('');
@@ -284,8 +283,7 @@ export const AccountsPage = () => {
   const onChangeAccountsFinish = useCallback(async () => {
     setCurrentModal(undefined);
     await fetchAccounts();
-    await fetchAccountsWithDeposits();
-  }, [fetchAccounts, fetchAccountsWithDeposits]);
+  }, [fetchAccounts]);
 
   const onModalClose = useCallback(() => {
     setCurrentModal(undefined);
