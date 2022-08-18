@@ -32,6 +32,7 @@ export const TokensTradesPage: FC<TokensTradesPage> = ({ currentTab, testid }) =
   const deviceSize = useDeviceSize();
   const { trades, tradesCount, fetch, isFetching } = useTrades();
   const [loadedTrades, setLoadedTrades] = useState<Trade[]>([]);
+  const [searched, setSearched] = useState(false);
 
   useEffect(() => {
     if (isLoadingAccounts || (currentTab === TradesTabs.MyTokensTrades && !selectedAccount?.address)) return;
@@ -47,8 +48,11 @@ export const TokensTradesPage: FC<TokensTradesPage> = ({ currentTab, testid }) =
 
   useEffect(() => {
     // append loaded trades to the existing list if screen is with infinity scroll
-    if (deviceSize !== DeviceSize.lg) setLoadedTrades((currentTrades) => { return [...currentTrades, ...trades]; });
-    else setLoadedTrades(trades);
+    if (deviceSize !== DeviceSize.lg && !searched) setLoadedTrades((currentTrades) => { return [...currentTrades, ...trades]; });
+    else {
+      setLoadedTrades(trades);
+      setSearched(false);
+    }
   }, [trades]);
 
   const debouncedSearch = useCallback(() => {
@@ -61,6 +65,7 @@ export const TokensTradesPage: FC<TokensTradesPage> = ({ currentTab, testid }) =
         searchText: args[0],
         seller: currentTab === TradesTabs.MyTokensTrades ? selectedAccount?.address : undefined
       });
+      setSearched(true);
     }, 300);
   }, [selectedAccount?.address, currentTab, sortString, pageSize]);
 
@@ -176,8 +181,7 @@ export const TokensTradesPage: FC<TokensTradesPage> = ({ currentTab, testid }) =
 
 const TradesPageWrapper = styled.div`
   width: 100%;
-  .unique-pagination-wrapper .per-page-selector-wrapper,
-  .unique-select .select-wrapper {
+  .unique-pagination-wrapper .per-page-selector-wrapper {
     font-size: 16px;
   }
 
