@@ -168,7 +168,7 @@ export const NFTPage = () => {
       }
       let filteredByAttributes = true;
       if (filterState?.attributes && filterState.attributes.length > 0) {
-        filteredByAttributes = filterState?.attributes.some((attributeItem) => {
+        filteredByAttributes = filterState?.attributes.every((attributeItem) => {
           const attribute = Object.values(token.attributes || {}).find((attribute) => attribute.name._.toLowerCase() === attributeItem.key.toLowerCase());
           return (attribute && attribute.isArray)
             ? (attribute.value as (BoxedNumberWithDefault | LocalizedStringWithDefault)[])
