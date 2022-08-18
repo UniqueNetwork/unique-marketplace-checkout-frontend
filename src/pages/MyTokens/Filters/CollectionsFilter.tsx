@@ -40,9 +40,9 @@ const CollectionsFilter: FC<CollectionsFilterProps> = ({
 
   useEffect(() => {
     if (!isFetchingTokens && tokens.length > 0) {
-      setAttributeCounts(getAttributesCountFromTokens(tokens));
+      setAttributeCounts(getAttributesCountFromTokens(selectedCollections.length === 1 ? featuredTokens : tokens));
     }
-  }, [isFetchingTokens, tokens]);
+  }, [isFetchingTokens, tokens, selectedCollections.length, featuredTokens]);
 
   useEffect(() => {
     if (!isFetchingTokens && featuredTokens.length > 0 && selectedCollections.length === 1) {
