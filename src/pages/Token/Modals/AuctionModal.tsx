@@ -5,7 +5,7 @@ import { BN } from '@polkadot/util';
 
 import { TPlaceABid } from './types';
 import DefaultMarketStages from './StagesModal';
-import { AdditionalWarning100 } from '../../../styles/colors';
+import { AdditionalWarning100, Coral100 } from '../../../styles/colors';
 import { TTokenPageModalBodyProps } from './TokenPageModal';
 import { useAuctionBidStages } from '../../../hooks/marketplaceStages';
 import { useAccounts } from '../../../hooks/useAccounts';
@@ -138,15 +138,15 @@ export const AskBidModal: FC<{ offer?: Offer, onConfirmPlaceABid(value: TPlaceAB
         {`Minimum bid ${formatKusamaBalance(minimalBid.toString(), api?.market?.kusamaDecimals)} ${chain || ''}`}
       </Text>
       <CautionTextWrapper>
-        {!isEnoughBalance && <Text color={'coral-500'}>Your balance is too low to place a bid</Text>}
+        {!isEnoughBalance && <WarningStyled color={'coral-500'}>Your balance is too low to place a bid</WarningStyled>}
+        {isEnoughBalance && <TextStyled
+          color='additional-warning-500'
+          size='s'
+          testid={`${testid}-fee-warning`}
+        >
+          {`A fee of ~ ${kusamaFee} ${chain || ''} can be applied to the transaction`}
+        </TextStyled>}
       </CautionTextWrapper>
-      <TextStyled
-        color='additional-warning-500'
-        size='s'
-        testid={`${testid}-fee-warning`}
-      >
-        {`A fee of ~ ${kusamaFee} ${chain || ''} can be applied to the transaction`}
-      </TextStyled>
       <ButtonWrapper>
         <Button
           disabled={!isAmountValid || !isEnoughBalance || isFetchingCalculatedbid}
@@ -210,14 +210,17 @@ const InputStyled = styled(NumberInput)`
 `;
 
 const TextStyled = styled(Text)`
-  margin-top: calc(var(--gap) / 2);
   box-sizing: border-box;
   display: flex;
   padding: 8px 16px;
-  margin-bottom: 24px;
+  margin: 32px 0 24px;
   border-radius: 4px;
   background-color: ${AdditionalWarning100};
   width: 100%;
+`;
+
+const WarningStyled = styled(TextStyled)`
+  background-color: ${Coral100};
 `;
 
 const ButtonWrapper = styled.div`
