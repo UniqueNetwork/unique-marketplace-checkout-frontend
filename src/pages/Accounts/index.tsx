@@ -24,7 +24,7 @@ import { ImportViaQRCodeAccountModal } from './Modals/ImportViaQRCode';
 import { WithdrawDepositModal } from './Modals/WithdrawDeposit';
 import { TransferFundsModal } from './Modals/SendFunds';
 import BalanceCell from './BalanceCell';
-import { AdditionalLight, BlueGrey300, Primary100, Primary500 } from 'styles/colors';
+import { AdditionalLight, BlueGrey300, Grey500, Primary100, Primary500 } from 'styles/colors';
 import config from '../../config';
 import { AccountInfo } from './types';
 import NoAccountsIcon from 'static/icons/no-accounts.svg';
@@ -53,7 +53,7 @@ const getAccountsColumns = ({
   {
     title: (
       <>
-        <p>Account</p>
+        <Title>Account</Title>
         {!isSmallDevice &&
           <IconWithHint align={{ appearance: 'horizontal', vertical: 'top', horizontal: 'right' }}>
             <span>Substrate account addresses (Kusama, Quartz, Polkadot, Unique, etc.) may be represented by a different address
@@ -79,7 +79,7 @@ const getAccountsColumns = ({
     }
   },
   {
-    title: 'Balance',
+    title: (<Title>Balance</Title>),
     width: '25%',
     field: 'balance',
     render(data, { accountInfo }: (Account & { accountInfo: AccountInfo })) {
@@ -87,7 +87,7 @@ const getAccountsColumns = ({
     }
   },
   {
-    title: 'Block explorer',
+    title: (<Title>Block explorer</Title>),
     width: '25%',
     field: 'blockExplorer',
     render(data, { accountInfo }: (Account & { accountInfo: AccountInfo })) {
@@ -109,7 +109,7 @@ const getAccountsColumns = ({
     }
   },
   {
-    title: isSmallDevice ? '' : 'Actions',
+    title: isSmallDevice ? '' : (<Title>Actions</Title>),
     width: '25%',
     field: 'actions',
     render(data, { accountInfo }: (Account & { accountInfo: AccountInfo })) {
@@ -478,9 +478,17 @@ const AddAccountButton = styled(Button)`
   }
 `;
 
+const Title = styled.p`
+  color: ${Grey500};
+  font-size: 16px;
+  line-height: 24px;
+  @media (max-width: 768px) {
+    margin-bottom: 4px;
+  }
+`;
+
 const AccountCellWrapper = styled.div`
   display: flex;
-  padding: 20px 0 !important;
   column-gap: calc(var(--gap) / 2);
   align-items: center;
 `;
