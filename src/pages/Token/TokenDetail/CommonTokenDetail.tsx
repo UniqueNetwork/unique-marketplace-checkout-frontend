@@ -222,11 +222,12 @@ const PictureWrapper = styled.div`
     text-align: center;
     max-height: 100%;
     border-radius: 8px;
-    
+    overflow: hidden;
 
     img {
       max-width: 100%;
       max-height: 100%;
+      
     }
 
     svg {
@@ -244,13 +245,11 @@ const PictureWrapper = styled.div`
     }
 
     @media (max-width: 567px) {
-      width: 100vw;
-      min-width: 100vw;
+      width: 100%;
     }
   }
   @media (max-width: 567px) {
-    width: 100vw;
-    margin-left: calc(0px - var(--gap));
+    width: 100%;
   }
 `;
 
