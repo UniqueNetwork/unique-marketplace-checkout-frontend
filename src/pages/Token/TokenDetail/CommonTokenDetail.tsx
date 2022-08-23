@@ -220,6 +220,7 @@ const PictureWrapper = styled.div`
   }
 
   @media (max-width: 567px) {
+    margin: 0 auto;
     width: 288px;
   }
   
