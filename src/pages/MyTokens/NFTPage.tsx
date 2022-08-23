@@ -196,6 +196,7 @@ export const NFTPage = () => {
         prefix: offer.tokenDescription?.prefix || '',
         imageUrl: offer.tokenDescription?.image || '',
         attributes: toTokenAttributes(offer.tokenDescription?.attributes),
+        video: typeof offer.tokenDescription.video === 'string' ? { fullUrl: offer.tokenDescription.video, ipfsCid: '' } : offer.tokenDescription.video,
         ...offer
       })) || []),
       ...tokens
