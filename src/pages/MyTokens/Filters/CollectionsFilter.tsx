@@ -40,9 +40,9 @@ const CollectionsFilter: FC<CollectionsFilterProps> = ({
   const { collections: selectedCollections = [], attributes: selectedAttributes = [], attributeCounts: selectedAttributeCounts = [] } = value || {};
 
   useEffect(() => {
-    // based on the amount of selected collections we calculate attribute counts either by all tokens either by filtered tokens
+    // based on the amount of selected collections we calculate attribute counts either by all tokens either by tokens from the selected collection
     if (selectedCollections.length === 1) {
-      setTokensForAttributeCounts(featuredTokens);
+      setTokensForAttributeCounts(tokens.filter((token) => selectedCollections.findIndex((collectionId: number) => token.collectionId === collectionId) > -1));
     } else setTokensForAttributeCounts(tokens);
   }, [selectedCollections, tokens, featuredTokens, selectedAttributes]);
 
