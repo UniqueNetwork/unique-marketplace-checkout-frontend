@@ -120,17 +120,11 @@ export const Picture: FC<PictureProps> = ({
 };
 
 const VideoStyled = styled.video`
-  height: 536px;
-  @media (max-width: 1919px) {
-    height: 326px;
-  }
-  @media (max-width: 1023px) {
-    height: 224px;
+  width: 100%;
+  @media (min-width: 1920px) {
+    height: 536px;
   }
   @media (max-width: 767px) {
-    height: 520px;
-  }
-  @media (max-width: 567px) {
-    height: 288px;
+    height: 100%;
   }
 `;
