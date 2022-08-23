@@ -77,6 +77,11 @@ const PictureWrapper = styled(Link)<{ isPlaying: boolean }>`
     svg {
       border-radius: 8px;
     }
+    
+    video {
+      height: 100% !important;
+      width: 100% !important;
+    }
   }
   
   .play-button {
@@ -94,8 +99,9 @@ const PictureWrapper = styled(Link)<{ isPlaying: boolean }>`
     backdrop-filter: blur(8px);
     border: 1px solid ${BlueGrey200};
     img {
-      width: 11px;
-      height: 13px;
+      width: 24px;
+      height: 24px;
+      margin-left: ${({ isPlaying }) => (isPlaying ? '0' : '4px')};
     }
   }
   
