@@ -98,6 +98,7 @@ const PictureWrapper = styled(Link)<{ isPlaying: boolean }>`
     background-color: #FFFFFF;
     backdrop-filter: blur(8px);
     border: 1px solid ${BlueGrey200};
+    cursor: pointer;
     img {
       width: 24px;
       height: 24px;

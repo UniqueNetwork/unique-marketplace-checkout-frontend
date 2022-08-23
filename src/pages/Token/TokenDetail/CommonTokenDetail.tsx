@@ -216,12 +216,11 @@ const PictureWrapper = styled.div`
   }
 
   @media (max-width: 767px) {
-    width: 520px;
+    width: calc(100vw - var(--gap) * 3);
   }
 
   @media (max-width: 567px) {
-    margin: 0 auto;
-    width: 288px;
+    width: calc(100vw - var(--gap) * 2);
   }
   
   .picture {
@@ -235,6 +234,7 @@ const PictureWrapper = styled.div`
     max-height: 100%;
     border-radius: 8px;
     overflow: hidden;
+    width: 100%;
 
     img {
       max-width: 100%;
@@ -245,23 +245,6 @@ const PictureWrapper = styled.div`
     svg {
       border-radius: 8px;
       height: auto;
-    }
-
-    @media (max-width: 1919px) {
-      width: 326px;
-    }
-
-
-    @media (max-width: 1023px) {
-      width: 224px;
-    }
-
-    @media (max-width: 767px) {
-      width: 520px;
-    }
-
-    @media (max-width: 567px) {
-      width: 288px;
     }
   }
 `;
