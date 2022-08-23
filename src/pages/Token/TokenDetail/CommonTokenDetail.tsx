@@ -56,7 +56,8 @@ export const CommonTokenDetail: FC<IProps> = ({
         imageUrl: image,
         attributes,
         description,
-        collectionCover
+        collectionCover,
+        video: offer.tokenDescription.video
       };
     }
 
@@ -101,6 +102,8 @@ export const CommonTokenDetail: FC<IProps> = ({
     setShareModalVisible(false);
   }, []);
 
+  const videoProp = useMemo(() => typeof video === 'string' ? { fullUrl: video, ipfsCid: '' } : video, [video]);
+
   return (
     <CommonTokenDetailStyled>
       <PictureWrapper>
@@ -109,7 +112,7 @@ export const CommonTokenDetail: FC<IProps> = ({
           <Picture
             alt={tokenId?.toString() || ''}
             src={imageUrl}
-            video={video}
+            video={videoProp}
             testid={`${testid}-token-picture`}
           />
         }
@@ -222,11 +225,12 @@ const PictureWrapper = styled.div`
     text-align: center;
     max-height: 100%;
     border-radius: 8px;
-    
+    overflow: hidden;
 
     img {
       max-width: 100%;
       max-height: 100%;
+      
     }
 
     svg {
@@ -244,13 +248,11 @@ const PictureWrapper = styled.div`
     }
 
     @media (max-width: 567px) {
-      width: 100vw;
-      min-width: 100vw;
+      width: 100%;
     }
   }
   @media (max-width: 567px) {
-    width: 100vw;
-    margin-left: calc(0px - var(--gap));
+    width: 100%;
   }
 `;
 

@@ -1,5 +1,5 @@
 import React, { FC, useCallback, useState } from 'react';
-import { BlueGrey200, BlueGrey500, BlueGrey100 } from 'styles/colors';
+import { BlueGrey200, BlueGrey500, BlueGrey100, BlueGrey300 } from 'styles/colors';
 import { VideoAttribute } from 'api/uniqueSdk/types';
 import styled from 'styled-components';
 import { Link } from 'react-router-dom';
@@ -83,11 +83,11 @@ const PictureWrapper = styled(Link)<{ isPlaying: boolean }>`
     align-items: center;
     border-radius: 50%;
     display: flex;
-    height: 32px;
+    height: 54px;
     justify-content: center;
     bottom: 8px;
     right: 8px;
-    width: 32px;
+    width: 54px;
     z-index: 1;
     position: absolute;
     background-color: #FFFFFF;
@@ -117,6 +117,10 @@ const PictureWrapper = styled(Link)<{ isPlaying: boolean }>`
   
   .play-button:hover {
     background-color: ${BlueGrey100};
+    border: 1px solid ${BlueGrey300};
+  }
+  
+  .play-button:active {
     border: 1px solid ${BlueGrey500};
   }
 `;
