@@ -1,7 +1,8 @@
-import React, { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { FC, useEffect, useMemo, useRef, useState } from 'react';
 import { BlueGrey100 } from '../styles/colors';
 import Skeleton from './Skeleton/Skeleton';
 import { VideoAttribute } from '../api/uniqueSdk/types';
+import styled from 'styled-components';
 
 interface VideoProps {
   autoplay?: boolean
@@ -67,10 +68,8 @@ export const Picture: FC<PictureProps> = ({
   return (<div className={'picture'}>
     {isLoading && <Skeleton width={'100%'} height={'100%'} />}
     {!isLoading && video &&
-      <video
+      <VideoStyled
         ref={videoRef}
-        width='100%'
-        height='100%'
         src={video.fullUrl || video.url}
         poster={imageSrc || undefined}
         controls={controls}
@@ -78,7 +77,7 @@ export const Picture: FC<PictureProps> = ({
         loop={loop}
         muted={muted}
         data-testid={`${testid}-video`}
-      ></video>
+      ></VideoStyled>
     }
     {!isLoading && imageSrc && !video &&
       <img
@@ -87,7 +86,7 @@ export const Picture: FC<PictureProps> = ({
         height={size || undefined}
         data-testid={`${testid}`}
       />}
-    {!isLoading && !imageSrc && <svg
+    {!isLoading && !imageSrc && !video && <svg
       fill={'white'}
       height='100%'
       viewBox='0 0 1000 1000'
@@ -119,3 +118,19 @@ export const Picture: FC<PictureProps> = ({
     }
   </div>);
 };
+
+const VideoStyled = styled.video`
+  height: 536px;
+  @media (max-width: 1919px) {
+    height: 326px;
+  }
+  @media (max-width: 1023px) {
+    height: 224px;
+  }
+  @media (max-width: 767px) {
+    height: 520px;
+  }
+  @media (max-width: 567px) {
+    height: 288px;
+  }
+`;
