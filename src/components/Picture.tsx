@@ -74,6 +74,7 @@ export const Picture: FC<PictureProps> = ({
         poster={imageSrc || undefined}
         controls={controls}
         autoPlay={autoplay}
+        playsInline
         loop={loop}
         muted={muted}
         data-testid={`${testid}-video`}
