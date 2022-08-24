@@ -21,6 +21,7 @@ interface CollectionsFilterProps {
   tokens: NFTToken[]
   collections: NFTCollection[]
   isFetchingTokens: boolean
+  featuredTokensForAttributeCounts: NFTToken[]
 }
 
 const CollectionsFilter: FC<CollectionsFilterProps> = ({
@@ -32,25 +33,18 @@ const CollectionsFilter: FC<CollectionsFilterProps> = ({
   featuredTokens,
   collections: myCollections,
   isFetchingTokens,
-  tokens
+  tokens,
+  featuredTokensForAttributeCounts
 }) => {
   const [attributes, setAttributes] = useState<Record<string, Attribute[]>>({});
   const [attributeCounts, setAttributeCounts] = useState<AttributeCount[]>([]);
-  const [tokensForAttributeCounts, setTokensForAttributeCounts] = useState(tokens);
   const { collections: selectedCollections = [], attributes: selectedAttributes = [], attributeCounts: selectedAttributeCounts = [] } = value || {};
 
   useEffect(() => {
-    // based on the amount of selected collections we calculate attribute counts either by all tokens either by tokens from the selected collection
-    if (selectedCollections.length === 1) {
-      setTokensForAttributeCounts(tokens.filter((token) => selectedCollections.findIndex((collectionId: number) => token.collectionId === collectionId) > -1));
-    } else setTokensForAttributeCounts(tokens);
-  }, [selectedCollections, tokens, featuredTokens, selectedAttributes]);
-
-  useEffect(() => {
     if (!isFetchingTokens && tokens.length > 0) {
-      setAttributeCounts(getAttributesCountFromTokens(tokensForAttributeCounts));
+      setAttributeCounts(getAttributesCountFromTokens(featuredTokensForAttributeCounts));
     }
-  }, [isFetchingTokens, tokens, tokensForAttributeCounts]);
+  }, [isFetchingTokens, tokens, featuredTokensForAttributeCounts]);
 
   useEffect(() => {
     if (!isFetchingTokens && featuredTokens.length > 0 && selectedCollections.length === 1) {
