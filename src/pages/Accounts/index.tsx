@@ -3,33 +3,35 @@ import { Button, Dropdown, Icon, TableColumnProps, Text } from '@unique-nft/ui-k
 import styled from 'styled-components';
 import { BN } from '@polkadot/util';
 
+import { toChainFormatAddress } from 'api/uniqueSdk/utils/addressUtils';
+import { TWithdrawBid } from 'api/restApi/auction/types';
+import { Account } from 'account/AccountContext';
+import { useApi } from 'hooks/useApi';
 import { useAccounts } from 'hooks/useAccounts';
+import useDeviceSize, { DeviceSize } from 'hooks/useDeviceSize';
+import AccountCard from 'components/Account/Account';
+import { Table } from 'components/Table';
+import { PagePaper } from 'components/PagePaper/PagePaper';
+import { TextInput } from 'components/TextInput/TextInput';
+import IconWithHint from 'components/IconWithHint/IconWithHint';
+import ConfirmModal from 'components/ConfirmModal';
+import GetKSMModal from 'components/GetKSMModal/GetKSMModal';
+import { formatKusamaBalance } from 'utils/textUtils';
 import { CreateAccountModal } from './Modals/CreateAccount';
 import { ImportViaSeedAccountModal } from './Modals/ImportViaSeed';
 import { ImportViaJSONAccountModal } from './Modals/ImportViaJson';
 import { ImportViaQRCodeAccountModal } from './Modals/ImportViaQRCode';
-import { TransferFundsModal } from './Modals/SendFunds';
-import { Table } from '../../components/Table';
-import { formatKusamaBalance } from '../../utils/textUtils';
-import { PagePaper } from '../../components/PagePaper/PagePaper';
 import { WithdrawDepositModal } from './Modals/WithdrawDeposit';
-import { Account } from '../../account/AccountContext';
-import { toChainFormatAddress } from '../../api/chainApi/utils/addressUtils';
-import { useApi } from '../../hooks/useApi';
-import AccountCard from '../../components/Account/Account';
-import useDeviceSize, { DeviceSize } from '../../hooks/useDeviceSize';
-import config from '../../config';
-import { TWithdrawBid } from '../../api/restApi/auction/types';
-import { TextInput } from '../../components/TextInput/TextInput';
-import { AdditionalLight, BlueGrey300, Primary100, Primary500 } from '../../styles/colors';
-import IconWithHint from 'components/IconWithHint/IconWithHint';
-import ConfirmModal from 'components/ConfirmModal';
-import { AccountInfo } from './types';
+import { TransferFundsModal } from './Modals/SendFunds';
 import BalanceCell from './BalanceCell';
-import GetKSMModal from 'components/GetKSMModal/GetKSMModal';
+import { AdditionalLight, BlueGrey300, Grey500, Primary100, Primary500 } from 'styles/colors';
+import config from '../../config';
+import { AccountInfo } from './types';
 import NoAccountsIcon from 'static/icons/no-accounts.svg';
 
 const tokenSymbol = 'KSM';
+
+const testid = 'accounts-page';
 
 type AccountsColumnsProps = {
   isSmallDevice: boolean
@@ -49,11 +51,18 @@ const getAccountsColumns = ({
     onShowGetKsmModal
   }: AccountsColumnsProps): TableColumnProps[] => [
   {
-    title: (<>Accounts<IconWithHint placement={'right-start'}>
-      <>Substrate account addresses (Kusama, Quartz, Polkadot, Unique, etc.) may be represented by a different address
-        character sequence, but they can be converted between each other because they share the same public key. You
-        can see all transformations for any given address on <StyledLink href='https://quartz.subscan.io/' target='_blank' rel='noreferrer'>Subscan</StyledLink>.</>
-    </IconWithHint></>),
+    title: (
+      <>
+        <Title>Account</Title>
+        {!isSmallDevice &&
+          <IconWithHint align={{ appearance: 'horizontal', vertical: 'top', horizontal: 'right' }}>
+            <span>Substrate account addresses (Kusama, Quartz, Polkadot, Unique, etc.) may be represented by a different address
+              character sequence, but they can be converted between each other because they share the same public key. You
+              can see all transformations for any given address on <StyledLink href='https://quartz.subscan.io/' target='_blank' rel='noreferrer'>Subscan</StyledLink>.</span>
+          </IconWithHint>
+        }
+      </>
+    ),
     width: '25%',
     field: 'accountInfo',
     render(accountInfo: AccountInfo) {
@@ -70,18 +79,18 @@ const getAccountsColumns = ({
     }
   },
   {
-    title: 'Balance',
+    title: (<Title>Balance</Title>),
     width: '25%',
-    field: 'accountInfo',
-    render(accountInfo: AccountInfo) {
+    field: 'balance',
+    render(data, { accountInfo }: (Account & { accountInfo: AccountInfo })) {
       return (<BalanceCell accountInfo={accountInfo} isSmallDevice={isSmallDevice} tokenSymbol={tokenSymbol} />);
     }
   },
   {
-    title: 'Block explorer',
+    title: (<Title>Block explorer</Title>),
     width: '25%',
-    field: 'accountInfo',
-    render(accountInfo: AccountInfo) {
+    field: 'blockExplorer',
+    render(data, { accountInfo }: (Account & { accountInfo: AccountInfo })) {
       if (accountInfo.deposit && !isSmallDevice) return <></>;
       return (
         <LinksWrapper>
@@ -100,15 +109,17 @@ const getAccountsColumns = ({
     }
   },
   {
-    title: isSmallDevice ? '' : 'Actions',
+    title: isSmallDevice ? '' : (<Title>Actions</Title>),
     width: '25%',
-    field: 'accountInfo',
-    render(accountInfo: AccountInfo) {
+    field: 'actions',
+    render(data, { accountInfo }: (Account & { accountInfo: AccountInfo })) {
       if (accountInfo.deposit && !isSmallDevice) {
         return (
           <DepositActionsWrapper>
             <Button title={'Withdraw'} onClick={onShowWithdrawDepositModal(accountInfo.address)} role={'primary'} />
-            <IconWithHint placement={'bottom-end'}>Learn more in <StyledLink href='/FAQ' target='_blank' rel='noreferrer'>FAQ</StyledLink></IconWithHint>
+            <IconWithHint align={{ appearance: 'vertical', vertical: 'bottom', horizontal: 'right' }}>
+              <span>Learn more in <StyledLink href='/FAQ' target='_blank' rel='noreferrer'>FAQ</StyledLink></span>
+            </IconWithHint>
           </DepositActionsWrapper>
         );
       }
@@ -125,7 +136,9 @@ const getAccountsColumns = ({
           </ActionsWrapper>
           {(accountInfo.deposit && isSmallDevice) && <DepositActionsWrapper>
             <Button title={'Withdraw'} onClick={onShowWithdrawDepositModal(accountInfo.address)} role={'primary'} />
-            <IconWithHint placement={'bottom-end'}>Learn more in <StyledLink href='/FAQ' target='_blank' rel='noreferrer'>FAQ</StyledLink></IconWithHint>
+            <IconWithHint align={{ appearance: 'vertical', vertical: 'bottom', horizontal: 'right' }}>
+              <span>Learn more in <StyledLink href='/FAQ' target='_blank' rel='noreferrer'>FAQ</StyledLink></span>
+            </IconWithHint>
           </DepositActionsWrapper>}
         </>
       );
@@ -134,6 +147,7 @@ const getAccountsColumns = ({
 ];
 
 const caretDown = { name: 'carret-down', size: 16, color: AdditionalLight };
+const caretUp = { name: 'carret-up', size: 16, color: AdditionalLight };
 
 enum AccountModal {
   create,
@@ -152,23 +166,18 @@ export const AccountsPage = () => {
     fetchAccounts,
     isLoading,
     isLoadingDeposits,
-    fetchAccountsWithDeposits,
     deleteLocalAccount
   } = useAccounts();
   const [searchString, setSearchString] = useState<string>('');
   const [currentModal, setCurrentModal] = useState<AccountModal | undefined>();
   const [selectedAddress, setSelectedAddress] = useState<string>();
+  const [isDropdownOpened, setIsDropdownOpened] = useState(false);
   const deviceSize = useDeviceSize();
   const { chainData } = useApi();
 
-  useEffect(() => {
-    if (isLoading) return;
-    void fetchAccountsWithDeposits();
-  }, [isLoading]);
-
   const formatAddress = useCallback((address: string) => {
-    return toChainFormatAddress(address, chainData?.properties.ss58Format || 0);
-  }, [chainData?.properties.ss58Format]);
+    return toChainFormatAddress(address, chainData?.SS58Prefix || 0);
+  }, [chainData?.SS58Prefix]);
 
   const onCreateAccountClick = useCallback(() => {
     setCurrentModal(AccountModal.create);
@@ -274,8 +283,7 @@ export const AccountsPage = () => {
   const onChangeAccountsFinish = useCallback(async () => {
     setCurrentModal(undefined);
     await fetchAccounts();
-    await fetchAccountsWithDeposits();
-  }, []);
+  }, [fetchAccounts]);
 
   const onModalClose = useCallback(() => {
     setCurrentModal(undefined);
@@ -289,18 +297,29 @@ export const AccountsPage = () => {
   return (<PagePaper>
     <AccountPageWrapper>
       <Row>
-        <CreateAccountButton title={'Create substrate account'} onClick={onCreateAccountClick}/>
+        <CreateAccountButton
+          testid={`${testid}-create-substrate-button`}
+          title={'Create substrate account'}
+          onClick={onCreateAccountClick}
+        />
         <DropdownStyled
           dropdownRender={() => <DropdownMenu>
-            <DropdownMenuItem onClick={onImportViaSeedClick}>Seed phrase</DropdownMenuItem>
-            <DropdownMenuItem onClick={onImportViaJSONClick}>Backup JSON file</DropdownMenuItem>
-            <DropdownMenuItem onClick={onImportViaQRClick}>QR-code</DropdownMenuItem>
+            <DropdownMenuItem onClick={onImportViaSeedClick} data-testid={`${testid}-seed-button`}>Seed phrase</DropdownMenuItem>
+            <DropdownMenuItem onClick={onImportViaJSONClick} data-testid={`${testid}-json-file-button`}>Backup JSON file</DropdownMenuItem>
+            <DropdownMenuItem onClick={onImportViaQRClick} data-testid={`${testid}-qr-button`}>QR-code</DropdownMenuItem>
           </DropdownMenu>}
+          onOpenChange={setIsDropdownOpened}
         >
-          <AddAccountButton title={'Add account via'} role={'primary'} iconRight={caretDown}/>
+          <AddAccountButton
+            testid={`${testid}-add-via-button`}
+            title={'Add account via'}
+            role={'primary'}
+            iconRight={isDropdownOpened ? caretUp : caretDown}
+          />
         </DropdownStyled>
         <SearchInputWrapper>
           <SearchInputStyled
+            testid={`${testid}-search`}
             placeholder={'Account'}
             iconLeft={{ name: 'magnify', size: 18 }}
             value={searchString}
@@ -321,24 +340,52 @@ export const AccountsPage = () => {
           data={filteredAccounts}
           loading={isLoading || isLoadingDeposits}
           emptyIconProps={searchString ? { name: 'magnifier-found' } : { file: NoAccountsIcon }}
+          idColumnName={'address'}
         />
       </TableWrapper>
-      <CreateAccountModal isVisible={currentModal === AccountModal.create} onFinish={onChangeAccountsFinish} onClose={onModalClose} />
-      <ImportViaSeedAccountModal isVisible={currentModal === AccountModal.importViaSeed} onFinish={onChangeAccountsFinish} onClose={onModalClose} />
-      <ImportViaJSONAccountModal isVisible={currentModal === AccountModal.importViaJSON} onFinish={onChangeAccountsFinish} onClose={onModalClose} />
-      <ImportViaQRCodeAccountModal isVisible={currentModal === AccountModal.importViaQRCode} onFinish={onChangeAccountsFinish} onClose={onModalClose} />
-      <TransferFundsModal isVisible={currentModal === AccountModal.sendFunds} onFinish={onChangeAccountsFinish} senderAddress={selectedAddress} />
+      <CreateAccountModal
+        isVisible={currentModal === AccountModal.create}
+        onFinish={onChangeAccountsFinish}
+        onClose={onModalClose}
+        testid={`${testid}-create-modal`}
+      />
+      <ImportViaSeedAccountModal
+        isVisible={currentModal === AccountModal.importViaSeed}
+        onFinish={onChangeAccountsFinish}
+        onClose={onModalClose}
+        testid={`${testid}-import-via-seed-modal`}
+      />
+      <ImportViaJSONAccountModal
+        isVisible={currentModal === AccountModal.importViaJSON}
+        onFinish={onChangeAccountsFinish}
+        onClose={onModalClose}
+        testid={`${testid}-import-via-json-modal`}
+      />
+      <ImportViaQRCodeAccountModal
+        isVisible={currentModal === AccountModal.importViaQRCode}
+        onFinish={onChangeAccountsFinish}
+        onClose={onModalClose}
+        testid={`${testid}-import-via-qr-modal`}
+      />
+      <TransferFundsModal
+        isVisible={currentModal === AccountModal.sendFunds}
+        onFinish={onChangeAccountsFinish}
+        senderAddress={selectedAddress}
+        testid={`${testid}-transfer-funds-modal`}
+      />
       <WithdrawDepositModal
         isVisible={currentModal === AccountModal.withdrawDeposit}
         onFinish={onChangeAccountsFinish}
         onClose={onModalClose}
         address={selectedAddress}
+        testid={`${testid}-withdraw-modal`}
       />
       <ConfirmModal
         isVisible={currentModal === AccountModal.deleteLocalAccount}
         onCancel={onModalClose}
         onConfirm={deleteLocalAccountConfirmed}
         headerText={'Delete local account'}
+        testid={`${testid}-delete-account-modal`}
       >
         <p>Are you sure, you want to perform this action? You won&apos;t be able to recover this account in future.</p>
       </ConfirmModal>
@@ -431,9 +478,17 @@ const AddAccountButton = styled(Button)`
   }
 `;
 
+const Title = styled.p`
+  color: ${Grey500};
+  font-size: 16px;
+  line-height: 24px;
+  @media (max-width: 768px) {
+    margin-bottom: 4px;
+  }
+`;
+
 const AccountCellWrapper = styled.div`
   display: flex;
-  padding: 20px 0 !important;
   column-gap: calc(var(--gap) / 2);
   align-items: center;
 `;
@@ -507,19 +562,6 @@ const IconWrapper = styled.div`
 
 const TableWrapper = styled.div`
   position: relative;
-`;
-
-const DropdownButtonWrapper = styled.div`
-  position: relative;
-  .unique-button {
-    padding-right: calc(var(--gap) * 3);
-  }
-  .icon {
-    position: absolute;
-    right: var(--gap);
-    top: 50%;
-    margin-top: -8px;
-  }
 `;
 
 const DropdownMenu = styled.div`

@@ -10,8 +10,8 @@ import { useApi } from '../../../hooks/useApi';
 import keyring from '@polkadot/ui-keyring';
 import { WarningBlock } from 'components/WarningBlock/WarningBlock';
 
-export const ImportViaJSONAccountModal: FC<TAccountModalProps> = ({ isVisible, onFinish }) => {
-  const { rawRpcApi } = useApi();
+export const ImportViaJSONAccountModal: FC<TAccountModalProps> = ({ isVisible, onFinish, testid }) => {
+  const { uniqueSdk } = useApi();
   const [pair, setPair] = useState<KeyringPair | null>(null);
   const [password, setPassword] = useState<string>('');
   const [passwordIncorrect, setPasswordIncorrect] = useState<boolean>(false);
@@ -20,16 +20,16 @@ export const ImportViaJSONAccountModal: FC<TAccountModalProps> = ({ isVisible, o
     if (!data) return;
     const reader = new FileReader();
     reader.onload = ({ target }: ProgressEvent<FileReader>): void => {
-      if (target && target.result && rawRpcApi) {
+      if (target && target.result && uniqueSdk) {
         console.log(target.result);
         const data = convertToU8a(target.result as ArrayBuffer);
 
-        setPair(keyringFromFile(data, rawRpcApi.genesisHash.toHex()));
+        setPair(keyringFromFile(data, uniqueSdk.api.genesisHash.toHex()));
       }
     };
 
     reader.readAsArrayBuffer(data.file);
-  }, [setPair, rawRpcApi]);
+  }, [setPair, uniqueSdk?.api]);
 
   const onRestoreClick = useCallback(() => {
     if (!pair || !password) return;
@@ -43,6 +43,11 @@ export const ImportViaJSONAccountModal: FC<TAccountModalProps> = ({ isVisible, o
     onFinish();
   }, [pair, password, onFinish]);
 
+  const onPasswordChange = useCallback((value: string) => {
+    setPasswordIncorrect(false);
+    setPassword(value);
+  }, []);
+
   return (<Modal isVisible={isVisible} isClosable={true} onClose={onFinish}>
     <Content>
       <Heading size='2'>{'Add an account via backup JSON file'}</Heading>
@@ -52,7 +57,12 @@ export const ImportViaJSONAccountModal: FC<TAccountModalProps> = ({ isVisible, o
         <Text size={'m'}>Upload</Text>
         <Text size={'s'} color={'grey-500'}>Click to select or drop the file here</Text>
       </TitleWrapper>
-      <Upload onChange={onUploadChange} type={'square'} accept={'.json'} />
+      <Upload
+        testid={`${testid}-upload-button`}
+        onChange={onUploadChange}
+        type={'square'}
+        accept={'.json'}
+      />
     </InputWrapper>
     <InputWrapper>
       <TitleWrapper>
@@ -60,7 +70,8 @@ export const ImportViaJSONAccountModal: FC<TAccountModalProps> = ({ isVisible, o
         <Text size={'s'} color={'grey-500'}>The password that was previously used to encrypt this account</Text>
       </TitleWrapper>
       <PasswordInput
-        onChange={setPassword}
+        testid={`${testid}-password`}
+        onChange={onPasswordChange}
         value={password}
       />
       {passwordIncorrect && <Text size={'s'} color={'coral-500'}>Password incorrect</Text>}
@@ -70,6 +81,7 @@ export const ImportViaJSONAccountModal: FC<TAccountModalProps> = ({ isVisible, o
     </WarningBlock>
     <ButtonWrapper>
       <Button
+        testid={`${testid}-restore-button`}
         disabled={!password || !pair}
         onClick={onRestoreClick}
         role='primary'

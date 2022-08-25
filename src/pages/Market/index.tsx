@@ -24,24 +24,9 @@ type TOption = SelectOptionProps &{
 
 const sortingOptions: TOption[] = [
   {
-    iconRight: { color: Secondary400, name: 'arrow-up', size: 16 },
-    id: 'asc(Price)',
-    title: 'Price'
-  },
-  {
     iconRight: { color: Secondary400, name: 'arrow-down', size: 16 },
-    id: 'desc(Price)',
-    title: 'Price'
-  },
-  {
-    iconRight: { color: Secondary400, name: 'arrow-up', size: 16 },
-    id: 'asc(TokenId)',
-    title: 'Token ID'
-  },
-  {
-    iconRight: { color: Secondary400, name: 'arrow-down', size: 16 },
-    id: 'desc(TokenId)',
-    title: 'Token ID'
+    id: 'desc(CreationDate)',
+    title: 'Listing date'
   },
   {
     iconRight: { color: Secondary400, name: 'arrow-up', size: 16 },
@@ -50,14 +35,31 @@ const sortingOptions: TOption[] = [
   },
   {
     iconRight: { color: Secondary400, name: 'arrow-down', size: 16 },
-    id: 'desc(CreationDate)',
-    title: 'Listing date'
+    id: 'desc(Price)',
+    title: 'Price'
+  },
+  {
+    iconRight: { color: Secondary400, name: 'arrow-up', size: 16 },
+    id: 'asc(Price)',
+    title: 'Price'
+  },
+  {
+    iconRight: { color: Secondary400, name: 'arrow-down', size: 16 },
+    id: 'desc(TokenId)',
+    title: 'Token ID'
+  },
+  {
+    iconRight: { color: Secondary400, name: 'arrow-up', size: 16 },
+    id: 'asc(TokenId)',
+    title: 'Token ID'
   }
 ];
 
 const pageSize = 20;
 
-const defaultSortingValue = sortingOptions[sortingOptions.length - 1];
+const defaultSortingValue = sortingOptions[0];
+
+const testid = 'market-page';
 
 export const MarketPage = () => {
   const searchParams = new URLSearchParams(window.location.search);
@@ -149,10 +151,8 @@ export const MarketPage = () => {
 
   const onChangeAccount = useCallback(() => {
     if (isFetching) return;
-    if (filterState?.statuses?.myNFTs || filterState?.statuses?.myBets) {
-      void onFilterChange(filterState);
-    }
-  }, [filterState?.statuses?.myNFTs, filterState?.statuses?.myBets]);
+    void onFilterChange(filterState);
+  }, [filterState, isFetching, onFilterChange]);
 
   useEffect(() => {
     onChangeAccount();
@@ -176,6 +176,7 @@ export const MarketPage = () => {
           attributes={attributes}
           attributeCounts={attributeCounts}
           onFilterChange={onFilterChange}
+          testid={`${testid}-filters`}
         />}
       </LeftColumn>
       <MainContent>
@@ -184,17 +185,22 @@ export const MarketPage = () => {
             searchValue={searchValue}
             placeholder='Collection / token'
             onSearch={onSearch}
+            testid={`${testid}-search-field`}
           />
           <SortSelectWrapper>
             <Select
               onChange={onSortingChange}
               options={sortingOptions}
               value={sortingValue}
+              testid={`${testid}-sorting-select`}
             />
           </SortSelectWrapper>
         </SearchAndSortingWrapper>
         <div>
-          <Text size='m'>{isFetching ? 'Loading items' : `${offersCount} items`}</Text>
+          <Text
+            testid={`${testid}-items-count`}
+            size='m'
+          >{isFetching ? 'Loading items' : `${offersCount} items`}</Text>
         </div>
         <InfiniteScroll
           hasMore={hasMore}
@@ -205,7 +211,7 @@ export const MarketPage = () => {
           useWindow={true}
         >
           {!isFetching && !offers?.length && <NoItems isSearchResult={!!searchValue || !!filterCount} />}
-          <OffersList offers={offers || []} isLoading={isFetching} />
+          <OffersList offers={offers || []} isLoading={isFetching} testid={`${testid}-offers`} />
         </InfiniteScroll>
       </MainContent>
     </MarketMainPageStyled>
@@ -216,11 +222,13 @@ export const MarketPage = () => {
       sortingOptions={sortingOptions}
       onFilterChange={onFilterChange}
       onSortingChange={onSortingChange}
+      testid={`${testid}-mobile-filters`}
       filterComponent={<Filters
         value={filterState}
         attributes={attributes}
         attributeCounts={attributeCounts}
         onFilterChange={onFilterChange}
+        testid={`${testid}-filters`}
       />}
     />}
   </PagePaper>);

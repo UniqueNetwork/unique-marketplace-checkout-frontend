@@ -18,9 +18,10 @@ interface SelectInputProps<T = SelectInputOption> {
   renderOption?(value: T): ReactNode | string
   isClearable?: boolean
   leftIcon?: IconProps
+  testid?: string
 }
 
-export function SelectInput<T = SelectInputOption>({ className, placeholder, options, value, onChange, renderOption, isClearable, leftIcon }: SelectInputProps<T>) {
+export function SelectInput<T = SelectInputOption>({ className, placeholder, options, value, onChange, renderOption, isClearable, leftIcon, testid }: SelectInputProps<T>) {
   const [selectedValue, setSelectedValue] = useState<T>();
   const [inputValue, setInputValue] = useState<string>('');
   const [isDropdownVisible, setIsDropdownVisible] = useState<boolean>(false);
@@ -85,19 +86,28 @@ export function SelectInput<T = SelectInputOption>({ className, placeholder, opt
         {showOption(selectedValue)}
       </div>}
       <input
+        data-testid={`${testid}-input`}
         type={'text'}
         value={inputValue}
         onChange={onInputChange}
         onFocus={onInputFocus}
         ref={InputRef}
       />
-      {(inputValue || (isClearable && value)) && <ClearButton name={'circle-close'} size={16} onClick={onClear} />}
+      {(inputValue || (isClearable && value)) &&
+        <ClearButton
+          name={'circle-close'}
+          size={16}
+          onClick={onClear}
+          testid={`${testid}-clear-button`}
+        />
+      }
+      <Icon name={'triangle'} size={8} />
     </InputWrapper>
-    <Dropdown isOpen={isDropdownVisible} ref={DropdownRef}>
+    {!!options.length && <Dropdown isOpen={isDropdownVisible} ref={DropdownRef} data-testid={`${testid}-dropdown`}>
       {options.map((item, index) => (
-        <OptionWrapper key={index} onClick={onOptionClick(item)} >{showOption(item)}</OptionWrapper>
+        <OptionWrapper key={index} onClick={onOptionClick(item)} data-testid={`${testid}-option-${index}`} >{showOption(item)}</OptionWrapper>
       ))}
-    </Dropdown>
+    </Dropdown>}
   </SelectInputWrapper>);
 }
 
@@ -116,12 +126,17 @@ const InputWrapper = styled.div`
     position: absolute;
     top: 0;
     left: 0;
-    right: 0;
+    right: calc(var(--gap) * 2);
     bottom: 0;
     border: none;
     background: transparent;
     outline: none;
-    padding: var(--gap);
+    padding: calc(var(--gap) / 2) var(--gap);
+  }
+  & .icon-triangle{
+    position: absolute;
+    top: calc(50% - 4px);
+    right: calc(var(--gap) / 2);
   }
   &.left-icon {
     padding-left: calc(var(--gap) * 2);
@@ -141,17 +156,19 @@ const Dropdown = styled.div<{ isOpen: boolean }>`
   width: 100%;
   top: calc(100% + 4px);
   flex-direction: column;
+  row-gap: calc(var(--gap) / 4);
   background: ${AdditionalLight};
   box-shadow: 0 2px 16px rgba(0, 0, 0, 0.08);
   border-radius: 4px;
-  max-height: 200px;
+  max-height: 180px;
   overflow-x: hidden;
   overflow-y: auto;
   z-index: 10;
+  padding: calc(var(--gap) / 2);
 `;
 
 const OptionWrapper = styled.div`
-  padding: var(--gap);
+  padding: 0 calc(var(--gap) / 2);
   cursor: pointer;
   &:hover {
     background: ${Primary100};
@@ -168,8 +185,7 @@ const Placeholder = styled.div`
 
 const ClearButton = styled(IconButton)`
   position: absolute;
-  //right: calc(var(--gap) * 2);
-  left: calc(100% - calc(var(--gap) * 1.5));
+  left: calc(100% - calc(var(--gap) * 2.5));
   top: 50%;
   margin-top: -8px;
   width: auto !important;

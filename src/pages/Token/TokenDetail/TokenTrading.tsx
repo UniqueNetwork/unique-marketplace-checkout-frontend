@@ -1,14 +1,14 @@
 import React, { FC, useContext, useMemo } from 'react';
 
-import { NFTToken } from '../../../api/chainApi/unique/types';
+import { NFTToken } from 'api/uniqueSdk/types';
 import { Offer } from '../../../api/restApi/offers/types';
 import accountContext from '../../../account/AccountContext';
 import { SellToken } from '../SellToken/SellToken';
 import { BuyToken } from '../BuyToken/BuyToken';
 import Auction from '../Auction/Auction';
-import { isTokenOwner, normalizeAccountId } from '../../../api/chainApi/utils/addressUtils';
+import { isTokenOwner, normalizeAccountId } from 'api/uniqueSdk/utils/addressUtils';
 import { useApi } from '../../../hooks/useApi';
-import { checkAllowedTokenInSettings } from '../../../api/chainApi/utils/checkTokenIsAllowed';
+import { checkAllowedTokenInSettings } from 'api/uniqueSdk/utils/checkTokenIsAllowed';
 
 interface TokenTradingProps {
   token?: NFTToken
@@ -21,9 +21,10 @@ interface TokenTradingProps {
   onDelistAuctionClick(): void
   onWithdrawClick(): void
   onAuctionClose(newOwnerAddress: string): void
+  testid: string
 }
 
-export const TokenTrading: FC<TokenTradingProps> = ({ token, offer, onSellClick, onTransferClick, onDelistClick, onDelistAuctionClick, onPlaceABidClick, onWithdrawClick, onBuyClick, onAuctionClose }) => {
+export const TokenTrading: FC<TokenTradingProps> = ({ token, offer, onSellClick, onTransferClick, onDelistClick, onDelistAuctionClick, onPlaceABidClick, onWithdrawClick, onBuyClick, onAuctionClose, testid }) => {
   const { selectedAccount } = useContext(accountContext);
   const { settings } = useApi();
 
@@ -49,6 +50,7 @@ export const TokenTrading: FC<TokenTradingProps> = ({ token, offer, onSellClick,
       onWithdrawClick={onWithdrawClick}
       onDelistAuctionClick={onDelistAuctionClick}
       onClose={onAuctionClose}
+      testid={`${testid}-auction`}
     />);
   }
 
@@ -59,6 +61,7 @@ export const TokenTrading: FC<TokenTradingProps> = ({ token, offer, onSellClick,
       onSellClick={onSellClick}
       onTransferClick={onTransferClick}
       onDelistClick={onDelistClick}
+      testid={`${testid}-sell`}
     />);
   }
 

@@ -3,19 +3,21 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { Icon, Link, useNotifications } from '@unique-nft/ui-kit';
 
 import { useApi } from '../../hooks/useApi';
-import { NFTToken } from '../../api/chainApi/unique/types';
+import { NFTToken } from 'api/uniqueSdk/types';
 import { MarketType } from '../../types/MarketTypes';
 import { CommonTokenDetail } from './TokenDetail/CommonTokenDetail';
-import { useOffer } from '../../api/restApi/offers/offer';
+import { useOffer } from 'api/restApi/offers/offer';
 import { TokenTrading } from './TokenDetail/TokenTrading';
 import { Error404 } from '../errors/404';
 import TokenPageModal from './Modals/TokenPageModal';
 import { PagePaper } from '../../components/PagePaper/PagePaper';
 import { useAccounts } from '../../hooks/useAccounts';
 import { shortcutText } from '../../utils/textUtils';
-import { compareEncodedAddresses } from '../../api/chainApi/utils/addressUtils';
+import { compareEncodedAddresses } from 'api/uniqueSdk/utils/addressUtils';
 import styled from 'styled-components';
 import { BlueGrey500 } from 'styles/colors';
+
+const testid = 'token-page';
 
 const TokenPage = () => {
   const { api } = useApi();
@@ -32,8 +34,8 @@ const TokenPage = () => {
   const fetchToken = useCallback(async () => {
     if (!api?.nft) return;
     setIsFetchingToken(true);
-    const token = await api?.nft?.getToken(Number(collectionId), Number(id)) as NFTToken;
-    setToken(token);
+    const token = await api?.nft?.getToken(Number(collectionId), Number(id));
+    if (token) setToken(token);
     setIsFetchingToken(false);
   }, [api?.nft, collectionId, id]);
 
@@ -63,14 +65,14 @@ const TokenPage = () => {
   const onAuctionClose = useCallback((newOwnerAddress: string) => {
     if (!token) return;
     info(
-      <>
+      <div data-testid={`${testid}-success-notification`}>
         {compareEncodedAddresses(
           newOwnerAddress,
           selectedAccount?.address || ''
         )
           ? 'You are'
           : `${shortcutText(newOwnerAddress)} is` }  the new owner of <Link href={`/token/${token.collectionId}/${token.id}`} title={`${token.prefix} #${token.id}`}/>
-      </>,
+      </div>,
       { name: 'success', size: 32, color: 'var(--color-additional-light)' }
     );
 
@@ -93,7 +95,7 @@ const TokenPage = () => {
 
   return (
     <>
-      <BackLink onClick={backClickHandler}>
+      <BackLink onClick={backClickHandler} data-testid={`${testid}-back-link`}>
         <Icon name='arrow-left' color={BlueGrey500} size={16}></Icon>
         <p>back</p>
       </BackLink>
@@ -102,6 +104,7 @@ const TokenPage = () => {
           token={token}
           offer={offer}
           isLoading={isFetchingOffer || isFetchingToken}
+          testid={`${testid}`}
         >
           <TokenTrading
             token={token}
@@ -114,6 +117,7 @@ const TokenPage = () => {
             onPlaceABidClick={onActionClick(MarketType.bid)}
             onWithdrawClick={onActionClick(MarketType.withdrawBid)}
             onAuctionClose={onAuctionClose}
+            testid={`${testid}`}
           />
           <TokenPageModal
             token={token}
@@ -121,6 +125,7 @@ const TokenPage = () => {
             marketType={marketType}
             onFinish={onFinish}
             onClose={onClose}
+            testid={`${testid}`}
           />
         </CommonTokenDetail>
       </TokenPagePaper>

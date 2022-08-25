@@ -7,7 +7,6 @@ import CheckboxSkeleton from '../Skeleton/CheckboxSkeleton';
 import { AttributeItem } from './types';
 import AttributesFilter from './AttributesFilter';
 import AttributeCountsFilter from './AttributeCountsFilter';
-import { useApi } from '../../hooks/useApi';
 import { Attribute, AttributeCount } from '../../api/restApi/offers/types';
 import { CollectionCover } from '../CollectionCover/CollectionCover';
 
@@ -18,12 +17,12 @@ interface CollectionsFilterProps {
   onChange(collections: number[], attributes?: AttributeItem[], attributeCounts?: number[]): void
   onAttributesChange?(value: { key: string, attribute: string }[]): void
   onAttributeCountsChange?(value: number[]): void
+  testid: string
 }
 
-const CollectionsFilter: FC<CollectionsFilterProps> = ({ value, attributes, attributeCounts, onChange, onAttributesChange, onAttributeCountsChange }) => {
+const CollectionsFilter: FC<CollectionsFilterProps> = ({ value, attributes, attributeCounts, onChange, onAttributesChange, onAttributeCountsChange, testid }) => {
   const { collections, isFetching } = useCollections();
   const { collections: selectedCollections = [], attributes: selectedAttributes = [], attributeCounts: selectedAttributeCounts = [] } = value || {};
-  const { settings } = useApi();
 
   const onCollectionSelect = useCallback((collectionId: number) => (value: boolean) => {
     let _selectedCollections;
@@ -33,7 +32,7 @@ const CollectionsFilter: FC<CollectionsFilterProps> = ({ value, attributes, attr
       _selectedCollections = selectedCollections.filter((item) => item !== collectionId);
     }
     onChange(_selectedCollections);
-  }, [selectedCollections, selectedAttributeCounts, onAttributesChange, onChange, settings?.blockchain.unique.collectionIds]);
+  }, [selectedCollections, onChange]);
 
   const onCollectionsClear = useCallback(() => {
     onChange([]);
@@ -44,6 +43,7 @@ const CollectionsFilter: FC<CollectionsFilterProps> = ({ value, attributes, attr
       isOpen={true}
       onClear={onCollectionsClear}
       isClearShow={selectedCollections.length > 0}
+      testid={`${testid}-accordion`}
     >
       <CollectionFilterWrapper>
         {isFetching && Array.from({ length: 3 }).map((_, index) => <CheckboxSkeleton key={`checkbox-skeleton-${index}`} />)}
@@ -56,9 +56,12 @@ const CollectionsFilter: FC<CollectionsFilterProps> = ({ value, attributes, attr
               label={''}
               size={'m'}
               onChange={onCollectionSelect(collection.id)}
+              testid={`${testid}-checkbox-${collection.id}`}
             />
             <CollectionCover src={collection.coverImageUrl} size={22} type={'circle'}/>
-            <Text>{collection.collectionName || ''}</Text>
+            <Text
+              testid={`${testid}-name-${collection.id}`}
+            >{collection.collectionName || ''}</Text>
           </CheckboxWrapper>
           ))}
       </CollectionFilterWrapper>
@@ -67,11 +70,13 @@ const CollectionsFilter: FC<CollectionsFilterProps> = ({ value, attributes, attr
       attributeCounts={attributeCounts}
       selectedAttributeCounts={selectedAttributeCounts}
       onAttributeCountsChange={onAttributeCountsChange}
+      testid={`${testid}-attribute-count`}
     />}
     {onAttributesChange && selectedCollections.length === 1 && <AttributesFilter
       attributes={attributes || {}}
       selectedAttributes={selectedAttributes}
       onAttributesChange={onAttributesChange}
+      testid={`${testid}-attributes`}
     />}
   </>);
 };

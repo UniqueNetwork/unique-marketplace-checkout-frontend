@@ -1,8 +1,9 @@
+import { BN } from '@polkadot/util';
 import { DecoratedRpc } from '@polkadot/api/types';
 import { RpcInterface } from '@polkadot/rpc-core/types/jsonrpc';
-import { GenericAccountId } from '@polkadot/types';
-import { UpDataStructsCollection, UpDataStructsCreateCollectionData, UpDataStructsCreateNftExData } from '@unique-nft/unique-mainnet-types/default/types';
-import { BN } from '@polkadot/util';
+import { DecodedAttributes, DecodedInfixOrUrlOrCidAndHash, OwnerAddress } from '@unique-nft/sdk/tokens';
+import { Account } from '../../account/AccountContext';
+import { SignerPayloadJSON, UnsignedTxPayload } from '@unique-nft/sdk/types';
 
 export type TokenId = {
   toNumber(): number
@@ -10,24 +11,30 @@ export type TokenId = {
 
 export type UniqueDecoratedRpc = DecoratedRpc<'promise', RpcInterface> & {
   unique?: {
-    collectionById(collectionId: string): Promise<{ value: UpDataStructsCollection & UpDataStructsCreateCollectionData }>
-    tokenData(collectionId: number, tokenId: number): Promise<{ toJSON: () => UpDataStructsCreateNftExData }>
-    variableMetadata(collectionId: number, tokenId: number): Promise<{ toJSON: () => string }>
-    constMetadata(collectionId: number, tokenId: number): Promise<{ toJSON: () => string }>
-    tokenOwner(collectionId: number, tokenId: number): Promise<{ toJSON: () => string }>
     accountTokens(collectionId: number, accountId: CrossAccountId): Promise<TokenId[]>
+    allowance(collectionId: string, accountId: CrossAccountId, contractAccountId: CrossAccountId, tokenId: string): Promise<{ toJSON(): number }>
   }
 }
 
-export type UniqueDecoratedQuery = DecoratedRpc<'promise', RpcInterface> & {
-  unique?: {
-    accountTokens(collectionId: number, accountId: CrossAccountId): Promise<TokenId[]>
-  }
+export type TTransaction = {
+  signerPayloadJSON?: SignerPayloadJSON
+  signature: `0x${string}`
 }
+
+export type TSignMessage = { (message: string, account?: string | Account | undefined): Promise<`0x${string}`>; (arg0: string): any; }
+
+export type TransactionOptions = {
+  // this function will be called after transaction is created and awaited before proceeding
+  signer?: string
+  sign: (unsignedTxPayload: UnsignedTxPayload) => Promise<`0x${string}` | null>
+  signMessage?: (message: string) => Promise<`0x${string}` | null>
+  // if not provided, signed.send() will be called instead
+  send?: (tx: TTransaction) => Promise<any | void>
+};
 
 export interface NFTCollectionSponsorship {
-  unconfirmed?: string
-  confirmed?: string
+  isConfirmed?: boolean
+  address?: string
 }
 
 export interface NFTCollection {
@@ -36,7 +43,7 @@ export interface NFTCollection {
   coverImageUrl?: string
   collectionName?: string
   description?: string
-  owner?: CrossAccountId | string
+  owner?: string
   sponsorship?: NFTCollectionSponsorship | null
 }
 
@@ -44,10 +51,12 @@ export type AttributesDecoded = {
   [key: string]: string | string[]
 }
 
+export type VideoAttribute = DecodedInfixOrUrlOrCidAndHash | undefined;
+
 export interface NFTToken {
   id: number
-  owner?: CrossAccountId
-  attributes?: AttributesDecoded
+  owner?: OwnerAddress
+  attributes?: DecodedAttributes
   imageUrl: string
   collectionId?: number
   collectionName?: string
@@ -55,6 +64,7 @@ export interface NFTToken {
   description?: string
   collectionCover?: string
   isAllowed?: boolean
+  video: VideoAttribute
 }
 
 export type MetadataType = {

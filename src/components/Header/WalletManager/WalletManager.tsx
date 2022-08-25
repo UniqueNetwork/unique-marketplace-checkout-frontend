@@ -2,15 +2,17 @@ import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { AccountsManager, Button, Text, useNotifications } from '@unique-nft/ui-kit';
+import { BN } from '@polkadot/util';
 
+import { toChainFormatAddress } from 'api/uniqueSdk/utils/addressUtils';
 import { useAccounts } from 'hooks/useAccounts';
 import { Account } from 'account/AccountContext';
+import { Avatar } from 'components/Avatar/Avatar';
+import GetKSMModal from 'components/GetKSMModal/GetKSMModal';
 import { BalanceOption } from './types';
 import { useApi } from 'hooks/useApi';
 import DefaultAvatar from 'static/icons/default-avatar.svg';
-import { Avatar } from 'components/Avatar/Avatar';
-import { toChainFormatAddress } from 'api/chainApi/utils/addressUtils';
-import GetKSMModal from 'components/GetKSMModal/GetKSMModal';
+import { TWithdrawBid } from 'api/restApi/auction/types';
 import { formatKusamaBalance } from 'utils/textUtils';
 import BalanceSkeleton from '../../Skeleton/BalanceSkeleton';
 import config from '../../../config';
@@ -29,15 +31,17 @@ export const WalletManager: FC = () => {
   const { chainData } = useApi();
   const { info } = useNotifications();
   const formatAddress = useCallback((address: string) => {
-    return toChainFormatAddress(address, chainData?.properties.ss58Format || 0);
-  }, [chainData?.properties.ss58Format]);
+    return toChainFormatAddress(address, chainData?.SS58Prefix || 0);
+  }, [chainData?.SS58Prefix]);
 
   const widgetAccounts = useMemo(() => accounts.map((account) => (
     { name: account.meta.name, ...account, address: formatAddress(account.address), substrateAddress: account?.address })
   ), [accounts, formatAddress]);
+
   const widgetSelectedAccount = useMemo(() => (
     { name: selectedAccount?.meta.name, ...selectedAccount, address: selectedAccount?.address ? formatAddress(selectedAccount.address) : '', substrateAddress: selectedAccount?.address }
   ), [selectedAccount, formatAddress]);
+
   const widgetAccountChange = useCallback((account) => {
     changeAccount({ ...account, address: account.substrateAddress } as Account);
   }, [changeAccount]);
@@ -63,8 +67,8 @@ export const WalletManager: FC = () => {
   }, [navigate]);
 
   const currentBalance: BalanceOption = useMemo(() => {
-    return { value: selectedAccount?.balance?.KSM?.toString() || '0', chain: chainData?.systemChain || '' };
-  }, [selectedAccount, chainData?.systemChain]);
+    return { value: selectedAccount?.balance?.KSM?.toString() || '0', chain: chainData?.token || '' };
+  }, [selectedAccount, chainData?.token]);
 
   const closeModal = useCallback(() => {
     setIsGetKsmOpened(false);
@@ -76,13 +80,24 @@ export const WalletManager: FC = () => {
   }, [setIsGetKsmOpened]);
 
   const formattedAccountDeposit = useMemo(() => {
-    if (!selectedAccount?.deposits?.sponsorshipFee || selectedAccount?.deposits?.sponsorshipFee?.toString() === '0') {
+    if (!selectedAccount?.deposits) {
       return undefined;
     }
-    return formatKusamaBalance(selectedAccount?.deposits?.sponsorshipFee?.toString());
-      }, [selectedAccount?.deposits]);
 
-  if (!isLoading && accounts.length === 0) {
+    const { sponsorshipFee, bids } = selectedAccount.deposits;
+    const { leader, withdraw } = bids || { leader: [], withdraw: [] };
+    if ((sponsorshipFee?.isZero() && leader.length === 0 && withdraw.length === 0)) {
+      return undefined;
+    }
+
+    const getTotalAmount = (acc: BN, bid: TWithdrawBid) => acc.add(new BN(bid.amount));
+    const deposit = (sponsorshipFee || new BN(0))
+    .add(withdraw.reduce(getTotalAmount, new BN(0)))
+    .add(leader.reduce(getTotalAmount, new BN(0)));
+    return formatKusamaBalance(deposit.toString());
+  }, [selectedAccount?.deposits]);
+
+  if (!isLoading && !selectedAccount) {
     return (
       <Button title={'Connect or create account'} onClick={onCreateAccountClick} />
     );
@@ -121,7 +136,7 @@ export const WalletManager: FC = () => {
         manageBalanceLinkTitle='Manage my balance'
         networks={[]}
         onAccountChange={widgetAccountChange}
-        onCopyAddressClick={onCopyAddress}
+        // onCopyAddressClick={onCopyAddress}
         onManageBalanceClick={onCreateAccountClick}
         onNetworkChange={function noRefCheck() { }}
         selectedAccount={widgetSelectedAccount}

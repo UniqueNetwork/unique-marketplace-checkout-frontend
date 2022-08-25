@@ -5,6 +5,7 @@ import { BN } from '@polkadot/util';
 
 import { TPlaceABid } from './types';
 import DefaultMarketStages from './StagesModal';
+import { AdditionalWarning100, Coral100 } from '../../../styles/colors';
 import { TTokenPageModalBodyProps } from './TokenPageModal';
 import { useAuctionBidStages } from '../../../hooks/marketplaceStages';
 import { useAccounts } from '../../../hooks/useAccounts';
@@ -12,14 +13,13 @@ import { useFee } from '../../../hooks/useFee';
 import { useApi } from '../../../hooks/useApi';
 import { formatKusamaBalance } from '../../../utils/textUtils';
 import { fromStringToBnString } from '../../../utils/bigNum';
-import { NumberInput } from 'components/NumberInput/NumberInput';
+import { NumberInput } from '../../../components/NumberInput/NumberInput';
 import { StageStatus } from '../../../types/StagesTypes';
 import { Offer } from '../../../api/restApi/offers/types';
 import { useAuction } from '../../../api/restApi/auction/auction';
 import { TCalculatedBid } from '../../../api/restApi/auction/types';
-import { WarningBlock } from 'components/WarningBlock/WarningBlock';
 
-export const AuctionModal: FC<TTokenPageModalBodyProps> = ({ offer, setIsClosable, onFinish }) => {
+export const AuctionModal: FC<TTokenPageModalBodyProps> = ({ offer, setIsClosable, onFinish, testid }) => {
   const [status, setStatus] = useState<'ask' | 'place-bid-stage'>('ask'); // TODO: naming
   const [bidValue, setBidValue] = useState<TPlaceABid>();
 
@@ -29,7 +29,7 @@ export const AuctionModal: FC<TTokenPageModalBodyProps> = ({ offer, setIsClosabl
     setIsClosable(false);
   }, [setStatus, setBidValue, setIsClosable]);
 
-  if (status === 'ask') return (<AskBidModal offer={offer} onConfirmPlaceABid={onConfirmPlaceABid} />);
+  if (status === 'ask') return (<AskBidModal offer={offer} onConfirmPlaceABid={onConfirmPlaceABid} testid={`${testid}-bid`} />);
   if (status === 'place-bid-stage') {
     return (<AuctionStagesModal
       accountAddress={bidValue?.accountAddress}
@@ -37,6 +37,7 @@ export const AuctionModal: FC<TTokenPageModalBodyProps> = ({ offer, setIsClosabl
       onFinish={onFinish}
       offer={offer}
       setIsClosable={setIsClosable}
+      testid={`${testid}-stages`}
     />);
   }
   return null;
@@ -44,23 +45,24 @@ export const AuctionModal: FC<TTokenPageModalBodyProps> = ({ offer, setIsClosabl
 
 const chainOptions = [{ id: 'KSM', title: 'KSM', iconRight: { size: 18, name: 'chain-kusama' } }];
 
-export const AskBidModal: FC<{ offer?: Offer, onConfirmPlaceABid(value: TPlaceABid): void}> = ({ offer, onConfirmPlaceABid }) => {
+export const AskBidModal: FC<{ offer?: Offer, onConfirmPlaceABid(value: TPlaceABid): void, testid: string}> = ({ offer, onConfirmPlaceABid, testid }) => {
   const [chain, setChain] = useState<string | undefined>('KSM');
-  const { kusamaFee } = useFee();
+  const { kusamaFee, getKusamaFee } = useFee();
   const { selectedAccount } = useAccounts();
-  const { api } = useApi();
+  const { api, settings } = useApi();
   const [calculatedBid, setCalculatedBid] = useState<TCalculatedBid>();
   const [isFetchingCalculatedbid, setIsFetchingCalculatedBid] = useState<boolean>(true);
   const { getCalculatedBid } = useAuction();
 
   const fetchCalculatedBid = useCallback(async () => {
-    if (!offer || !selectedAccount) return;
+    if (!offer || !selectedAccount || !settings) return;
     setIsFetchingCalculatedBid(true);
     const _calculatedBid = await getCalculatedBid({
       collectionId: offer?.collectionId || 0,
       tokenId: offer?.tokenId || 0,
       bidderAddress: selectedAccount?.address || ''
     });
+    await getKusamaFee(settings.auction.address, new BN(_calculatedBid?.minBidderAmount || 0));
     setCalculatedBid(_calculatedBid);
     setIsFetchingCalculatedBid(false);
   }, [offer, selectedAccount?.address]);
@@ -91,6 +93,8 @@ export const AskBidModal: FC<{ offer?: Offer, onConfirmPlaceABid(value: TPlaceAB
 
   const onBidAmountChange = useCallback((value: string) => {
     setBidAmount(value);
+    if (!settings) return;
+    getKusamaFee(settings.auction.address, new BN(fromStringToBnString(value, api?.market?.kusamaDecimals)));
   }, [setBidAmount]);
 
   const isAmountValid = useMemo(() => {
@@ -134,11 +138,15 @@ export const AskBidModal: FC<{ offer?: Offer, onConfirmPlaceABid(value: TPlaceAB
         {`Minimum bid ${formatKusamaBalance(minimalBid.toString(), api?.market?.kusamaDecimals)} ${chain || ''}`}
       </Text>
       <CautionTextWrapper>
-        {!isEnoughBalance && <Text color={'coral-500'}>Your balance is too low to place a bid</Text>}
+        {!isEnoughBalance && <WarningStyled color={'coral-500'}>Your balance is too low to place a bid</WarningStyled>}
+        {isEnoughBalance && <TextStyled
+          color='additional-warning-500'
+          size='s'
+          testid={`${testid}-fee-warning`}
+        >
+          {`A fee of ~ ${kusamaFee} ${chain || ''} can be applied to the transaction`}
+        </TextStyled>}
       </CautionTextWrapper>
-      <WarningBlock>
-        {`A fee of ~ ${kusamaFee} ${chain || ''} can be applied to the transaction`}
-      </WarningBlock>
       <ButtonWrapper>
         <Button
           disabled={!isAmountValid || !isEnoughBalance || isFetchingCalculatedbid}
@@ -201,6 +209,20 @@ const InputStyled = styled(NumberInput)`
   }
 `;
 
+const TextStyled = styled(Text)`
+  box-sizing: border-box;
+  display: flex;
+  padding: 8px 16px;
+  margin: 32px 0 24px;
+  border-radius: 4px;
+  background-color: ${AdditionalWarning100};
+  width: 100%;
+`;
+
+const WarningStyled = styled(TextStyled)`
+  background-color: ${Coral100};
+`;
+
 const ButtonWrapper = styled.div`
   display: flex;
   justify-content: flex-end;
@@ -208,7 +230,7 @@ const ButtonWrapper = styled.div`
 
 const CautionTextWrapper = styled.div`
   display: flex;
-  min-height: calc(var(--gap) * 1.5);
+  min-height: calc(var(--gap) * 2);
 `;
 
 const Content = styled.div`
