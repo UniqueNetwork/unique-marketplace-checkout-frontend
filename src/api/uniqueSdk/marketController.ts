@@ -1,5 +1,6 @@
 import { Sdk } from '@unique-nft/substrate-client';
 import { TokenIdArguments, TokenByIdResult } from '@unique-nft/substrate-client/tokens';
+import { isEthereumAddress } from '@unique-nft/substrate-client/utils';
 import { BN } from '@polkadot/util';
 import { CrossAccountId, EvmCollectionAbiMethods, MarketplaceAbiMethods, TokenAskType, TransactionOptions, TSignMessage, UniqueDecoratedRpc } from './types';
 import marketplaceAbi from './abi/marketPlaceAbi.json';
@@ -455,7 +456,7 @@ export class UniqueSDKMarketController {
     if (!token) throw new Error('Token for unlock not found');
     const owner = token.owner;
 
-    if (owner && compareEncodedAddresses(owner, address)) return;
+    if (owner && !isEthereumAddress(owner) && compareEncodedAddresses(owner, address)) return;
 
     const unsignedTxPayload = await this.uniqueSdk.extrinsics.build({
       section: 'unique',
