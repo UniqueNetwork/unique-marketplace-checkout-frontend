@@ -87,9 +87,9 @@ export const CommonTokenDetail: FC<IProps> = ({
   const isOwner = useMemo(() => {
     if (!selectedAccount || isLoading) return false;
     if (offer) {
-      return isTokenOwner(selectedAccount.address, { Substrate: offer.seller });
+      return isTokenOwner(selectedAccount.address, offer.seller);
     }
-    return isTokenOwner(selectedAccount.address, normalizeAccountId(token?.owner || ''));
+    return token?.owner ? isTokenOwner(selectedAccount.address, token.owner) : false;
   }, [isLoading, selectedAccount, token, offer]);
 
   const [shareModalVisible, setShareModalVisible] = useState(false);

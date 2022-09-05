@@ -2,7 +2,7 @@ import { Sdk } from '@unique-nft/substrate-client';
 import { TokenIdArguments, TokenByIdResult } from '@unique-nft/substrate-client/tokens';
 import { isEthereumAddress } from '@unique-nft/substrate-client/utils';
 import { BN } from '@polkadot/util';
-import { CrossAccountId, EvmCollectionAbiMethods, MarketplaceAbiMethods, TokenAskType, TransactionOptions, TSignMessage, UniqueDecoratedRpc } from './types';
+import { EvmCollectionAbiMethods, MarketplaceAbiMethods, TokenAskType, TransactionOptions, TSignMessage, UniqueDecoratedRpc } from './types';
 import marketplaceAbi from './abi/marketPlaceAbi.json';
 import nonFungibleAbi from './abi/nonFungibleAbi.json';
 import { collectionIdToAddress, getEthAccount, compareEncodedAddresses, isTokenOwner, normalizeAccountId } from './utils/addressUtils';
@@ -247,7 +247,7 @@ export class UniqueSDKMarketController {
 
     const token = await this.uniqueSdk.tokens.get_new(tokenIdArguments);
     if (!token) throw new Error('Token not found');
-    if (isTokenOwner(ethAddress, normalizeAccountId(token.owner))) return;
+    if (isTokenOwner(ethAddress, token.owner)) return;
 
     const unsignedTxPayload = await this.uniqueSdk.extrinsics.build({
       section: 'unique',
@@ -270,7 +270,7 @@ export class UniqueSDKMarketController {
   // ???
   private async checkIfNftApproved (tokenOwner: string, collectionId: string, tokenId: string): Promise<boolean> {
     const { unique } = (this.uniqueSdk?.api.rpc as UniqueDecoratedRpc);
-    const approvedCount = (await unique?.allowance(collectionId, normalizeAccountId(tokenOwner), normalizeAccountId({ Ethereum: this.contractAddress }), tokenId))?.toJSON();
+    const approvedCount = (await unique?.allowance(collectionId, normalizeAccountId(tokenOwner), { Ethereum: this.contractAddress.toLowerCase() }, tokenId))?.toJSON();
 
     return approvedCount === 1;
   }
@@ -419,7 +419,7 @@ export class UniqueSDKMarketController {
     const token = await this.uniqueSdk.tokens.get_new(tokenIdArguments);
     if (!token) throw new Error('Token not found');
 
-    if (!isTokenOwner(from, normalizeAccountId(token.owner))) throw new Error('You are not owner of this token');
+    if (!isTokenOwner(from, token.owner)) throw new Error('You are not owner of this token');
 
     const unsignedTxPayload = await this.uniqueSdk.tokens.transfer.build({
       address: from,
