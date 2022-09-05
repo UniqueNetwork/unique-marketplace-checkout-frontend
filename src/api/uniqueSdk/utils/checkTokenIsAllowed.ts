@@ -1,5 +1,5 @@
 import { Settings } from 'api/restApi/settings/types';
-import { TokenId } from 'api/uniqueSdk/types';
+import { TokenIdArguments } from '@unique-nft/substrate-client/tokens';
 
 export const checkAllowedTokenInSettings = (tokenId: number, collectionId: number, settings?: Settings) => {
   const allowedTokens = settings?.blockchain.unique.allowedTokens.find((item) => item.collection === collectionId)?.tokens.split(',') || [];
@@ -12,7 +12,7 @@ export const checkTokenIsAllowed = (tokenId: number, allowedTokens: string[]) =>
   return allowedTokens.some((item) => /^\d+-\d+$/.test(item) ? checkInRange(item.split('-')) : Number(item) === tokenId);
 };
 
-export const filterAllowedTokens = (tokens: TokenId[], allowedTokens?: string) => {
+export const filterAllowedTokens = (tokens: TokenIdArguments[], allowedTokens?: string) => {
   if (!allowedTokens) return tokens;
-  return tokens.filter((id) => checkTokenIsAllowed(id.toNumber(), allowedTokens.split(',')));
+  return tokens.filter(({ tokenId }) => checkTokenIsAllowed(tokenId, allowedTokens.split(',')));
 };
