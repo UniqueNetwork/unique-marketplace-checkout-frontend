@@ -6,7 +6,7 @@ import accountContext from '../../../account/AccountContext';
 import { SellToken } from '../SellToken/SellToken';
 import { BuyToken } from '../BuyToken/BuyToken';
 import Auction from '../Auction/Auction';
-import { isTokenOwner, normalizeAccountId } from 'api/uniqueSdk/utils/addressUtils';
+import { isTokenOwner } from 'api/uniqueSdk/utils/addressUtils';
 import { useApi } from '../../../hooks/useApi';
 import { checkAllowedTokenInSettings } from 'api/uniqueSdk/utils/checkTokenIsAllowed';
 

@@ -2,10 +2,10 @@ import { Sdk } from '@unique-nft/substrate-client';
 import { TokenIdArguments, TokenByIdResult } from '@unique-nft/substrate-client/tokens';
 import { isEthereumAddress } from '@unique-nft/substrate-client/utils';
 import { BN } from '@polkadot/util';
-import { EvmCollectionAbiMethods, MarketplaceAbiMethods, TokenAskType, TransactionOptions, TSignMessage, UniqueDecoratedRpc } from './types';
+import { EvmCollectionAbiMethods, MarketplaceAbiMethods, TokenAskType, TransactionOptions, TSignMessage } from './types';
 import marketplaceAbi from './abi/marketPlaceAbi.json';
 import nonFungibleAbi from './abi/nonFungibleAbi.json';
-import { collectionIdToAddress, getEthAccount, compareEncodedAddresses, isTokenOwner, normalizeAccountId } from './utils/addressUtils';
+import { collectionIdToAddress, getEthAccount, compareEncodedAddresses, isTokenOwner } from './utils/addressUtils';
 import { formatKsm, fromStringToBnString } from './utils/textFormat';
 import { repeatCheckForTransactionFinish } from './utils/repeatCheckTransaction';
 import { Settings } from '../restApi/settings/types';
@@ -267,12 +267,9 @@ export class UniqueSDKMarketController {
     });
   }
 
-  // ???
+  // sell
   private async checkIfNftApproved (tokenOwner: string, collectionId: string, tokenId: string): Promise<boolean> {
-    const { unique } = (this.uniqueSdk?.api.rpc as UniqueDecoratedRpc);
-    const approvedCount = (await unique?.allowance(collectionId, normalizeAccountId(tokenOwner), { Ethereum: this.contractAddress.toLowerCase() }, tokenId))?.toJSON();
-
-    return approvedCount === 1;
+    return (await this.uniqueSdk?.tokens.allowance({ collectionId: Number(collectionId), tokenId: Number(tokenId), from: tokenOwner, to: this.contractAddress }))?.isAllowed || false;
   }
 
   // sell

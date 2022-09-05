@@ -13,7 +13,7 @@ import { Avatar } from 'components/Avatar/Avatar';
 import DefaultAvatar from 'static/icons/default-avatar.svg';
 import config from 'config';
 import { useAccounts } from 'hooks/useAccounts';
-import { isTokenOwner, normalizeAccountId, toChainFormatAddress } from 'api/uniqueSdk/utils/addressUtils';
+import { isTokenOwner, toChainFormatAddress } from 'api/uniqueSdk/utils/addressUtils';
 import { Offer } from 'api/restApi/offers/types';
 import { useApi } from 'hooks/useApi';
 import Skeleton from 'components/Skeleton/Skeleton';

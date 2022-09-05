@@ -1,7 +1,7 @@
 import { addressToEvm, encodeAddress } from '@polkadot/util-crypto';
 import { keyring } from '@polkadot/ui-keyring';
 import Web3 from 'web3';
-import { CrossAccountId } from '../types';
+import { Address } from '@unique-nft/substrate-client/types';
 
 export const subToEthLowercase = (address: string): string => {
   const bytes = addressToEvm(address);
@@ -20,21 +20,13 @@ export const getEthAccount = (account: string) => {
   return ethAccount.toLowerCase();
 };
 
-export const isTokenOwner = (account: string, tokenOwner: string): boolean => {
+export const isTokenOwner = (account: string, tokenOwner: Address): boolean => {
   if (tokenOwner.startsWith('0x')) {
     return getEthAccount(account).toLowerCase() === tokenOwner.toLowerCase();
   }
 
   return compareEncodedAddresses(account, tokenOwner);
 };
-
-export function normalizeAccountId(account: string): CrossAccountId {
-  if (account.startsWith('0x')) {
-    return { Ethereum: account };
-  }
-
-  return { Substrate: account };
-}
 
 export function toChainFormatAddress (address: string, ss58Format: number) {
   if (address.startsWith('0x')) return address;
