@@ -3,6 +3,7 @@ import { NFTToken } from './types';
 import { Settings } from '../restApi/settings/types';
 import { getEthAccount } from './utils/addressUtils';
 import { checkTokenIsAllowed, filterAllowedTokens } from './utils/checkTokenIsAllowed';
+import { Address } from '@unique-nft/substrate-client/types';
 
 export class UniqueSDKNFTController {
   private sdk: Sdk;
@@ -14,7 +15,7 @@ export class UniqueSDKNFTController {
     this.allowedTokens = settings.blockchain?.unique?.allowedTokens.reduce((acc, item) => ({ ...acc, [item.collection]: item.tokens }), {}) || {};
   }
 
-  async getAccountMarketableTokens(address: string): Promise<NFTToken[]> {
+  async getAccountMarketableTokens(address: Address): Promise<NFTToken[]> {
     if (!this.sdk?.api || !address) {
       return [];
     }

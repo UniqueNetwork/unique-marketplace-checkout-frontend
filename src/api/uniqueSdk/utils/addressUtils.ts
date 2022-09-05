@@ -3,7 +3,7 @@ import { keyring } from '@polkadot/ui-keyring';
 import Web3 from 'web3';
 import { Address } from '@unique-nft/substrate-client/types';
 
-export const subToEthLowercase = (address: string): string => {
+export const subToEthLowercase = (address: Address): string => {
   const bytes = addressToEvm(address);
 
   return '0x' + Buffer.from(bytes).toString('hex');
@@ -14,13 +14,13 @@ export const compareEncodedAddresses = (subAddress1: string, subAddress2: string
   return encodeAddress(subAddress1) === encodeAddress(subAddress2);
 };
 
-export const getEthAccount = (account: string) => {
+export const getEthAccount = (account: Address) => {
   if (!account) throw new Error('Account was not provided');
   const ethAccount = Web3.utils.toChecksumAddress(subToEthLowercase(account));
   return ethAccount.toLowerCase();
 };
 
-export const isTokenOwner = (account: string, tokenOwner: Address): boolean => {
+export const isTokenOwner = (account: Address, tokenOwner: Address): boolean => {
   if (tokenOwner.startsWith('0x')) {
     return getEthAccount(account).toLowerCase() === tokenOwner.toLowerCase();
   }
@@ -28,12 +28,12 @@ export const isTokenOwner = (account: string, tokenOwner: Address): boolean => {
   return compareEncodedAddresses(account, tokenOwner);
 };
 
-export function toChainFormatAddress (address: string, ss58Format: number) {
+export function toChainFormatAddress (address: Address, ss58Format: number) {
   if (address.startsWith('0x')) return address;
   return keyring.encodeAddress(address, ss58Format);
 }
 
-export function collectionIdToAddress (address: number): string {
+export function collectionIdToAddress (address: number): Address {
   if (address >= 0xffffffff || address < 0) {
     throw new Error('id overflow');
   }
