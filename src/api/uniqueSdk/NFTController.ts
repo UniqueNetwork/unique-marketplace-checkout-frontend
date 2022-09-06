@@ -1,5 +1,5 @@
 import { Sdk } from '@unique-nft/substrate-client';
-import { NFTToken } from './types';
+import { NFTToken, TokenId } from './types';
 import { Settings } from '../restApi/settings/types';
 import { getEthAccount } from './utils/addressUtils';
 import { checkTokenIsAllowed, filterAllowedTokens } from './utils/checkTokenIsAllowed';
@@ -21,18 +21,21 @@ export class UniqueSDKNFTController {
     }
     const tokens: NFTToken[] = [];
 
+    // @ts-ignore
+    const { unique } = this.sdk?.api.rpc || {};
+
     for (const collectionId of this.collectionIds) {
       try {
-        const tokensIds =
-          (await this.sdk?.tokens.getAccountTokens({ collectionId, address }))?.tokens || [];
-        const tokensIdsOnEth =
-          (await this.sdk?.tokens.getAccountTokens({ collectionId, address: getEthAccount(address) }))?.tokens || [];
+        const tokensIds: TokenId[] =
+          await unique?.accountTokens(collectionId, { Substrate: address }) || [];
+        const tokensIdsOnEth: TokenId[] =
+          await unique?.accountTokens(collectionId, { Ethereum: getEthAccount(address) }) || [];
 
         const currentAllowedTokens = this.allowedTokens[collectionId];
         const allowedIds = filterAllowedTokens([...tokensIds, ...tokensIdsOnEth], currentAllowedTokens);
         const tokensOfCollection = (await Promise.all(allowedIds
-          .map(({ tokenId }) =>
-            this.getToken(collectionId, tokenId)))) as NFTToken[];
+          .map((tokenId) =>
+            this.getToken(collectionId, tokenId.toNumber())))) as NFTToken[];
 
         tokens.push(...tokensOfCollection);
       } catch (e) {

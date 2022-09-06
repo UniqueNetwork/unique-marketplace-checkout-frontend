@@ -3,6 +3,10 @@ import { DecodedAttributes, DecodedInfixOrUrlOrCidAndHash } from '@unique-nft/su
 import { Account } from '../../account/AccountContext';
 import { SignerPayloadJSON, UnsignedTxPayload, Address } from '@unique-nft/substrate-client/types';
 
+export type TokenId = {
+  toNumber(): number
+};
+
 export type TTransaction = {
   signerPayloadJSON?: SignerPayloadJSON
   signature: `0x${string}`
