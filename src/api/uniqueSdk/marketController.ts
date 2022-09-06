@@ -247,7 +247,7 @@ export class UniqueSDKMarketController {
 
     const token = await this.uniqueSdk.tokens.get_new(tokenIdArguments);
     if (!token) throw new Error('Token not found');
-    if (isTokenOwner(address, token.owner)) return;
+    if (token.owner.toLowerCase() === ethAddress.toLowerCase()) return;
 
     const unsignedTxPayload = await this.uniqueSdk.extrinsics.build({
       section: 'unique',
@@ -271,7 +271,12 @@ export class UniqueSDKMarketController {
   private async checkIfNftApproved (tokenOwner: Address, collectionId: string, tokenId: string): Promise<boolean> {
     // @ts-ignore
     const { unique } = this.uniqueSdk?.api.rpc || {};
-    const approvedCount = (await unique?.allowance(Number(collectionId), { Substrate: tokenOwner }, { Ethereum: this.contractAddress }, Number(tokenId)))?.toJSON();
+    const approvedCount = (await unique?.allowance(
+      Number(collectionId),
+      isEthereumAddress(tokenOwner) ? { Ethereum: tokenOwner } : { Substrate: tokenOwner },
+      { Ethereum: this.contractAddress },
+      Number(tokenId)
+    ))?.toJSON();
 
     return approvedCount === 1;
   }
