@@ -2,6 +2,7 @@ import { addressToEvm, encodeAddress } from '@polkadot/util-crypto';
 import { keyring } from '@polkadot/ui-keyring';
 import Web3 from 'web3';
 import { Address } from '@unique-nft/substrate-client/types';
+import { isEthereumAddress } from '@unique-nft/substrate-client/utils';
 
 export const subToEthLowercase = (address: Address): string => {
   const bytes = addressToEvm(address);
@@ -21,7 +22,7 @@ export const getEthAccount = (account: Address) => {
 };
 
 export const isTokenOwner = (account: Address, tokenOwner: Address): boolean => {
-  if (tokenOwner.startsWith('0x')) {
+  if (isEthereumAddress(tokenOwner)) {
     return getEthAccount(account).toLowerCase() === tokenOwner.toLowerCase();
   }
 
@@ -29,7 +30,7 @@ export const isTokenOwner = (account: Address, tokenOwner: Address): boolean => 
 };
 
 export function toChainFormatAddress (address: Address, ss58Format: number) {
-  if (address.startsWith('0x')) return address;
+  if (isEthereumAddress(address)) return address;
   return keyring.encodeAddress(address, ss58Format);
 }
 
