@@ -1,15 +1,16 @@
 import { Sdk } from '@unique-nft/substrate-client';
 import { TokenIdArguments, TokenByIdResult } from '@unique-nft/substrate-client/tokens';
+import { isEthereumAddress } from '@unique-nft/substrate-client/utils';
 import { BN } from '@polkadot/util';
-import { CrossAccountId, EvmCollectionAbiMethods, MarketplaceAbiMethods, TokenAskType, TransactionOptions, TSignMessage, UniqueDecoratedRpc } from './types';
+import { EvmCollectionAbiMethods, MarketplaceAbiMethods, TokenAskType, TransactionOptions, TSignMessage } from './types';
 import marketplaceAbi from './abi/marketPlaceAbi.json';
 import nonFungibleAbi from './abi/nonFungibleAbi.json';
-import { collectionIdToAddress, getEthAccount, compareEncodedAddresses, isTokenOwner, normalizeAccountId } from './utils/addressUtils';
+import { collectionIdToAddress, getEthAccount, compareEncodedAddresses, isTokenOwner } from './utils/addressUtils';
 import { formatKsm, fromStringToBnString } from './utils/textFormat';
 import { repeatCheckForTransactionFinish } from './utils/repeatCheckTransaction';
 import { Settings } from '../restApi/settings/types';
 import '@unique-nft/substrate-client/balance';
-import { AllBalances } from '@unique-nft/substrate-client/types';
+import { Address, AllBalances } from '@unique-nft/substrate-client/types';
 import Web3 from 'web3';
 
 export class UniqueSDKMarketController {
@@ -59,7 +60,7 @@ export class UniqueSDKMarketController {
   }
 
   // purchase
-  async addDeposit(address: string, collectionId: string, tokenId: string, options: TransactionOptions): Promise<void> {
+  async addDeposit(address: Address, collectionId: string, tokenId: string, options: TransactionOptions): Promise<void> {
     const matcherContractInstance = this.getMatcherContractInstance(getEthAccount(address));
     const userDeposit = await this.getUserDeposit(address);
     if (!userDeposit) throw new Error('No user deposit');
@@ -96,8 +97,8 @@ export class UniqueSDKMarketController {
   }
 
   // purchase
-  async addToWhiteList(account: string, options: TransactionOptions, signMessage: TSignMessage): Promise<void> {
-    const ethAddress = getEthAccount(account);
+  async addToWhiteList(address: Address, options: TransactionOptions, signMessage: TSignMessage): Promise<void> {
+    const ethAddress = getEthAccount(address);
     const isWhiteListed = await this.checkWhiteListed(ethAddress);
     if (isWhiteListed) {
       return;
@@ -113,7 +114,7 @@ export class UniqueSDKMarketController {
     }
 
     try {
-      await repeatCheckForTransactionFinish(async () => await this.checkWhiteListed(account));
+      await repeatCheckForTransactionFinish(async () => await this.checkWhiteListed(address));
       return;
     } catch (e) {
       console.error('addToWhiteList error pushed upper');
@@ -122,7 +123,7 @@ export class UniqueSDKMarketController {
   }
 
   // purchase
-  async buyToken(address: string, collectionId: string, tokenId: string, options: TransactionOptions): Promise<void> {
+  async buyToken(address: Address, collectionId: string, tokenId: string, options: TransactionOptions): Promise<void> {
     const ethAddress = getEthAccount(address);
     const evmCollectionInstance = this.getEvmCollectionInstance(collectionId);
     const matcherContractInstance = this.getMatcherContractInstance(ethAddress);
@@ -155,7 +156,7 @@ export class UniqueSDKMarketController {
   }
 
   // sell
-  async cancelSell(address: string, collectionId: string, tokenId: string, options: TransactionOptions): Promise<void> {
+  async cancelSell(address: Address, collectionId: string, tokenId: string, options: TransactionOptions): Promise<void> {
     const ethAddress = getEthAccount(address);
     const matcherContractInstance = this.getMatcherContractInstance(ethAddress);
     const evmCollectionInstance = this.getEvmCollectionInstance(collectionId);
@@ -196,8 +197,8 @@ export class UniqueSDKMarketController {
   }
 
   // account
-  async checkWhiteListed(account: string): Promise<boolean> {
-    const ethAddress = getEthAccount(account);
+  async checkWhiteListed(address: Address): Promise<boolean> {
+    const ethAddress = getEthAccount(address);
     try {
       return (await this.uniqueSdk.api.query.evmContractHelpers.allowlist(this.contractAddress, ethAddress)).toJSON() as boolean;
     } catch (e) {
@@ -209,7 +210,7 @@ export class UniqueSDKMarketController {
   }
 
   // fee
-  async getKusamaFee(sender: string, recipient?: string, value?: BN): Promise<string | null> {
+  async getKusamaFee(sender: Address, recipient?: string, value?: BN): Promise<string | null> {
     const transferFee = await this.kusamaSdk.extrinsics.getFee({
       address: sender,
       section: 'balances',
@@ -223,8 +224,8 @@ export class UniqueSDKMarketController {
   }
 
   // account
-  async getUserDeposit(account: string): Promise<BN> {
-    const ethAddress = getEthAccount(account);
+  async getUserDeposit(address: Address): Promise<BN> {
+    const ethAddress = getEthAccount(address);
 
     const matcherContractInstance = this.getMatcherContractInstance(ethAddress);
     const result = await matcherContractInstance.methods.balanceKSM(ethAddress).call();
@@ -237,8 +238,8 @@ export class UniqueSDKMarketController {
   }
 
   // sell
-  async lockNftForSale(account: string, collectionId: string, tokenId: string, options: TransactionOptions): Promise<void> {
-    const ethAddress = getEthAccount(account);
+  async lockNftForSale(address: Address, collectionId: string, tokenId: string, options: TransactionOptions): Promise<void> {
+    const ethAddress = getEthAccount(address);
 
     const tokenIdArguments: TokenIdArguments = {
       collectionId: Number(collectionId), tokenId: Number(tokenId)
@@ -246,7 +247,7 @@ export class UniqueSDKMarketController {
 
     const token = await this.uniqueSdk.tokens.get_new(tokenIdArguments);
     if (!token) throw new Error('Token not found');
-    if (isTokenOwner(ethAddress, { Substrate: token.owner })) return;
+    if (token.owner.toLowerCase() === ethAddress.toLowerCase()) return;
 
     const unsignedTxPayload = await this.uniqueSdk.extrinsics.build({
       section: 'unique',
@@ -266,16 +267,22 @@ export class UniqueSDKMarketController {
     });
   }
 
-  // ???
-  private async checkIfNftApproved (tokenOwner: CrossAccountId, collectionId: string, tokenId: string): Promise<boolean> {
-    const { unique } = (this.uniqueSdk?.api.rpc as UniqueDecoratedRpc);
-    const approvedCount = (await unique?.allowance(collectionId, normalizeAccountId(tokenOwner), normalizeAccountId({ Ethereum: this.contractAddress }), tokenId))?.toJSON();
+  // sell
+  private async checkIfNftApproved (tokenOwner: Address, collectionId: string, tokenId: string): Promise<boolean> {
+    // @ts-ignore
+    const { unique } = this.uniqueSdk?.api.rpc || {};
+    const approvedCount = (await unique?.allowance(
+      Number(collectionId),
+      isEthereumAddress(tokenOwner) ? { Ethereum: tokenOwner } : { Substrate: tokenOwner },
+      { Ethereum: this.contractAddress },
+      Number(tokenId)
+    ))?.toJSON();
 
     return approvedCount === 1;
   }
 
   // sell
-  async sendNftToSmartContract(address: string, collectionId: string, tokenId: string, options: TransactionOptions): Promise<void> {
+  async sendNftToSmartContract(address: Address, collectionId: string, tokenId: string, options: TransactionOptions): Promise<void> {
     const tokenIdArguments: TokenIdArguments = {
       collectionId: Number(collectionId), tokenId: Number(tokenId)
     };
@@ -284,7 +291,7 @@ export class UniqueSDKMarketController {
     if (!token) throw new Error('Token not found');
 
     const evmCollectionInstance = this.getEvmCollectionInstance(collectionId);
-    const approved = await this.checkIfNftApproved({ Substrate: token.owner }, collectionId, tokenId);
+    const approved = await this.checkIfNftApproved(token.owner, collectionId, tokenId);
 
     if (approved) return;
 
@@ -306,6 +313,7 @@ export class UniqueSDKMarketController {
         []
       ]
     });
+
     const signature = await options.sign?.(unsignedTxPayload);
 
     if (!signature) throw new Error('Signing failed');
@@ -317,7 +325,7 @@ export class UniqueSDKMarketController {
   }
 
   // sell
-  async setForFixPriceSale(address: string, collectionId: string, tokenId: string, price: string, options: TransactionOptions): Promise<void> {
+  async setForFixPriceSale(address: Address, collectionId: string, tokenId: string, price: string, options: TransactionOptions): Promise<void> {
     const ethAddress = getEthAccount(address);
     const evmCollectionInstance = this.getEvmCollectionInstance(collectionId);
     const matcherContractInstance = this.getMatcherContractInstance(ethAddress);
@@ -356,7 +364,7 @@ export class UniqueSDKMarketController {
   }
 
   // account
-  async transferBalance(address: string, destination: string, amount: string, options: TransactionOptions): Promise<void> {
+  async transferBalance(address: Address, destination: string, amount: string, options: TransactionOptions): Promise<void> {
     const unsignedTxPayload = await this.kusamaSdk.extrinsics.build({
       section: 'balances',
       method: 'transfer',
@@ -380,7 +388,7 @@ export class UniqueSDKMarketController {
     }
   }
 
-  async transferBidBalance(address: string, amount: string, options: TransactionOptions): Promise<void> {
+  async transferBidBalance(address: Address, amount: string, options: TransactionOptions): Promise<void> {
     const unsignedTxPayload = await this.kusamaSdk.extrinsics.build({
       section: 'balances',
       method: 'transferKeepAlive',
@@ -404,12 +412,12 @@ export class UniqueSDKMarketController {
     }
   }
 
-  transferToAuction(owner: string, collectionId: string, tokenId: string, options: TransactionOptions): Promise<void> {
+  transferToAuction(owner: Address, collectionId: string, tokenId: string, options: TransactionOptions): Promise<void> {
     return this.transferToken(owner, this.auctionAddress, collectionId, tokenId, options);
   }
 
   // token
-  async transferToken(from: string, to: string, collectionId: string, tokenId: string, options: TransactionOptions): Promise<void> {
+  async transferToken(from: Address, to: Address, collectionId: string, tokenId: string, options: TransactionOptions): Promise<void> {
     const tokenIdArguments: TokenIdArguments = {
       collectionId: Number(collectionId), tokenId: Number(tokenId)
     };
@@ -417,7 +425,7 @@ export class UniqueSDKMarketController {
     const token = await this.uniqueSdk.tokens.get_new(tokenIdArguments);
     if (!token) throw new Error('Token not found');
 
-    if (!isTokenOwner(from, { Substrate: token.owner })) throw new Error('You are not owner of this token');
+    if (!isTokenOwner(from, token.owner)) throw new Error('You are not owner of this token');
 
     const unsignedTxPayload = await this.uniqueSdk.tokens.transfer.build({
       address: from,
@@ -443,7 +451,7 @@ export class UniqueSDKMarketController {
   }
 
   // purchase
-  async unlockNft(address: string, collectionId: string, tokenId: string, options: TransactionOptions): Promise<void> {
+  async unlockNft(address: Address, collectionId: string, tokenId: string, options: TransactionOptions): Promise<void> {
     const ethAddress = getEthAccount(address);
 
     const tokenIdArguments: TokenIdArguments = {
@@ -454,7 +462,7 @@ export class UniqueSDKMarketController {
     if (!token) throw new Error('Token for unlock not found');
     const owner = token.owner;
 
-    if (owner && compareEncodedAddresses(owner, address)) return;
+    if (owner && !isEthereumAddress(owner) && compareEncodedAddresses(owner, address)) return;
 
     const unsignedTxPayload = await this.uniqueSdk.extrinsics.build({
       section: 'unique',
@@ -474,7 +482,7 @@ export class UniqueSDKMarketController {
   }
 
   // account
-  async withdrawDeposit(address: string, options: TransactionOptions): Promise<void> {
+  async withdrawDeposit(address: Address, options: TransactionOptions): Promise<void> {
     if (!address || address === '') throw new Error('Address not provided');
     const ethAddress = getEthAccount(address);
     const matcherContractInstance = this.getMatcherContractInstance(ethAddress);
@@ -510,7 +518,7 @@ export class UniqueSDKMarketController {
     });
   }
 
-  async getAccountBalance(address: string): Promise<AllBalances> {
+  async getAccountBalance(address: Address): Promise<AllBalances> {
     return await this.kusamaSdk.balance.get({ address });
   }
 }
