@@ -1,8 +1,7 @@
-import React, { FC, useCallback } from 'react';
-import { InputText } from '@unique-nft/ui-kit';
-import styled from 'styled-components/macro';
+import React, { FC, useCallback, useMemo } from 'react';
+import { IconProps, InputText } from '@unique-nft/ui-kit';
+import styled from 'styled-components';
 import { IconButton } from '../IconButton/IconButton';
-import { IconProps } from '@unique-nft/ui-kit/dist/cjs/types';
 
 interface TextInputProps {
   value: string | undefined
@@ -11,26 +10,45 @@ interface TextInputProps {
   label?: string
   className?: string
   iconLeft?: IconProps
+  errorText?: string
+  allowSpaces?: boolean
+  testid?: string
 }
 
-export const TextInput: FC<TextInputProps> = ({ value, onChange, placeholder, label, className, iconLeft }) => {
+export const TextInput: FC<TextInputProps> = ({ value, onChange, placeholder, label, className, iconLeft, errorText, allowSpaces, testid }) => {
   const onChangeInput = useCallback((_value: string) => {
-    onChange(_value.trim());
-  }, [onChange]);
+    if (!allowSpaces) onChange(_value.trim());
+    else onChange(_value);
+  }, [onChange, allowSpaces]);
 
   const onClear = useCallback(() => {
     onChange('');
   }, [onChange]);
 
+  const iconRight = useMemo(() => {
+    if (value) {
+      return (
+        <ClearButton
+          name={'circle-close'}
+          size={24}
+          onClick={onClear}
+          testid={`${testid}-clear-button`}
+        />);
+    } else return null;
+  }, [value, testid, onClear]);
+
   return <InputWrapper className={className}>
     <InputText
+      testid={`${testid}-input`}
       placeholder={placeholder}
       onChange={onChangeInput}
       value={value}
       label={label}
       iconLeft={iconLeft}
+      statusText={errorText}
+      error={!!errorText}
+      iconRight={iconRight}
     />
-    {value && <ClearButton name={'close'} size={16} onClick={onClear} />}
   </InputWrapper>;
 };
 
@@ -39,15 +57,15 @@ const InputWrapper = styled.div`
   display: inline-block;
   .unique-input-text {
     width: auto;
-    input {
-      padding-right: 22px;
+    div.input-wrapper.with-icon > input {
+      padding-right: 36px;
     }
   }
 `;
 
 const ClearButton = styled(IconButton)`
   position: absolute;
-  right: calc(var(--gap) / 2);
-  bottom: 10px;
+  right: 0;
+  bottom: 5px;
   width: auto !important;
 `;

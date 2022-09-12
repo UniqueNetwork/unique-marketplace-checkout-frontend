@@ -1,37 +1,41 @@
 import React, { FC } from 'react';
-import { TableColumnProps, TableRow } from '@unique-nft/ui-kit/dist/cjs/types';
-import { Text } from '@unique-nft/ui-kit';
+import { IconProps, TableColumnProps, TableRowProps, Text } from '@unique-nft/ui-kit';
 import styled from 'styled-components';
 
 import { MobileTableRow } from './MobileTableRow';
 import MobileTableSkeleton from '../Skeleton/MobileTableSkeleton';
+import EmptyTable from '../EmptyTable';
 
 interface MobileTableProps {
   className?: string
   columns?: TableColumnProps[]
-  data?: TableRow[]
+  data?: TableRowProps[]
   loading?: boolean
+  emptyIconProps?: Omit<IconProps, 'size'>
+  idColumnName: string
 }
 
 const MobileTable: FC<MobileTableProps> = ({
   columns,
   data,
   loading,
-  className
+  className,
+  emptyIconProps,
+  idColumnName
 }) => {
   let children = <MobileTableSkeleton columns={columns || []} />;
 
-  if (!loading && data?.length === 0) children = <Text className={'text_grey'}>No data</Text>;
+  if (!loading && data?.length === 0) children = <EmptyTable iconProps={emptyIconProps} />;
   else if (!loading) {
-    children = <>{data?.map((item, index) => (
+    children = <>{data?.map((item, rowIndex) => (
       <MobileTableRow
-        key={index}
+        key={item[idColumnName] as string}
       >
-        {columns?.map((column) => (
+        {columns?.map((column, columnIndex) => (
           <div key={`column-${column.field || ''}`}>
             {typeof column?.title === 'object' ? <>{column.title}</> : <Text color={'grey-500'}>{`${column?.title || ''}`}</Text>}
-            {column.render && <>{column.render(item[column.field as keyof TableRow])}</>}
-            {!column.render && <Text>{item[column.field as keyof TableRow]?.toString() || ''}</Text>}
+            {column.render && <>{column.render(item[column.field as keyof TableRowProps], item, { rowIndex, columnIndex })}</>}
+            {!column.render && <Text>{item[column.field as keyof TableRowProps]?.toString() || ''}</Text>}
           </div>
         ))}
       </MobileTableRow>
@@ -39,14 +43,8 @@ const MobileTable: FC<MobileTableProps> = ({
   }
 
   return (
-    <MobileTableWrapper className={className}>{children}</MobileTableWrapper>
+    <div className={className}>{children}</div>
   );
 };
-
-const MobileTableWrapper = styled.div`
-  && {
-    margin: var(--gap) 0;  
-  }
-`;
 
 export default MobileTable;

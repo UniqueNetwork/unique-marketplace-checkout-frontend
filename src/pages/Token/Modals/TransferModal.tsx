@@ -1,19 +1,17 @@
 import React, { FC, useCallback, useEffect, useState } from 'react';
-import { Button, Heading, Link, Text } from '@unique-nft/ui-kit';
-import styled from 'styled-components/macro';
+import { Button, Heading, Link, useNotifications } from '@unique-nft/ui-kit';
+import styled from 'styled-components';
 
 import { TTransfer } from './types';
 import { TTokenPageModalBodyProps } from './TokenPageModal';
-import { AdditionalWarning100 } from '../../../styles/colors';
 import { useTransferStages } from '../../../hooks/marketplaceStages';
 import DefaultMarketStages from './StagesModal';
 import { useAccounts } from '../../../hooks/useAccounts';
 import { StageStatus } from '../../../types/StagesTypes';
-import { NotificationSeverity } from '../../../notification/NotificationContext';
-import { useNotification } from '../../../hooks/useNotification';
-import { TextInput } from '../../../components/TextInput/TextInput';
+import { TextInput } from 'components/TextInput/TextInput';
+import { WarningBlock } from 'components/WarningBlock/WarningBlock';
 
-export const TransferModal: FC<TTokenPageModalBodyProps> = ({ token, setIsClosable, onFinish }) => {
+export const TransferModal: FC<TTokenPageModalBodyProps> = ({ token, setIsClosable, onFinish, testid }) => {
   const { selectedAccount } = useAccounts();
   const [status, setStatus] = useState<'ask' | 'transfer-stage'>('ask'); // TODO: naming
   const [recipient, setRecipient] = useState<string>('');
@@ -26,7 +24,7 @@ export const TransferModal: FC<TTokenPageModalBodyProps> = ({ token, setIsClosab
 
   if (!selectedAccount) return null;
 
-  if (status === 'ask') return (<AskTransferModal onTransfer={onTransfer} />);
+  if (status === 'ask') return (<AskTransferModal onTransfer={onTransfer} testid={`${testid}-ask-transfer`} />);
   if (status === 'transfer-stage') {
     return (<TransferStagesModal
       recipient={recipient}
@@ -34,12 +32,13 @@ export const TransferModal: FC<TTokenPageModalBodyProps> = ({ token, setIsClosab
       token={token}
       setIsClosable={setIsClosable}
       sender={selectedAccount.address}
+      testid={testid}
     />);
   }
   return null;
 };
 
-const AskTransferModal: FC<{ onTransfer(receiver: string): void }> = ({ onTransfer }) => {
+const AskTransferModal: FC<{ onTransfer(receiver: string): void, testid: string }> = ({ onTransfer, testid }) => {
   const [address, setAddress] = useState<string>('');
   const onAddressInputChange = useCallback((value: string) => {
     setAddress(value);
@@ -62,34 +61,30 @@ const AskTransferModal: FC<{ onTransfer(receiver: string): void }> = ({ onTransf
         label='Please enter the address you wish to send the NFT to'
         onChange={onAddressInputChange}
         value={address}
+        testid={`${testid}-address-input`}
       />
-      <TextStyled
-        color='additional-warning-500'
-        size='s'
-      >
+      <WarningBlock>
         Proceed with caution, once confirmed the transaction cannot be reverted.
-      </TextStyled>
-      <TextStyled
-        color='additional-warning-500'
-        size='s'
-      >
+      </WarningBlock>
+      <WarningBlock>
         Make sure to use a Substrate address created with a Polkadot.&#123;js&#125; wallet. There is no guarantee that third-party wallets, exchanges or hardware wallets can successfully sign and process your transfer which will result in a possible loss of the NFT.
-      </TextStyled>
+      </WarningBlock>
       <ButtonWrapper>
         <Button
           disabled={!address}
           onClick={onConfirmTransferClick}
           role='primary'
           title='Confirm'
+          testid={`${testid}-confirm-button`}
         />
       </ButtonWrapper>
     </>
   );
 };
 
-const TransferStagesModal: FC<TTokenPageModalBodyProps & TTransfer> = ({ token, onFinish, sender, recipient }) => {
+const TransferStagesModal: FC<TTokenPageModalBodyProps & TTransfer> = ({ token, onFinish, sender, recipient, testid }) => {
   const { stages, status, initiate } = useTransferStages(token?.collectionId || 0, token?.id || 0);
-  const { push } = useNotification();
+  const { info } = useNotifications();
 
   useEffect(() => {
     initiate({ sender, recipient });
@@ -97,33 +92,33 @@ const TransferStagesModal: FC<TTokenPageModalBodyProps & TTransfer> = ({ token, 
 
   useEffect(() => {
     if (status === StageStatus.success) {
-      push({ severity: NotificationSeverity.success, message: <><Link href={`/token/${token?.collectionId}/${token?.id}`} title={`${token?.prefix} #${token?.id}`}/> transferred</> });
+      info(
+        <div data-testid={`${testid}-success-notification`}><Link href={`/token/${token?.collectionId}/${token?.id}`} title={`${token?.prefix} #${token?.id}`}/> transferred</div>,
+        { name: 'success', size: 32, color: 'var(--color-additional-light)' }
+      );
     }
   }, [status]);
 
   return (
     <div>
-      <DefaultMarketStages stages={stages} status={status} onFinish={onFinish} />
+      <DefaultMarketStages
+        stages={stages}
+        status={status}
+        onFinish={onFinish}
+        testid={testid}
+      />
     </div>
   );
 };
 
-const TextStyled = styled(Text)`
-  box-sizing: border-box;
-  display: flex;
-  padding: 8px 16px;
-  margin-bottom: 16px;
-  border-radius: 4px;
-  background-color: ${AdditionalWarning100};
-  width: 100%;
-`;
-
 const InputWrapper = styled(TextInput)`
-  margin-bottom: 32px;
+  margin-bottom: 8px;
   width: 100%;
 
   label {
-    margin-bottom: 16px;
+    margin-bottom: 16px;    
+    white-space: break-spaces;
+    height: auto;
   }
 `;
 

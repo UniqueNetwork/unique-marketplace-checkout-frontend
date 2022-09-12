@@ -1,25 +1,26 @@
-import React, { FC, useCallback, useEffect } from 'react';
-import styled from 'styled-components/macro';
+import React, { FC, useCallback } from 'react';
+import styled from 'styled-components';
 import { Checkbox, Text } from '@unique-nft/ui-kit';
 import { useCollections } from '../../hooks/useCollections';
 import Accordion from '../Accordion/Accordion';
-import { Avatar } from '../Avatar/Avatar';
 import CheckboxSkeleton from '../Skeleton/CheckboxSkeleton';
-import { useAttributes } from '../../api/restApi/offers/attributes';
-import { useAttributeCounts } from '../../api/restApi/offers/attributeCounts';
 import { AttributeItem } from './types';
 import AttributesFilter from './AttributesFilter';
 import AttributeCountsFilter from './AttributeCountsFilter';
-import { useApi } from '../../hooks/useApi';
+import { Attribute, AttributeCount } from '../../api/restApi/offers/types';
+import { CollectionCover } from '../CollectionCover/CollectionCover';
 
 interface CollectionsFilterProps {
   value?: { collections?: number[], attributes?: { key: string, attribute: string }[], attributeCounts?: number[] } | null
+  attributes?: Record<string, Attribute[]>
+  attributeCounts?: AttributeCount[]
   onChange(collections: number[], attributes?: AttributeItem[], attributeCounts?: number[]): void
   onAttributesChange?(value: { key: string, attribute: string }[]): void
   onAttributeCountsChange?(value: number[]): void
+  testid: string
 }
 
-const CollectionsFilter: FC<CollectionsFilterProps> = ({ value, onChange, onAttributesChange, onAttributeCountsChange }) => {
+const CollectionsFilter: FC<CollectionsFilterProps> = ({ value, attributes, attributeCounts, onChange, onAttributesChange, onAttributeCountsChange, testid }) => {
   const { collections, isFetching } = useCollections();
   // const { attributes, fetch: fetchAttributes, reset: resetAttributes, isFetching: isAttributesFetching } = useAttributes();
   // const { attributeCounts, fetch: fetchAttributeCounts, isFetching: isAttributeCountsFetching } = useAttributeCounts();
@@ -63,6 +64,7 @@ const CollectionsFilter: FC<CollectionsFilterProps> = ({ value, onChange, onAttr
       isOpen={true}
       onClear={onCollectionsClear}
       isClearShow={selectedCollections.length > 0}
+      testid={`${testid}-accordion`}
     >
       <CollectionFilterWrapper>
         {isFetching && Array.from({ length: 3 }).map((_, index) => <CheckboxSkeleton key={`checkbox-skeleton-${index}`} />)}
@@ -75,9 +77,12 @@ const CollectionsFilter: FC<CollectionsFilterProps> = ({ value, onChange, onAttr
               label={''}
               size={'m'}
               onChange={onCollectionSelect(collection.id)}
+              testid={`${testid}-checkbox-${collection.id}`}
             />
-            <Avatar src={collection.coverImageUrl} size={22} type={'circle'}/>
-            <Text>{collection.collectionName || ''}</Text>
+            <CollectionCover src={collection.coverImageUrl} size={22} type={'circle'}/>
+            <Text
+              testid={`${testid}-name-${collection.id}`}
+            >{collection.collectionName || ''}</Text>
           </CheckboxWrapper>
           ))}
       </CollectionFilterWrapper>

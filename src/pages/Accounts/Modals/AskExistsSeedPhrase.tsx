@@ -1,20 +1,26 @@
 import React, { ChangeEvent, FC, useCallback, useState } from 'react';
-import { Button, Checkbox, Text } from '@unique-nft/ui-kit';
-import styled from 'styled-components/macro';
+import { Button, Text } from '@unique-nft/ui-kit';
+import styled from 'styled-components';
 
 import { TCreateAccountBodyModalProps } from './types';
 import { addressFromSeed } from '../../../utils/seedUtils';
 import DefaultAvatar from '../../../static/icons/default-avatar.svg';
 import { defaultPairType, derivePath } from './CreateAccount';
-import { AdditionalWarning100, Grey300 } from '../../../styles/colors';
-import { Avatar } from '../../../components/Avatar/Avatar';
+import { Avatar } from 'components/Avatar/Avatar';
+import useDeviceSize, { DeviceSize } from '../../../hooks/useDeviceSize';
+import { shortcutText } from '../../../utils/textUtils';
 
-export const AskExistsSeedPhraseModal: FC<TCreateAccountBodyModalProps> = ({ onFinish }) => {
-  const [seed, setSeed] = useState<string>('');
-  const [address, setAddress] = useState<string>('');
-  const [confirmSeedSaved, setConfirmSeedSaved] = useState<boolean>(false);
+export const AskExistsSeedPhraseModal: FC<TCreateAccountBodyModalProps> = ({ accountProperties, onFinish, testid }) => {
+  const [seed, setSeed] = useState<string>(accountProperties?.seed || '');
+  const [address, setAddress] = useState<string>(accountProperties?.address || '');
+  const deviceSize = useDeviceSize();
 
   const changeSeed = useCallback((value: string) => {
+    if (!value) {
+      setAddress('');
+      setSeed('');
+      return;
+    }
     setSeed(value);
     const newAddress = addressFromSeed(value, derivePath, defaultPairType);
     setAddress(newAddress);
@@ -25,38 +31,35 @@ export const AskExistsSeedPhraseModal: FC<TCreateAccountBodyModalProps> = ({ onF
   }, []);
 
   const onNextClick = useCallback(() => {
+    if (!seed) return;
     onFinish({ seed, address });
   }, [seed, address]);
 
   return (<>
     <AddressWrapper>
-      <Avatar size={24} src={DefaultAvatar} address={address} />
-      <Text>{address}</Text>
+      {address && <><Avatar size={24} src={DefaultAvatar} address={address} />
+        <Text
+          testid={`${testid}-address`}
+          size={'s'}
+          color={'grey-500'}
+        >{deviceSize === DeviceSize.sm ? shortcutText(address) : address}</Text>
+      </>}
+      {!address && <Text size={'s'} color={'grey-400'}>The account address will appear while entering the secret seed{deviceSize === DeviceSize.sm ? '...' : ' value'}</Text>}
     </AddressWrapper>
     <InputSeedWrapper>
+      <Text>The secret seed value</Text>
       <SeedInput
+        data-testid={`${testid}-seed-input`}
         onChange={onSeedChange}
         value={seed}
+        rows={deviceSize === DeviceSize.sm ? 3 : 1}
       />
     </InputSeedWrapper>
-    <TextStyled
-      color='additional-warning-500'
-      size='s'
-    >
-      Ensure that you keep this seed in a safe place. Anyone with access to it can re-create the account and gain full access to it.
-    </TextStyled>
-    <ConfirmWrapperRow>
-      <Checkbox label={'I have saved my mnemnic seed safely'}
-        checked={confirmSeedSaved}
-        onChange={setConfirmSeedSaved}
-        size={'m'}
-      />
-    </ConfirmWrapperRow>
     <ButtonWrapper>
-
       <StepsTextStyled size={'m'}>Step 1/3</StepsTextStyled>
       <Button
-        disabled={!address || !confirmSeedSaved}
+        testid={`${testid}-next-button`}
+        disabled={!address}
         onClick={onNextClick}
         role='primary'
         title='Next'
@@ -75,39 +78,47 @@ const AddressWrapper = styled.div`
   .unique-text {
     text-overflow: ellipsis;
     overflow: hidden;
+    &.color-grey-400 {
+      color: var(--color-grey-400);
+    }
+  }
+  @media (max-width: 567px) {
+    font-weight: 400;
+    font-size: 14px;
+    line-height: 22px;
+    padding: 0 16px;
+    height: 62px;
+    align-items: baseline;
+    &>div {
+      margin: auto 0;
+    }
+    .unique-text {
+      margin: auto 0;
+    }
   }
 `;
 
 const InputSeedWrapper = styled.div`
-  border: 1px solid ${Grey300};
-  border-radius: 4px;
-  padding: var(--gap);
   display: flex;
-  margin-bottom: var(--gap);
+  flex-direction: column;
+  margin-bottom: 30px;
+  width: 100%;
 `;
 
 const SeedInput = styled.textarea`
-  margin-bottom: 32px;
-  width: 100%;
-  border: none;
+  border: 1px solid var(--grey-300);
+  border-radius: 4px;
+  padding: calc(var(--gap) / 2) var(--gap);
+  width: calc(100% - var(--gap) * 2);
   height: auto;
   resize: none;
   outline: 0px none transparent;
-`;
-
-const TextStyled = styled(Text)`
-  box-sizing: border-box;
-  display: flex;
-  padding: 8px 16px;
-  margin: calc(var(--gap) * 1.5) 0;
-  border-radius: 4px;
-  background-color: ${AdditionalWarning100};
-  width: 100%;
-`;
-
-const ConfirmWrapperRow = styled.div`
-  display: flex;
-  margin-bottom: calc(var(--gap) * 1.5);
+  margin-top: var(--gap);
+  font-family: 'Roboto';
+  font-style: normal;
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 24px;
 `;
 
 const StepsTextStyled = styled(Text)`
@@ -117,4 +128,5 @@ const StepsTextStyled = styled(Text)`
 const ButtonWrapper = styled.div`
   display: flex;
   justify-content: flex-end;
+  align-items: baseline;
 `;

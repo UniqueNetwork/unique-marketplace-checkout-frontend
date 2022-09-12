@@ -1,4 +1,5 @@
 import { PaginatedResponse, Pagination, Sortable } from '../base/types';
+import { VideoAttribute } from '../../uniqueSdk/types';
 
 export type GetOffersRequestPayload = {
   collectionId?: number | number[]
@@ -7,7 +8,8 @@ export type GetOffersRequestPayload = {
   seller?: string
   isAuction?: boolean
   bidderAddress?: string
-  traitsCount?: number[]
+  attributes?: string[]
+  numberOfAttributes?: number[]
   searchText?: string
   searchLocale?: string
 } & Pagination & Sortable;
@@ -50,12 +52,16 @@ export type Offer = {
     image: string
     prefix: string
     attributes: OfferTokenAttribute[]
+    video?: string | VideoAttribute
   }
   currency: string
   isSellBlockchain: boolean
 }
 
-export type OffersResponse = PaginatedResponse<Offer>
+export type OffersResponse = PaginatedResponse<Offer> & {
+  attributes: Record<string, Attribute[]>;
+  attributesCount: AttributeCount[]
+}
 
 export type UseFetchOffersProps = Partial<GetOffersRequestPayload>
 

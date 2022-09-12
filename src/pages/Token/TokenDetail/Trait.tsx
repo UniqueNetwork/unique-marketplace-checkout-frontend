@@ -1,7 +1,7 @@
 import { FC } from 'react';
-import styled from 'styled-components/macro';
+import styled from 'styled-components';
 import { Text } from '@unique-nft/ui-kit';
-import { Grey100 } from '../../../styles/colors';
+import { BlueGrey100 } from '../../../styles/colors';
 
 export interface ITraitProps {
   trait: string;
@@ -10,9 +10,8 @@ export interface ITraitProps {
 export const Trait: FC<ITraitProps> = ({ trait }: ITraitProps) => (
   <TraitStyled>
     <Text
-      color='secondary-300'
       size='s'
-      weight='medium'
+      weight='regular'
     >
       {trait}
     </Text>
@@ -24,8 +23,10 @@ const TraitStyled = styled.div`
   flex-wrap: nowrap;
   padding: 1px 8px;
   border-radius: 4px;
-  background-color: ${Grey100};
-
+  background-color: ${BlueGrey100};
+  .unique-text {
+    color: var(--color-secondary-300);
+  }
   &:not(:last-of-type) {
     margin-right: 8px;
   }

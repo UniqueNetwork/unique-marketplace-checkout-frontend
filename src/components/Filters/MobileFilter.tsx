@@ -1,13 +1,11 @@
 import React, { ReactElement, useCallback, useState } from 'react';
-import styled from 'styled-components/macro';
-import { Button, Select, Tabs } from '@unique-nft/ui-kit';
-import { IconProps, SelectOptionProps } from '@unique-nft/ui-kit/dist/cjs/types';
+import styled from 'styled-components';
+import { Button, IconProps, Select, SelectOptionProps, Tabs } from '@unique-nft/ui-kit';
 
-import { FilterChangeHandler, FiltersProps, FilterState } from './types';
+import { FilterChangeHandler, FilterState } from './types';
 import { AdditionalLight } from '../../styles/colors';
 
 type MobileFiltersProps<T> = {
-  value: T | null
   filterCount: number
   defaultSortingValue: SelectOptionProps
   sortingValue: string
@@ -18,12 +16,13 @@ type MobileFiltersProps<T> = {
   }[]
   onFilterChange: FilterChangeHandler<T>
   onSortingChange(value: SelectOptionProps): void
-  filterComponent?: (props: FiltersProps<T>) => ReactElement | null
+  filterComponent?: ReactElement | null
+  testid: string
 }
 
 const tabs = ['Filter', 'Sort'];
 
-export function MobileFilters<T = FilterState>({ value, filterCount, filterComponent, defaultSortingValue, sortingValue, sortingOptions, onFilterChange, onSortingChange }: MobileFiltersProps<T>) {
+export function MobileFilters<T = FilterState>({ filterCount, filterComponent, defaultSortingValue, sortingValue, sortingOptions, onFilterChange, onSortingChange, testid }: MobileFiltersProps<T>) {
   const [isVisible, setIsVisible] = useState(false);
   const [activeTabIndex, setActiveTabIndex] = useState(0);
 
@@ -43,10 +42,24 @@ export function MobileFilters<T = FilterState>({ value, filterCount, filterCompo
 
   return <>
     <MobileFilterActionsWrapper>
-      {!isVisible && <Button role={'primary'} onClick={onVisibleButtonClick} title={`Filter and sort ${filterCount ? `(${filterCount})` : ''} `} />}
+      {!isVisible && <Button
+        role={'primary'}
+        onClick={onVisibleButtonClick}
+        title={`Filter and sort ${filterCount ? `(${filterCount})` : ''} `}
+        testid={`${testid}-filter-sort-button`}
+      />}
       {isVisible && <>
-        <Button onClick={onShowButtonClick} title={'Show'} />
-        <Button role={'danger'} onClick={onResetButtonClick} title={'Reset'} />
+        <Button
+          onClick={onShowButtonClick}
+          title={'Show'}
+          testid={`${testid}-show-button`}
+        />
+        <Button
+          role={'danger'}
+          onClick={onResetButtonClick}
+          title={'Reset'}
+          testid={`${testid}-reset-button`}
+        />
       </>
       }
     </MobileFilterActionsWrapper>
@@ -55,16 +68,18 @@ export function MobileFilters<T = FilterState>({ value, filterCount, filterCompo
         activeIndex={activeTabIndex}
         labels={tabs}
         onClick={setActiveTabIndex}
+        testid={`${testid}-tabs`}
       />
       <Tabs
         activeIndex={activeTabIndex}
       >
-        {(filterComponent && filterComponent({ value, onFilterChange })) || <></>}
+        {filterComponent || <></>}
         <SortStyled>
           <Select
             onChange={onSortingChange}
             options={sortingOptions}
             value={sortingValue}
+            testid={`${testid}-sorting-select`}
           />
         </SortStyled>
       </Tabs>

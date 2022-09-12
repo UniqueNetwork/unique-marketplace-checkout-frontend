@@ -7,5 +7,6 @@
     w.ENV.SCAN_URL = '${SCAN_URL}';
     w.ENV.UNIQUE_API_URL = '${UNIQUE_API_URL}';
     w.ENV.CHECKOUT_PUBLIC_KEY = '${CHECKOUT_PUBLIC_KEY}'
+    w.ENV.RAMP_API_KEY = '${RAMP_API_KEY}';
 
 })(this);

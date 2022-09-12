@@ -1,13 +1,15 @@
-import { Text } from '@unique-nft/ui-kit';
 import { FC, useCallback, useState } from 'react';
 import { Link } from 'react-router-dom';
-import styled from 'styled-components/macro'; // Todo: https://cryptousetech.atlassian.net/browse/NFTPAR-1201
+import styled from 'styled-components';
+import { Icon } from '@unique-nft/ui-kit';
 
-import { useScreenWidthFromThreshold } from '../../hooks/useScreenWidthFromThreshold';
-import menu from '../../static/icons/menu.svg';
+import { useScreenWidthFromThreshold } from 'hooks/useScreenWidthFromThreshold';
+import useDeviceSize, { DeviceSize } from 'hooks/useDeviceSize';
+import { useAdminLoggingIn } from 'api/restApi/admin/login';
+import { useAccounts } from 'hooks/useAccounts';
 import { TMenuItems } from '../PageLayout';
 import { WalletManager } from './WalletManager/WalletManager';
-import useDeviceSize, { DeviceSize } from '../../hooks/useDeviceSize';
+import { DesktopMenuLink, MobileMenuLink } from './MenuLink';
 
 interface HeaderProps {
   activeItem: TMenuItems;
@@ -17,9 +19,12 @@ export const Header: FC<HeaderProps> = ({ activeItem }) => {
   const { lessThanThreshold: showMobileMenu } =
     useScreenWidthFromThreshold(1279);
   const [mobileMenuIsOpen, toggleMobileMenu] = useState(false);
+  const { selectedAccount, isLoading } = useAccounts();
+  const { hasAdminPermission } = useAdminLoggingIn();
+
   const mobileMenuToggler = useCallback(() => {
     toggleMobileMenu((prevState) => !prevState);
-  }, []);
+  }, [selectedAccount]);
 
   const deviceSize = useDeviceSize();
 
@@ -28,53 +33,31 @@ export const Header: FC<HeaderProps> = ({ activeItem }) => {
       <LeftSideColumn>
         {showMobileMenu && <MenuIcon
           onClick={mobileMenuToggler}
-          src={menu}
-        />}
+        >
+          <Icon name={'menu'} size={32} />
+        </MenuIcon>}
         <LogoLink to={'/'}>
-          <LogoIcon src={'/logos/logo.svg'} />
+          <LogoIcon src={activeItem === 'Collections' ? '/logos/admin.svg' : '/logos/logo.svg'} />
         </LogoLink>
         {!showMobileMenu && (
           <nav>
-            <Link to='/'>
-              <DesktopMenuItem
-                $active={activeItem === 'Market'}
-                color='additional-dark'
-                size='m'
-                weight='medium'
-              >
-                Market
-              </DesktopMenuItem>
-            </Link>
-            <Link to='myTokens'>
-              <DesktopMenuItem
-                $active={activeItem === 'My tokens'}
-                color='additional-dark'
-                size='m'
-                weight='medium'
-              >
-                My tokens
-              </DesktopMenuItem>
-            </Link>
-            <Link to='trades'>
-              <DesktopMenuItem
-                $active={activeItem === 'Trades'}
-                color='additional-dark'
-                size='m'
-                weight='medium'
-              >
-                Trades
-              </DesktopMenuItem>
-            </Link>
-            <Link to='faq'>
-              <DesktopMenuItem
-                $active={activeItem === 'FAQ'}
-                color='additional-dark'
-                size='m'
-                weight='medium'
-              >
-                FAQ
-              </DesktopMenuItem>
-            </Link>
+            <DesktopMenuLink to='/' active={activeItem === 'Market'}>
+              Market
+            </DesktopMenuLink>
+            <DesktopMenuLink to='myTokens' active={activeItem === 'My tokens'} disabled={!selectedAccount && !isLoading}>
+              My tokens
+            </DesktopMenuLink>
+            <DesktopMenuLink to='trades' active={activeItem === 'Trades'}>
+              Trades
+            </DesktopMenuLink>
+            <DesktopMenuLink to='faq' active={activeItem === 'FAQ'}>
+              FAQ
+            </DesktopMenuLink>
+            {hasAdminPermission &&
+              <DesktopMenuLink to='administration' active={activeItem === 'Collections'}>
+                Admin panel
+              </DesktopMenuLink>
+            }
           </nav>
         )}
       </LeftSideColumn>
@@ -83,66 +66,33 @@ export const Header: FC<HeaderProps> = ({ activeItem }) => {
       </RightSide>
       {showMobileMenu && mobileMenuIsOpen && (
         <MobileMenu>
-          <LinkWrapper onClick={mobileMenuToggler}>
-            <Link to='/'>
-              <TextStyled
-                $active={activeItem === 'Market'}
-                color='additional-dark'
-                size='m'
-                weight='medium'
-              >
-                Market
-              </TextStyled>
-            </Link>
-          </LinkWrapper>
-          <LinkWrapper onClick={mobileMenuToggler}>
-            <Link to='myTokens'>
-              <TextStyled
-                $active={activeItem === 'My tokens'}
-                color='additional-dark'
-                size='m'
-                weight='medium'
-              >
-                My tokens
-              </TextStyled>
-            </Link>
-          </LinkWrapper>
-          <LinkWrapper onClick={mobileMenuToggler}>
-            <Link to='trades'>
-              <TextStyled
-                $active={activeItem === 'Trades'}
-                color='additional-dark'
-                size='m'
-                weight='medium'
-              >
-                Trades
-              </TextStyled>
-            </Link>
-          </LinkWrapper>
-          <LinkWrapper onClick={mobileMenuToggler}>
-            <Link to='faq'>
-              <TextStyled
-                $active={activeItem === 'FAQ'}
-                color='additional-dark'
-                size='m'
-                weight='medium'
-              >
-                FAQ
-              </TextStyled>
-            </Link>
-          </LinkWrapper>
-          {deviceSize !== DeviceSize.lg && <LinkWrapper onClick={mobileMenuToggler}>
-            <Link to='accounts'>
-              <TextStyled
-                $active={activeItem === 'Manage accounts'}
-                color='additional-dark'
-                size='m'
-                weight='medium'
-              >
-                Manage accounts
-              </TextStyled>
-            </Link>
-          </LinkWrapper>}
+          <MobileMenuLink to='/' active={activeItem === 'Market'} onClick={mobileMenuToggler}>
+            Market
+          </MobileMenuLink>
+          <MobileMenuLink
+            to='myTokens'
+            active={activeItem === 'My tokens'}
+            onClick={mobileMenuToggler}
+            disabled={!selectedAccount && !isLoading}
+          >
+            My tokens
+          </MobileMenuLink>
+          <MobileMenuLink to='trades' active={activeItem === 'Trades'} onClick={mobileMenuToggler}>
+            Trades
+          </MobileMenuLink>
+          <MobileMenuLink to='faq' active={activeItem === 'FAQ'} onClick={mobileMenuToggler}>
+            FAQ
+          </MobileMenuLink>
+          {deviceSize !== DeviceSize.lg &&
+            <MobileMenuLink to='accounts' active={activeItem === 'Manage accounts'} onClick={mobileMenuToggler}>
+              Manage accounts
+            </MobileMenuLink>
+          }
+          {hasAdminPermission &&
+            <MobileMenuLink to='administration' active={activeItem === 'Collections'} onClick={mobileMenuToggler}>
+              Admin panel
+            </MobileMenuLink>
+          }
         </MobileMenu>
       )}
     </HeaderStyled>
@@ -154,6 +104,11 @@ const HeaderStyled = styled.div`
   align-items: center;
   justify-content: space-between;
   width: 100%;
+  @media (max-width: 567px) {
+    .unique-modal-wrapper {
+      padding: 0;
+    }
+  }
 `;
 
 const LeftSideColumn = styled.div`
@@ -161,7 +116,7 @@ const LeftSideColumn = styled.div`
   align-items: center;
 `;
 
-const MenuIcon = styled.img`
+const MenuIcon = styled.div`
   width: 32px;
   height: 32px;
   margin-right: 8px;
@@ -182,13 +137,6 @@ const RightSide = styled.div`
   align-items: center;
 `;
 
-const LinkWrapper = styled.div`
-  display: contents;
-  a {
-    margin-right: 0;
-  }
-`;
-
 const MobileMenu = styled.div`
   position: absolute;
   top: 81px;
@@ -201,28 +149,4 @@ const MobileMenu = styled.div`
   flex-direction: column;
   padding: 16px;
   z-index: 9;
-`;
-
-const TextStyled = styled(Text) <{ $active?: boolean }>`
-  && {
-    display: flex;
-    border-radius: 4px;
-    padding: 8px 16px;
-    background-color: ${(props) => props.$active ? 'var(--color-primary-500)' : 'transparent'};
-    color: ${(props) => props.$active ? 'var(--color-additional-light)' : 'var(--color-additional-dark)'};
-    &:hover {
-      color: ${(props) => (props.$active ? 'var(--color-additional-light)' : 'var(--color-primary-500)')};
-    }
-  }
-`;
-
-const DesktopMenuItem = styled(Text) <{ $active?: boolean }>`
-  && {
-    margin-right: 24px;
-    color: ${(props) => props.$active ? 'var(--color-additional-dark)' : 'var(--color-primary-500)'};
-    border-bottom: ${(props) => props.$active ? '1px solid var(--color-additional-dark)' : 'none'};
-    &:hover {
-      color: ${(props) => (props.$active ? 'var(--color-additional-dark)' : 'var(--color-primary-400)')};
-    }
-  }
 `;

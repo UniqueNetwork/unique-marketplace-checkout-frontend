@@ -5,6 +5,7 @@ declare type Env = {
   REACT_APP_UNIQUE_API_URL: string | undefined,
   REACT_APP_SCAN_URL: string | undefined,
   CHECKOUT_PUBLIC_KEY: string | undefined
+  REACT_APP_RAMP_API_KEY: string | undefined,
 } & Record<string, string | undefined>
 
 declare type Config = {
@@ -12,7 +13,9 @@ declare type Config = {
   feturedCollectionIds: number[]
   uniqueApiUrl: string | undefined
   scanUrl: string | undefined
+  walletUrl: string | undefined
   IPFSGateway: string | undefined
+  rampApiKey: string | undefined
   checkoutPublicKey: string | undefined
 }
 
@@ -28,6 +31,8 @@ const config: Config = {
   uniqueApiUrl: window.ENV?.UNIQUE_API_URL || process.env.REACT_APP_UNIQUE_API_URL,
   IPFSGateway: window.ENV?.IPFS_GATEWAY || process.env.REACT_APP_IPFS_GATEWAY,
   scanUrl: window.ENV?.SCAN_URL || process.env.REACT_APP_SCAN_URL,
+  walletUrl: window.ENV?.WALLET_URL || process.env.REACT_APP_WALLET_URL,
+  rampApiKey: window.ENV && 'RAMP_API_KEY' in window.ENV ? window.ENV.RAMP_API_KEY : process.env.REACT_APP_RAMP_API_KEY,
   checkoutPublicKey: window.ENV?.CHECKOUT_PUBLIC_KEY || process.env.REACT_APP_CHECKOUT_PUBLIC_KEY
 };
 

@@ -1,17 +1,20 @@
-import React, { FC, useCallback, useMemo, useRef, useState } from 'react';
+import React, { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { Account, AccountProvider, AccountSigner } from './AccountContext';
 import { SignModal } from '../components/SignModal/SignModal';
 import { KeyringPair } from '@polkadot/keyring/types';
-import { web3Accounts, web3Enable } from '@polkadot/extension-dapp';
+import { web3Accounts, web3Enable, web3AccountsSubscribe, web3EnablePromise } from '@polkadot/extension-dapp';
 import { sleep } from '../utils/helpers';
 import keyring from '@polkadot/ui-keyring';
 import { BN } from '@polkadot/util';
 import { Codec } from '@polkadot/types/types';
 import { useApi } from '../hooks/useApi';
 import { getWithdrawBids } from '../api/restApi/auction/auction';
+import { Unsubcall } from '@polkadot/extension-inject/types';
 
 export const DefaultAccountKey = 'unique_market_account_address';
+
+type TQueryAccountResponse = { data: { free: BN } };
 
 const AccountWrapper: FC = ({ children }) => {
   const [accounts, setAccounts] = useState<Account[]>([]);
@@ -19,11 +22,17 @@ const AccountWrapper: FC = ({ children }) => {
   const [isLoadingDeposits, setIsLoadingDeposits] = useState<boolean>(false);
   const [fetchAccountsError, setFetchAccountsError] = useState<string | undefined>();
   const [selectedAccount, setSelectedAccount] = useState<Account>();
-  const { rpcClient, api, rawKusamaRpcApi } = useApi();
+  const { api, kusamaSdk } = useApi();
 
   const changeAccount = useCallback((account: Account) => {
     localStorage.setItem(DefaultAccountKey, account.address);
     setSelectedAccount(account);
+  }, []);
+
+  const clearAllAccounts = useCallback(() => {
+    localStorage.removeItem(DefaultAccountKey);
+    setSelectedAccount(undefined);
+    setAccounts([]);
   }, []);
 
   const [isSignModalVisible, setIsSignModalVisible] = useState<boolean>(false);
@@ -51,16 +60,19 @@ const AccountWrapper: FC = ({ children }) => {
   }, []);
 
   const getExtensionAccounts = useCallback(async () => {
-    // this call fires up the authorization popup
-    let extensions = await web3Enable('my cool dapp');
-    if (extensions.length === 0) {
-      console.log('Extension not found, retry in 1s');
-      await sleep(1000);
-      extensions = await web3Enable('my cool dapp');
+    if (!web3EnablePromise) {
+      // this call fires up the authorization popup
+      let extensions = await web3Enable('my cool dapp');
       if (extensions.length === 0) {
-        return [];
+        console.log('Extension not found, retry in 1s');
+        await sleep(1000);
+        extensions = await web3Enable('my cool dapp');
+        if (extensions.length === 0) {
+          return [];
+        }
       }
     }
+
     return (await web3Accounts()).map((account) => ({ ...account, signerType: AccountSigner.extension })) as Account[];
   }, []);
 
@@ -80,9 +92,10 @@ const AccountWrapper: FC = ({ children }) => {
   }, [getExtensionAccounts, getLocalAccounts]);
 
   const getAccountBalance = useCallback(async (account: Account) => {
-    const balances = await rpcClient?.rawKusamaRpcApi?.derive.balances?.all(account.address);
-    return balances?.availableBalance || new BN(0);
-  }, [rpcClient]);
+    // const balances = await rpcClient?.rawKusamaRpcApi?.derive.balances?.all(account.address);
+    const balances = await api?.market?.getAccountBalance(account.address);
+    return new BN(balances?.freeBalance?.raw || 0);
+  }, [api]);
 
   const getAccountsBalances = useCallback(async (accounts: Account[]) => Promise.all(accounts.map(async (account: Account) => ({
     ...account,
@@ -101,12 +114,12 @@ const AccountWrapper: FC = ({ children }) => {
 
   const unsubscribesBalancesChanges = useRef<Record<string, Codec>>({});
   const subscribeBalancesChanges = useCallback(async (accounts: Account[]) => {
-    if (!rawKusamaRpcApi) return;
+    if (!kusamaSdk?.api) return;
 
     const unsubscribes = await Promise.all(accounts.map(async (account) => {
-      const unsubscribe = await rawKusamaRpcApi.query.system.account(account.address, ({ data: { free } }: { data: { free: BN } }) => {
+      const unsubscribe = await kusamaSdk.api.query.system.account(account.address, ({ data: { free } }: TQueryAccountResponse) => {
         if (!account.balance?.KSM || !free.sub(account.balance.KSM).isZero()) {
-          setAccounts(accounts.map((_account: Account) => ({
+          setAccounts((accounts) => accounts.map((_account: Account) => ({
             ..._account,
             balance: account.address === _account.address ? { KSM: free } : _account.balance
           })));
@@ -116,10 +129,25 @@ const AccountWrapper: FC = ({ children }) => {
     }));
 
     unsubscribesBalancesChanges.current = unsubscribes.reduce<Record<string, Codec>>((acc, item) => ({ ...acc, ...item }), {});
-  }, [rawKusamaRpcApi]);
+  }, [kusamaSdk, setAccounts]);
+
+  const fetchAccountsWithDeposits = useCallback(async (fetchedAccounts: Account[]) => {
+    setIsLoadingDeposits(true);
+    const _accounts = await Promise.all(fetchedAccounts.map(async (account) => ({
+      ...account,
+      deposits: {
+        bids: (await getWithdrawBids({ owner: account.address })).data || { withdraw: [], leader: [] },
+        sponsorshipFee: await api?.market?.getUserDeposit(account.address)
+      }
+    })));
+    setAccounts(_accounts);
+    setIsLoadingDeposits(false);
+    return _accounts;
+  }, [api?.market]);
 
   const fetchAccounts = useCallback(async () => {
-    if (!rpcClient?.isKusamaApiConnected) return;
+    // if (!rpcClient?.isKusamaApiConnected) return;
+    if (!kusamaSdk) return;
     setIsLoading(true);
 
     const allAccounts = await getAccounts();
@@ -127,7 +155,6 @@ const AccountWrapper: FC = ({ children }) => {
     if (allAccounts?.length) {
       const accountsWithBalance = await getAccountsBalances(allAccounts);
       const accountsWithWhiteListStatus = await getAccountsWhiteListStatus(accountsWithBalance);
-
       setAccounts(accountsWithWhiteListStatus);
 
       await subscribeBalancesChanges(accountsWithWhiteListStatus);
@@ -140,25 +167,29 @@ const AccountWrapper: FC = ({ children }) => {
       } else {
         changeAccount(allAccounts[0]);
       }
+      await fetchAccountsWithDeposits(accountsWithWhiteListStatus);
     } else {
+      clearAllAccounts();
       setFetchAccountsError('No accounts in extension');
     }
     setIsLoading(false);
-  }, [rpcClient?.isKusamaApiConnected, getAccountsBalances, getAccountsWhiteListStatus]);
+  }, [kusamaSdk, getAccountsBalances, getAccountsWhiteListStatus, fetchAccountsWithDeposits]);
 
-  const fetchAccountsWithDeposits = useCallback(async () => {
-    setIsLoadingDeposits(true);
-    const _accounts = await Promise.all(accounts.map(async (account) => ({
-      ...account,
-      deposits: {
-        bids: (await getWithdrawBids({ owner: account.address })).data || { withdraw: [], leader: [] },
-        sponsorshipFee: await api?.market?.getUserDeposit(account.address)
-      }
-    })));
-    setAccounts(_accounts);
-    setIsLoadingDeposits(false);
-    return _accounts;
-  }, [accounts]);
+  useEffect(() => {
+    let unsubscribe: Unsubcall;
+    if (web3EnablePromise) { // if polkadot extension is enabled
+      const listenExtensionChanges = async () => {
+        unsubscribe = await web3AccountsSubscribe(() => {
+          fetchAccounts();
+        });
+      };
+
+      listenExtensionChanges();
+      return () => {
+        unsubscribe && unsubscribe();
+      };
+    }
+  }, [web3EnablePromise, fetchAccounts]);
 
   const value = useMemo(() => ({
     isLoading,
