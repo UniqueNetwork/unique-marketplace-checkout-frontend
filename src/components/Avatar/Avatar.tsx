@@ -1,9 +1,10 @@
 import { FC } from 'react';
 import Identicon from '@polkadot/react-identicon';
-import styled from 'styled-components/macro';
+import styled from 'styled-components';
+import { DecodedInfixOrUrlOrCidAndHash } from '@unique-nft/substrate-client/tokens';
 
 export interface IAvatarProps {
-  src?: string;
+  src?: string | DecodedInfixOrUrlOrCidAndHash;
   address?: string;
   size: number;
   type?: 'circle' | 'square';
@@ -15,6 +16,7 @@ export const Avatar: FC<IAvatarProps> = ({
   address,
   type = 'square'
 }: IAvatarProps) => {
+  const imgUrl = typeof src === 'string' ? src : (src?.fullUrl || src?.url);
   if (address) {
     return <Identicon
       value={address}
@@ -24,8 +26,9 @@ export const Avatar: FC<IAvatarProps> = ({
 
   return <AvatarWrapper size={size}>
     <AvatarStyled $type={type}
-      src={src}
+      src={imgUrl}
       height={size}
+      alt={''}
     />
   </AvatarWrapper>;
 };
@@ -43,4 +46,7 @@ const AvatarStyled = styled.img<{ $type: 'circle' | 'square' }>`
   border-radius: ${(props) => (props.$type === 'circle' ? '50%' : '4px')};
   outline: ${(props) =>
     props.$type === 'circle' ? '1px solid $color-grey-200' : 'none'};
+  background-position: center center;
+  background-size: cover;
+  background-repeat: no-repeat;
 `;

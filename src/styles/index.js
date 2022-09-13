@@ -16,4 +16,17 @@ a{
 .unique-modal {
   overflow: visible;
 }
+
+/* fix tooltip with clickable content */
+.unique-tooltip {
+  span {
+    z-index: 101; 
+  }
+}
+
+/* TODO: move it to ui-kit */
+.notification-container {
+  position: fixed;
+}
+
 `;

@@ -1,13 +1,12 @@
 import React, { FC, useCallback } from 'react';
-import styled from 'styled-components/macro';
+import styled from 'styled-components';
 
-import PricesFilter from '../../../components/Filters/PricesFilter';
-import { AttributeItem, FiltersProps, PriceRange } from '../../../components/Filters/types';
-import CollectionsFilter from '../../../components/Filters/CollectionsFilter';
-import { MyTokensFilterState, MyTokensStatuses } from './types';
+import PricesFilter from 'components/Filters/PricesFilter';
+import { AttributeItem, FiltersProps, PriceRange, MyTokensFilterState, MyTokensStatuses } from './types';
 import StatusFilter from './StatusFilter';
+import CollectionsFilter from './CollectionsFilter';
 
-export const Filters: FC<FiltersProps<MyTokensFilterState>> = ({ value, onFilterChange }) => {
+export const Filters: FC<FiltersProps<MyTokensFilterState>> = ({ value, onFilterChange, featuredTokens, collections, isFetchingTokens, testid, tokens, featuredTokensForAttributeCounts }) => {
   // const onStatusFilterChange = useCallback((statuses: MyTokensStatuses) => {
   //   onFilterChange({ ...(value || {}), statuses });
   // }, [value, onFilterChange]);
@@ -29,13 +28,19 @@ export const Filters: FC<FiltersProps<MyTokensFilterState>> = ({ value, onFilter
   }, [value, onFilterChange]);
 
   return <FiltersStyled>
-    {/* <StatusFilter value={value?.statuses} onChange={onStatusFilterChange}/> */}
-    <PricesFilter value={value?.prices} onChange={onPricesFilterChange} />
+    {/* <StatusFilter value={value?.statuses} onChange={onStatusFilterChange} testid={`${testid}-status`} /> */}
+    <PricesFilter value={value?.prices} onChange={onPricesFilterChange} testid={`${testid}-prices`} />
     <CollectionsFilter
       value={value}
       onChange={onCollectionsFilterChange}
       onAttributesChange={onCollectionAttributesFilterChange}
       onAttributeCountsChange={onCollectionAttributeCountsFilterChange}
+      testid={`${testid}-collections`}
+      featuredTokens={featuredTokens}
+      tokens={tokens}
+      collections={collections}
+      isFetchingTokens={isFetchingTokens}
+      featuredTokensForAttributeCounts={featuredTokensForAttributeCounts}
     />
   </FiltersStyled>;
 };
@@ -45,4 +50,7 @@ const FiltersStyled = styled.div`
   display: flex;
   flex-direction: column;
   row-gap: calc(var(--gap) * 2);
+  @media (max-width: 1024px) {
+    width: 100%;
+  }
 `;

@@ -1,6 +1,6 @@
 import React, { FC, useCallback } from 'react';
 import { InputText } from '@unique-nft/ui-kit';
-import styled from 'styled-components/macro';
+import styled from 'styled-components';
 import { IconButton } from '../IconButton/IconButton';
 
 interface AmountInputProps {
@@ -10,9 +10,10 @@ interface AmountInputProps {
   decimals?: number
   label?: string
   className?: string
+  testid?: string
 }
 
-export const NumberInput: FC<AmountInputProps> = ({ value, onChange, placeholder, decimals = 6, label, className }) => {
+export const NumberInput: FC<AmountInputProps> = ({ value, onChange, placeholder, decimals = 6, label, className, testid = '' }) => {
   const onChangeInput = useCallback((_value: string) => {
     if (_value === '') onChange(_value);
     // regExp to check value according to valid number format
@@ -34,8 +35,15 @@ export const NumberInput: FC<AmountInputProps> = ({ value, onChange, placeholder
       onChange={onChangeInput}
       value={value}
       label={label}
+      testid={`${testid}`}
     />
-    {value && <ClearButton name={'close'} size={16} onClick={onClear} />}
+    {value &&
+      <ClearButton
+        name={'circle-close'}
+        size={16}
+        onClick={onClear}
+        testid={`${testid}-clear-button`}
+    />}
   </InputWrapper>;
 };
 
@@ -45,7 +53,7 @@ const InputWrapper = styled.div`
   .unique-input-text {
     width: auto;
     input {
-      padding-right: 22px;
+      padding-right: 32px;
     }
   }
 `;
@@ -53,6 +61,6 @@ const InputWrapper = styled.div`
 const ClearButton = styled(IconButton)`
   position: absolute;
   right: calc(var(--gap) / 2);
-  bottom: 10px;
+  bottom: calc(var(--gap) / 2);
   width: auto !important;
 `;

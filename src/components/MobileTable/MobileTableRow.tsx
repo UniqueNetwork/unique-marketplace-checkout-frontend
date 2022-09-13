@@ -7,6 +7,7 @@ export const MobileTableRow = styled.div`
   grid-row-gap: var(--gap);
   grid-column-gap: calc(var(--gap) / 2);
   padding: var(--gap) 0;
+  position: relative;
 
   & > div {
     display: flex;
@@ -14,7 +15,7 @@ export const MobileTableRow = styled.div`
     align-items: flex-start;
   }
 
-  @media (max-width: 320px) {
+  @media (max-width: 420px) {
     grid-template-columns: 1fr;
   }
 `;

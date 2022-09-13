@@ -3,7 +3,7 @@ import { defaultParams } from '../base/axios';
 import { TCheckoutPayParams, FetchStatus } from './types';
 import { useCallback, useState } from 'react';
 
-const endpoint = '/api/payment/checkout';
+const endpoint = '/api';
 
 export const payForTokenWithCardMethod = (body: TCheckoutPayParams) => post<TCheckoutPayParams>(`${endpoint}/pay`, body, { ...defaultParams });
 

@@ -1,18 +1,47 @@
-import React, { FC, useEffect, useState } from 'react';
+import React, { FC, useEffect, useMemo, useRef, useState } from 'react';
 import { BlueGrey100 } from '../styles/colors';
 import Skeleton from './Skeleton/Skeleton';
+import { VideoAttribute } from '../api/uniqueSdk/types';
+import styled from 'styled-components';
+import { DecodedInfixOrUrlOrCidAndHash } from '@unique-nft/substrate-client/tokens';
 
-interface PictureProps {
-  src?: string
-  alt: string
+interface VideoProps {
+  autoplay?: boolean
+  controls?: boolean
+  loop?: boolean
+  muted?: boolean
 }
 
-export const Picture: FC<PictureProps> = ({ alt, src }) => {
+interface PictureProps {
+  src?: string | DecodedInfixOrUrlOrCidAndHash
+  alt: string
+  testid?: string
+  size?: number
+  video?: VideoAttribute
+  videoProps?: VideoProps
+  isPlaying?: boolean
+}
+
+export const Picture: FC<PictureProps> = ({
+  alt,
+  src,
+  size,
+  testid = '',
+  video,
+  videoProps,
+  isPlaying
+}) => {
   const [imageSrc, setImageSrc] = useState<string | undefined>();
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const { autoplay = true, controls = true, loop = true, muted = true } = useMemo(() => videoProps || {}, [videoProps]);
+  const videoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
-    if (!src) return;
+    const imageUrl = src ? (typeof src === 'string' ? src.trim() : src.fullUrl) : '';
+    if (!imageUrl) {
+      setImageSrc(undefined);
+      return;
+    }
 
     const image = new Image();
 
@@ -20,24 +49,47 @@ export const Picture: FC<PictureProps> = ({ alt, src }) => {
 
     image.onload = () => {
       setIsLoading(false);
-      setImageSrc(src);
+      setImageSrc(imageUrl);
     };
 
     image.onerror = () => {
       setIsLoading(false);
     };
 
-    image.src = src;
+    image.src = imageUrl;
   }, [src]);
+
+  useEffect(() => {
+    if (isPlaying && videoRef.current?.paused) {
+      void videoRef.current.play();
+    } else if (!isPlaying && !videoRef.current?.paused) {
+      void videoRef.current?.pause();
+    }
+  }, [isPlaying]);
 
   return (<div className={'picture'}>
     {isLoading && <Skeleton width={'100%'} height={'100%'} />}
-    {!isLoading && imageSrc &&
+    {!isLoading && video &&
+      <VideoStyled
+        ref={videoRef}
+        src={video.fullUrl || video.url}
+        poster={imageSrc || undefined}
+        controls={controls}
+        autoPlay={autoplay}
+        playsInline
+        loop={loop}
+        muted={muted}
+        data-testid={`${testid}-video`}
+      ></VideoStyled>
+    }
+    {!isLoading && imageSrc && !video &&
       <img
         alt={alt}
-        src={src}
+        src={imageSrc}
+        height={size || undefined}
+        data-testid={`${testid}`}
       />}
-    {!isLoading && !imageSrc && <svg
+    {!isLoading && !imageSrc && !video && <svg
       fill={'white'}
       height='100%'
       viewBox='0 0 1000 1000'
@@ -50,7 +102,7 @@ export const Picture: FC<PictureProps> = ({ alt, src }) => {
         x={0}
         y={0}
       />
-      <g transform='translate(500.000000,500.000000) scale(3.8000,3.8000)'>
+      <g transform={`translate(500.000000,500.000000) scale(${size ? size / 2 : 3.2},${size ? size / 2 : 3.2})`}>
         <g transform='translate(-32.000000,-32.000000)'>
           <path fillRule='evenodd'
             clipRule='evenodd'
@@ -69,3 +121,13 @@ export const Picture: FC<PictureProps> = ({ alt, src }) => {
     }
   </div>);
 };
+
+const VideoStyled = styled.video`
+  width: 100%;
+  @media (min-width: 1920px) {
+    height: 536px;
+  }
+  @media (max-width: 767px) {
+    height: 100%;
+  }
+`;

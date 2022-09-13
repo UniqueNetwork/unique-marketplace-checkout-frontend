@@ -1,11 +1,11 @@
 import React, { FC } from 'react';
-import styled from 'styled-components/macro';
+import styled from 'styled-components';
 import { Heading, Text } from '@unique-nft/ui-kit';
 import { Trait } from './Trait';
-import { TAttributes } from '../../../api/graphQL';
+import { DecodedAttributes } from '@unique-nft/substrate-client/tokens';
 
 interface IProps {
-  attributes: TAttributes;
+  attributes: DecodedAttributes;
 }
 
 export const AttributesBlock: FC<IProps> = ({ attributes }: IProps) => {
@@ -31,8 +31,13 @@ export const AttributesBlock: FC<IProps> = ({ attributes }: IProps) => {
   return (
     <div>
       <HeadingStyled size={'4'}>Attributes</HeadingStyled>
-      {Object.keys(attributes).filter((key) => key !== 'ipfsJson').map((key) => {
-        return AttributesRow({ attribute: key, enumeration: attributes[key] });
+      {Object.values(attributes).map((attribute) => {
+        return AttributesRow({
+          attribute: typeof attribute.name === 'string' ? attribute.name : attribute?.name?._ || '',
+          enumeration: Array.isArray(attribute.value)
+            ? attribute.value.map((item) => typeof item === 'string' ? item : item._.toString())
+            : typeof attribute.value === 'string' ? attribute.value : attribute.value._.toString()
+        });
       })}
     </div>
   );

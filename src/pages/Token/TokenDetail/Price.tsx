@@ -1,25 +1,35 @@
-import React, { FC } from 'react';
+import React, { FC, useMemo } from 'react';
 import { Heading, Icon, Text } from '@unique-nft/ui-kit';
 import BN from 'bn.js';
-import styled from 'styled-components/macro';
+import styled from 'styled-components';
 
-import Kusama from '../../../static/icons/logo-kusama.svg';
-import { formatKusamaBalance } from '../../../utils/textUtils';
+import { formatFiatPrice, formatKusamaBalance } from '../../../utils/textUtils';
 import { useApi } from '../../../hooks/useApi';
 
 interface PriceProps {
   price: string;
+  testid?: string;
   isSellBlockchain: boolean;
 }
 
-export const Price: FC<PriceProps> = ({ price, isSellBlockchain }) => {
+export const Price: FC<PriceProps> = ({ price, isSellBlockchain, testid = '' }) => {
   const { api } = useApi();
+  const formattedPrice = useMemo(() => {
+    if (isSellBlockchain) {
+      return `${formatKusamaBalance(new BN(price).toString(), api?.market?.kusamaDecimals)}`;
+    } else {
+      return `${formatFiatPrice(price).toString()}$`;
+    }
+  }, [isSellBlockchain, price, api?.market?.kusamaDecimals]);
 
   return (
     <PriceWrapper>
       <Row>
-        <Heading size={'1'}>{`${formatKusamaBalance(new BN(price).toString(), api?.market?.kusamaDecimals)}${!isSellBlockchain ? '$' : ''}`}</Heading>
-        {isSellBlockchain && <Icon file={Kusama} size={32}/>}
+        <Heading
+          testid={`${testid}-price`}
+          size={'1'}
+        >{formattedPrice}</Heading>
+        {isSellBlockchain && <Icon name={'chain-kusama'} size={32} />}
       </Row>
     </PriceWrapper>
   );

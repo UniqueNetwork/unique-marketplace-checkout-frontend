@@ -1,7 +1,7 @@
 import React, { FC, useCallback, useState } from 'react';
 import { Button, Heading, Modal, Text } from '@unique-nft/ui-kit';
 import keyring from '@polkadot/ui-keyring';
-import styled from 'styled-components/macro';
+import styled from 'styled-components';
 
 import { TAccountModalProps } from './types';
 import { PasswordInput } from '../../../components/PasswordInput/PasswordInput';
@@ -10,7 +10,7 @@ import { useAccounts } from '../../../hooks/useAccounts';
 import DefaultAvatar from '../../../static/icons/default-avatar.svg';
 import { Avatar } from '../../../components/Avatar/Avatar';
 
-export const ImportViaQRCodeAccountModal: FC<TAccountModalProps> = ({ isVisible, onFinish }) => {
+export const ImportViaQRCodeAccountModal: FC<TAccountModalProps> = ({ isVisible, onFinish, testid }) => {
   const [address, setAddress] = useState<string>();
   const [scanned, setScanned] = useState<ScannedResult>();
   const [password, setPassword] = useState<string>('');
@@ -48,13 +48,18 @@ export const ImportViaQRCodeAccountModal: FC<TAccountModalProps> = ({ isVisible,
       {!address && <QRReader onScan={onScan} />}
       {address && <AddressWrapper>
         <Avatar size={24} src={DefaultAvatar} address={address} />
-        <Text>{address}</Text>
+        <Text
+          testid={`${testid}-address`}
+        >{address}</Text>
       </AddressWrapper>}
     </InputWrapper>
     <InputWrapper>
-      <Text size={'m'}>Password</Text>
-      <Text size={'s'} color={'grey-500'}>The password that was previously used to encrypt this account</Text>
-      <PasswordInput placeholder={'Password'}
+      <PasswordTitle>
+        <Text size={'m'}>Password</Text>
+        <Text size={'s'} color={'grey-500'}>The password that was previously used to encrypt this account</Text>
+      </PasswordTitle>
+      <PasswordInput
+        testid={`${testid}-password`}
         onChange={setPassword}
         value={password}
       />
@@ -62,6 +67,7 @@ export const ImportViaQRCodeAccountModal: FC<TAccountModalProps> = ({ isVisible,
 
     <ButtonWrapper>
       <Button
+        testid={`${testid}-save-button`}
         disabled={!address || !password}
         onClick={onSaveClick}
         role='primary'
@@ -73,7 +79,7 @@ export const ImportViaQRCodeAccountModal: FC<TAccountModalProps> = ({ isVisible,
 };
 
 const Content = styled.div`
-  && h2 {
+  && h2, && h3 {
     margin-bottom: 0;
   }
 `;
@@ -88,11 +94,24 @@ const InputWrapper = styled.div`
   padding: var(--gap) 0;
   display: flex;
   flex-direction: column;
-  margin-bottom: var(--gap);
   row-gap: var(--gap);
 `;
 
 const ButtonWrapper = styled.div`
   display: flex;
   justify-content: flex-end;
+  margin-top: var(--gap);
+
+
+  @media (max-width: 567px) {
+    button {
+      width: 100%;
+    }
+  }
+`;
+
+const PasswordTitle = styled.div`
+  display: flex;
+  flex-direction: column;
+  row-gap: calc(var(--gap) / 4);
 `;
