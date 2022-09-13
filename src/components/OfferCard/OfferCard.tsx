@@ -1,4 +1,4 @@
-import React, { FC, useMemo } from 'react';
+import React, { FC, useCallback, useMemo } from 'react';
 import { Icon, Text } from '@unique-nft/ui-kit';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
@@ -6,7 +6,7 @@ import styled from 'styled-components';
 import { Offer } from 'api/restApi/offers/types';
 import { useAccounts } from 'hooks/useAccounts';
 import { compareEncodedAddresses } from 'api/uniqueSdk/utils/addressUtils';
-import { formatKusamaBalance } from 'utils/textUtils';
+import { formatFiatPrice, formatKusamaBalance } from 'utils/textUtils';
 import { timeDifference } from 'utils/timestampUtils';
 import { Primary600 } from 'styles/colors';
 import config from '../../config';
@@ -44,6 +44,11 @@ export const OfferCard: FC<TTokensCard> = ({ offer, testid }) => {
     return compareEncodedAddresses(offer?.auction!.bids[0].bidderAddress, selectedAccount.address);
   }, [isBidder, topBid, selectedAccount]);
 
+  const formatBalance = useCallback((balance: string | number) => {
+    if (offer.type !== 'Fiat') return formatKusamaBalance(balance);
+    return formatFiatPrice(balance);
+  }, [offer]);
+
   return (
     <TokensCardStyled>
       <TokensMedia
@@ -78,8 +83,8 @@ export const OfferCard: FC<TTokensCard> = ({ offer, testid }) => {
           <Text
             testid={`${testid}-price`}
             size='l'
-          >{topBid ? `${formatKusamaBalance(Number(topBid))}` : `${formatKusamaBalance(offer?.price)}` }</Text>
-          {offer.isSellBlockchain ? <Icon name={'chain-kusama'} size={16}/> : <Text size='s'>$</Text>}
+          >{topBid ? `${formatBalance(Number(topBid))}` : `${formatBalance(offer?.price)}` }</Text>
+          {offer.type !== 'Fiat' ? <Icon name={'chain-kusama'} size={16}/> : <Text size='s'>$</Text>}
         </PriceWrapper>
         {!offer?.auction && <Text size={'xs'} color={'grey-500'} >Price</Text>}
         {offer?.auction && <AuctionInfoWrapper>

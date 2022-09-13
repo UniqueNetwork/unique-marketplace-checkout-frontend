@@ -7,9 +7,9 @@ export enum FetchStatus {
 
 export type TCheckoutPayParams = {
   tokenCard: string
-  transferAddress: string
-  tokenId: number
-  collectionId: number
+  buyerAddress: string
+  tokenId: string
+  collectionId: string
 }
 
 export type TCheckoutPayResponse = {

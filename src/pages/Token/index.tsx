@@ -110,7 +110,7 @@ const TokenPage = () => {
             token={token}
             offer={offer}
             onSellClick={onActionClick(MarketType.sellFix)}
-            onBuyClick={onActionClick(offer?.isSellBlockchain ? MarketType.purchase : MarketType.checkout)}
+            onBuyClick={onActionClick((offer?.type !== 'Fiat') ? MarketType.purchase : MarketType.checkout)}
             onTransferClick={onActionClick(MarketType.transfer)}
             onDelistClick={onActionClick(MarketType.delist)}
             onDelistAuctionClick={onActionClick(MarketType.delistAuction)}

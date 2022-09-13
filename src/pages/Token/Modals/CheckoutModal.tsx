@@ -48,10 +48,10 @@ const CheckoutModal: FC<TTokenPageModalBodyProps> = ({ offer }) => {
     // send request with tokenized card here
     setCardToken(cardToken);
     await payForTokenWithCard({
-      tokenId: offer?.tokenId || 0,
-      collectionId: offer?.collectionId || 0,
+      tokenId: offer?.tokenId.toString() || '0',
+      collectionId: offer?.collectionId.toString() || '0',
       tokenCard: cardToken,
-      transferAddress: walletAddress
+      buyerAddress: walletAddress
     });
     setLoading(false);
     setPaymentCompleted(true);

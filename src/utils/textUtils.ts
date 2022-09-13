@@ -30,3 +30,8 @@ export const formatKusamaBalance = (balance: string | number, decimals = 12) => 
     maximumFractionDigits: decimals
   });
 };
+
+export const formatFiatPrice = (price: string | number) => {
+  const priceValue = Number(price);
+  return priceValue / 100;
+};

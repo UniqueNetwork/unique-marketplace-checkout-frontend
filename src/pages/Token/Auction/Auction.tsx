@@ -4,7 +4,6 @@ import styled from 'styled-components';
 import BN from 'bn.js';
 
 import { AdditionalPositive100, AdditionalPositive500, Coral100, Coral500, Grey300 } from 'styles/colors';
-// import { useOfferSubscription } from 'hooks/useOfferSubscription';
 import { useAccounts } from 'hooks/useAccounts';
 import { compareEncodedAddresses, isTokenOwner } from 'api/uniqueSdk/utils/addressUtils';
 import { Offer } from 'api/restApi/offers/types';
@@ -14,6 +13,7 @@ import Timer from 'components/Timer';
 import AccountLink from 'components/Account/AccountLink';
 import { PriceForAuction } from '../TokenDetail/PriceForAuction';
 import Bids from './Bids';
+import { formatFiatPrice } from '../../../utils/textUtils';
 
 interface AuctionProps {
   offer: Offer
@@ -107,7 +107,7 @@ const Auction: FC<AuctionProps> = ({ offer: initialOffer, onPlaceABidClick, onDe
 
   // useOfferSubscription({ offer, onPlaceBid, onAuctionStopped, onAuctionClosed });
 
-  const price = offer.price;
+  const price = useMemo(() => (offer.type !== 'Fiat' ? offer.price : formatFiatPrice(offer.price).toString()), [offer]);
 
   return (<>
     <Text size={'l'}>{topBid ? 'Next minimum bid' : 'Starting bid'}</Text>

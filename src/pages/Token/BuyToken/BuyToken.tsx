@@ -8,6 +8,7 @@ import { Price } from '../TokenDetail/Price';
 import { Grey300 } from '../../../styles/colors';
 import { Offer } from '../../../api/restApi/offers/types';
 import { useAccounts } from '../../../hooks/useAccounts';
+import { formatFiatPrice } from '../../../utils/textUtils';
 
 interface BuyTokenProps {
   offer?: Offer;
@@ -24,7 +25,7 @@ export const BuyToken: FC<BuyTokenProps> = ({ offer, onBuy }) => {
   }, [offer?.price, selectedAccount?.balance?.KSM, marketCommission]);
 
   const onBuyClick = useCallback(() => {
-    if (!isEnoughBalance && offer?.isSellBlockchain) return;
+    if (!isEnoughBalance && offer?.type !== 'Fiat') return;
 
     onBuy();
   }, [onBuy, isEnoughBalance, offer]);
@@ -33,17 +34,17 @@ export const BuyToken: FC<BuyTokenProps> = ({ offer, onBuy }) => {
 
   return (<>
     <Text size={'l'}>Price</Text>
-    <Price price={offer.price} isSellBlockchain={offer.isSellBlockchain} />
+    <Price price={offer.price} isSellBlockchain={offer.type !== 'Fiat'} />
     <ButtonWrapper>
       <Button
         onClick={onBuyClick}
         role='primary'
         title='Buy'
         wide={true}
-        disabled={(!isEnoughBalance && offer.isSellBlockchain)}
+        disabled={(!isEnoughBalance && offer.type !== 'Fiat')}
       />
     </ButtonWrapper>
-    {(!isEnoughBalance && offer.isSellBlockchain) && <Text color={'coral-500'}>Your balance is too low to buy</Text>}
+    {(!isEnoughBalance && offer.type !== 'Fiat') && <Text color={'coral-500'}>Your balance is too low to buy</Text>}
     <Divider />
   </>);
 };
