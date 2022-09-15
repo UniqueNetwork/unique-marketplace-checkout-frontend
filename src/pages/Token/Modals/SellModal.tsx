@@ -10,6 +10,7 @@ import { useAuctionSellStages, useSellFixStages } from '../../../hooks/marketpla
 import { useAccounts } from '../../../hooks/useAccounts';
 import { StageStatus } from '../../../types/StagesTypes';
 import { NumberInput } from 'components/NumberInput/NumberInput';
+import { useFiatSellFixStages } from '../../../hooks/marketplaceStages/useFiatSellFixStages';
 
 const tokenSymbol = 'KSM';
 
@@ -45,7 +46,7 @@ export const SellModal: FC<TTokenPageModalBodyProps> = ({ token, onFinish, setIs
         testid={`${testid}-sell-auction`}
       />);
     case 'fix-price-stage':
-      return (<SellFixStagesModal
+      return (<SellFiatFixStagesModal
         collectionId={collectionId || 0}
         tokenId={tokenId || 0}
         tokenPrefix={token?.prefix || ''}
@@ -234,6 +235,33 @@ type TSellAuctionStagesModal = {
 
 export const SellFixStagesModal: FC<TSellFixStagesModal> = ({ collectionId, tokenId, tokenPrefix, sellFix, onFinish, testid }) => {
   const { stages, status, initiate } = useSellFixStages(collectionId, tokenId);
+  const { info } = useNotifications();
+
+  useEffect(() => { initiate(sellFix); }, [sellFix]);
+
+  useEffect(() => {
+    if (status === StageStatus.success) {
+      info(
+        <div data-testid={`${testid}-success-notification`}><Link href={`/token/${collectionId}/${tokenId}`} title={`${tokenPrefix} #${tokenId}`}/> offered for sale</div>,
+        { name: 'success', size: 32, color: 'var(--color-additional-light)' }
+      );
+    }
+  }, [status]);
+
+  return (
+    <div>
+      <DefaultMarketStages
+        stages={stages}
+        status={status}
+        onFinish={onFinish}
+        testid={`${testid}`}
+      />
+    </div>
+  );
+};
+
+export const SellFiatFixStagesModal: FC<TSellFixStagesModal> = ({ collectionId, tokenId, tokenPrefix, sellFix, onFinish, testid }) => {
+  const { stages, status, initiate } = useFiatSellFixStages(collectionId, tokenId);
   const { info } = useNotifications();
 
   useEffect(() => { initiate(sellFix); }, [sellFix]);

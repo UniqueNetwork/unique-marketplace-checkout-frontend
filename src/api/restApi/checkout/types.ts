@@ -1,3 +1,5 @@
+import { SignerPayloadJSON } from '@polkadot/types/types';
+
 export enum FetchStatus {
   default = 'Default',
   inProgress = 'InProgress',
@@ -10,6 +12,13 @@ export type TCheckoutPayParams = {
   buyerAddress: string
   tokenId: string
   collectionId: string
+}
+
+export type TCheckoutFixedSellParams = {
+  price: number
+  currency: string
+  signerPayloadJSON?: SignerPayloadJSON
+  signature: `0x${string}`
 }
 
 export type TCheckoutPayResponse = {

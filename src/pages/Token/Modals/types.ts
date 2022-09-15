@@ -32,3 +32,8 @@ export type TAuctionBidProps = {
   value: string
   accountAddress: string
 }
+
+export type TFiatFixPriceProps = {
+  accountAddress: string
+  price: string
+}
