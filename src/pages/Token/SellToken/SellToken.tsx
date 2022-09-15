@@ -46,7 +46,7 @@ export const SellToken: FC<SellTokenProps> = ({ offer, isAllowed, onSellClick, o
   return (
     <>
       <ActionsWrapper>
-        {/* {settings?.marketType !== 'primary' && <Button title={'Sell'} role={'primary'} onClick={onSellClick}/>} */}
+        {settings?.marketType !== 'primary' && <Button title={'Sell'} role={'primary'} onClick={onSellClick}/>}
         <Button
           title={'Transfer'}
           onClick={onTransferClick}

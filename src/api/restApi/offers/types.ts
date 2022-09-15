@@ -52,7 +52,7 @@ export type Offer = {
     description: string
     image?: DecodedInfixOrUrlOrCidAndHash | string
     prefix: string
-    attributes: DecodedAttributes
+    attributes: OfferTokenAttribute[]
     video?: string | VideoAttribute
   }
   currency: string
