@@ -7,6 +7,7 @@ import { Offer } from 'api/restApi/offers/types';
 import { Price } from '../TokenDetail/Price';
 import { useAccounts } from 'hooks/useAccounts';
 import { useApi } from 'hooks/useApi';
+import { useAdminLoggingIn } from '../../../api/restApi/admin/login';
 
 interface SellTokenProps {
   offer?: Offer
@@ -20,6 +21,7 @@ interface SellTokenProps {
 export const SellToken: FC<SellTokenProps> = ({ offer, isAllowed, onSellClick, onTransferClick, onDelistClick, testid }) => {
   const { selectedAccount } = useAccounts();
   const { settings } = useApi();
+  const { hasAdminPermission } = useAdminLoggingIn();
 
   const hideSellBtn = useMemo(() => {
     return settings?.marketType === 'primary' && !settings?.administrators.includes(selectedAccount?.address || '');
@@ -46,7 +48,7 @@ export const SellToken: FC<SellTokenProps> = ({ offer, isAllowed, onSellClick, o
   return (
     <>
       <ActionsWrapper>
-        {settings?.marketType !== 'primary' && <Button title={'Sell'} role={'primary'} onClick={onSellClick}/>}
+        {(settings?.marketType !== 'primary' && hasAdminPermission) && <Button title={'Sell'} role={'primary'} onClick={onSellClick}/>}
         <Button
           title={'Transfer'}
           onClick={onTransferClick}

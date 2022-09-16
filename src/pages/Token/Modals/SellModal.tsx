@@ -1,4 +1,4 @@
-import { Button, Heading, Tabs, Select, Link, useNotifications } from '@unique-nft/ui-kit';
+import { Button, Heading, Tabs, Select, Link, useNotifications, Loader, Icon, Text } from '@unique-nft/ui-kit';
 import { SelectOptionProps } from '@unique-nft/ui-kit/dist/cjs/types';
 import React, { FC, useCallback, useEffect, useState } from 'react';
 import styled from 'styled-components';
@@ -10,7 +10,7 @@ import { useAuctionSellStages, useSellFixStages } from '../../../hooks/marketpla
 import { useAccounts } from '../../../hooks/useAccounts';
 import { StageStatus } from '../../../types/StagesTypes';
 import { NumberInput } from 'components/NumberInput/NumberInput';
-import { useFiatSellFixStages } from '../../../hooks/marketplaceStages/useFiatSellFixStages';
+import { sellTokenForFixedFiat } from '../../../api/restApi/checkout/checkout';
 
 const tokenSymbol = 'KSM';
 
@@ -262,31 +262,74 @@ export const SellFixStagesModal: FC<TSellFixStagesModal> = ({ collectionId, toke
 };
 
 export const SellFiatFixStagesModal: FC<TSellFixStagesModal> = ({ collectionId, tokenId, tokenPrefix, sellFix, onFinish, testid }) => {
-  const { stages, status, initiate } = useFiatSellFixStages(collectionId, tokenId);
-  const { info } = useNotifications();
-
-  useEffect(() => { initiate(sellFix); }, [sellFix]);
+  // const { stages, status, initiate } = useFiatSellFixStages(collectionId, tokenId);
+  const { info, error } = useNotifications();
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (status === StageStatus.success) {
+    if (loading || !collectionId || !tokenId || !sellFix.price) return;
+    (async () => {
+      setLoading(true);
+      await sellTokenForFixedFiat({ collectionId, tokenId, currency: 'USD', price: Number(sellFix.price) });
+    })()
+    .then(() => {
       info(
         <div data-testid={`${testid}-success-notification`}><Link href={`/token/${collectionId}/${tokenId}`} title={`${tokenPrefix} #${tokenId}`}/> offered for sale</div>,
         { name: 'success', size: 32, color: 'var(--color-additional-light)' }
       );
-    }
-  }, [status]);
+    }).catch(() => {
+      error('Sell token request failed');
+    })
+    .finally(() => {
+      setLoading(false);
+      onFinish();
+    });
+  }, [collectionId, tokenId]);
 
   return (
     <div>
-      <DefaultMarketStages
-        stages={stages}
-        status={status}
-        onFinish={onFinish}
-        testid={`${testid}`}
-      />
+      <HeadingWrapper>
+        <Heading size='2'>Please wait</Heading>
+      </HeadingWrapper>
+      <StageWrapper>
+        <StatusWrapper>
+          {loading && <Loader isFullPage />}
+        </StatusWrapper>
+        <TitleWrapper>
+          <Text
+            size={'m'}
+            testid={`${testid}-stage`}
+          >Set the NFT price</Text>
+        </TitleWrapper>
+      </StageWrapper>
     </div>
   );
 };
+
+const HeadingWrapper = styled.div`
+  margin-bottom: 16px;
+`;
+
+const StageWrapper = styled.div`
+  display: grid;
+  grid-template-columns: 24px 1fr;
+  grid-column-gap: var(--gap);
+  grid-row-gap: var(--gap);
+  align-items: flex-start;
+`;
+
+const StatusWrapper = styled.div`
+  position: relative;
+  height: 100%;
+  > div {
+    top: 12px;
+  }
+`;
+
+const TitleWrapper = styled.div`
+  display: flex;
+  flex-direction: column;
+`;
 
 export const SellAuctionStagesModal: FC<TSellAuctionStagesModal> = ({ collectionId, tokenId, tokenPrefix, auction, onFinish, testid }) => {
   const { stages, status, initiate } = useAuctionSellStages(collectionId, tokenId);

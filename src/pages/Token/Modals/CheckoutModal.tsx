@@ -18,7 +18,7 @@ import BN from 'bn.js';
 import { useApi } from '../../../hooks/useApi';
 import { FetchStatus } from '../../../api/restApi/checkout/types';
 
-const CheckoutModal: FC<TTokenPageModalBodyProps> = ({ offer }) => {
+const CheckoutModal: FC<TTokenPageModalBodyProps> = ({ offer, onFinish }) => {
   const [cardValid, setCardValid] = useState(false);
   const [loading, setLoading] = useState(false);
   const [paymentCompleted, setPaymentCompleted] = useState(false);
@@ -55,7 +55,8 @@ const CheckoutModal: FC<TTokenPageModalBodyProps> = ({ offer }) => {
     });
     setLoading(false);
     setPaymentCompleted(true);
-  }, [offer, walletAddress, payForTokenWithCard]);
+    onFinish();
+  }, [offer, walletAddress, payForTokenWithCard, onFinish]);
 
   return (
     <Content>

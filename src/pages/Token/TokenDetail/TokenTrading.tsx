@@ -1,4 +1,4 @@
-import React, { FC, useContext, useMemo } from 'react';
+import React, { FC, useCallback, useContext, useMemo } from 'react';
 
 import { NFTToken } from 'api/uniqueSdk/types';
 import { Offer } from '../../../api/restApi/offers/types';
@@ -9,6 +9,9 @@ import Auction from '../Auction/Auction';
 import { isTokenOwner } from 'api/uniqueSdk/utils/addressUtils';
 import { useApi } from '../../../hooks/useApi';
 import { checkAllowedTokenInSettings } from 'api/uniqueSdk/utils/checkTokenIsAllowed';
+import { useAdminLoggingIn } from '../../../api/restApi/admin/login';
+import { useAccounts } from '../../../hooks/useAccounts';
+import { useNotifications } from '@unique-nft/ui-kit';
 
 interface TokenTradingProps {
   token?: NFTToken
@@ -27,6 +30,9 @@ interface TokenTradingProps {
 export const TokenTrading: FC<TokenTradingProps> = ({ token, offer, onSellClick, onTransferClick, onDelistClick, onDelistAuctionClick, onPlaceABidClick, onWithdrawClick, onBuyClick, onAuctionClose, testid }) => {
   const { selectedAccount } = useContext(accountContext);
   const { settings } = useApi();
+  const { getJWToken } = useAdminLoggingIn();
+  const { isLoading: isAccountsLoading } = useAccounts();
+  const { warning } = useNotifications();
 
   const isAllowed = useMemo(() => {
     if (offer) {
@@ -43,6 +49,21 @@ export const TokenTrading: FC<TokenTradingProps> = ({ token, offer, onSellClick,
     return token?.owner ? isTokenOwner(selectedAccount.address, token.owner) : false;
   }, [selectedAccount, token, offer]);
 
+  const checkAdminPermission = useCallback(() => {
+    if (isAccountsLoading) return;
+    void (async () => {
+      const jwtoken = await getJWToken();
+      if (!jwtoken) {
+        warning(
+          'Unable to login, please try again!',
+          { name: 'warning', size: 32, color: 'var(--color-additional-light)' }
+        );
+        return;
+      }
+      onSellClick();
+    })();
+  }, [isAccountsLoading, onSellClick, getJWToken, warning]);
+
   if (offer?.auction) {
     return (<Auction
       offer={offer}
@@ -58,7 +79,7 @@ export const TokenTrading: FC<TokenTradingProps> = ({ token, offer, onSellClick,
     return (<SellToken
       offer={offer}
       isAllowed={isAllowed}
-      onSellClick={onSellClick}
+      onSellClick={checkAdminPermission}
       onTransferClick={onTransferClick}
       onDelistClick={onDelistClick}
       testid={`${testid}-sell`}

@@ -204,7 +204,10 @@ export const NFTPage = () => {
         video: typeof offer.tokenDescription.video === 'string' ? { fullUrl: offer.tokenDescription.video, ipfsCid: '' } : offer.tokenDescription.video,
         ...offer
       })) || []),
-      ...tokens
+      ...tokens.filter((token) => {
+        if (!offers) return true;
+        return !offers.find((offer) => offer.collectionId === token.collectionId && offer.tokenId === token.id);
+      })
     ];
   }, [tokens, offers]);
 

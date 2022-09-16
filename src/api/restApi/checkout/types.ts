@@ -17,8 +17,13 @@ export type TCheckoutPayParams = {
 export type TCheckoutFixedSellParams = {
   price: number
   currency: string
-  signerPayloadJSON?: SignerPayloadJSON
-  signature: `0x${string}`
+  tokenId: number
+  collectionId: number
+}
+
+export type TCheckoutDelistParams = {
+  tokenId: number
+  collectionId: number
 }
 
 export type TCheckoutPayResponse = {
