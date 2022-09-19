@@ -13,7 +13,7 @@ import { NumberInput } from 'components/NumberInput/NumberInput';
 import { sellTokenForFixedFiat } from '../../../api/restApi/checkout/checkout';
 import { useFiatSellFixStages } from '../../../hooks/marketplaceStages/useFiatSellFixStages';
 
-const tokenSymbol = 'KSM';
+const tokenSymbol = '$';
 
 export const SellModal: FC<TTokenPageModalBodyProps> = ({ token, onFinish, setIsClosable, testid }) => {
   const { collectionId, id: tokenId } = token || {};
