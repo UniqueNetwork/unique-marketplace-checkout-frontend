@@ -1,6 +1,5 @@
 import { useMemo } from 'react';
 
-import { cancelAuction } from 'api/restApi/auction/auction';
 import { useAccounts } from '../useAccounts';
 import { InternalStage, StageStatus } from '../../types/StagesTypes';
 import useStages from '../useStages';
@@ -16,10 +15,10 @@ export const useCancelFiatStages = (collectionId: number, tokenId: number) => {
       action: async () => {
         if (!selectedAccount) throw new Error('Account not selected');
 
-        const message = `collectionId=${collectionId}&tokenId=${tokenId}`;
+        const message = 'cancel_fiat_offer';
         const signature = await signMessage(message);
         await delistTokenFiatSale(
-          { collectionId, tokenId },
+          { collectionId, tokenId, sellerAddress: selectedAccount.address },
           { signature, signer: selectedAccount.address }
         );
       }
