@@ -25,6 +25,7 @@ export type TCheckoutDelistParams = {
   tokenId: number
   collectionId: number
   sellerAddress: string
+  signature: `0x${string}`
 }
 
 export type TCheckoutPayResponse = {

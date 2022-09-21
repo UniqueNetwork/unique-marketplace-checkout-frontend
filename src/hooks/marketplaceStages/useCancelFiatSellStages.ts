@@ -18,7 +18,7 @@ export const useCancelFiatStages = (collectionId: number, tokenId: number) => {
         const message = 'cancel_fiat_offer';
         const signature = await signMessage(message);
         await delistTokenFiatSale(
-          { collectionId, tokenId, sellerAddress: selectedAccount.address },
+          { collectionId, tokenId, sellerAddress: selectedAccount.address, signature },
           { signature, signer: selectedAccount.address }
         );
       }
