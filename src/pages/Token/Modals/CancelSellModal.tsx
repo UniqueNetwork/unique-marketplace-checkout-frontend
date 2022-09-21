@@ -6,16 +6,17 @@ import DefaultMarketStages from './StagesModal';
 import { TTokenPageModalBodyProps } from './TokenPageModal';
 import { useAccounts } from '../../../hooks/useAccounts';
 import { StageStatus } from '../../../types/StagesTypes';
+import { useCancelFiatStages } from '../../../hooks/marketplaceStages/useCancelFiatSellStages';
 
 export const CancelSellFixStagesModal: FC<TTokenPageModalBodyProps> = ({ offer, onFinish, setIsClosable, testid }) => {
   const { selectedAccount } = useAccounts();
-  const { stages, status, initiate } = useCancelSellFixStages(offer?.collectionId || 0, offer?.tokenId || 0);
+  const { stages, status, initiate } = useCancelFiatStages(offer?.collectionId || 0, offer?.tokenId || 0);
   const { info } = useNotifications();
 
   useEffect(() => {
     if (!selectedAccount) throw new Error('Account not selected');
     setIsClosable(false);
-    void initiate({ accountAddress: selectedAccount?.address });
+    void initiate(null);
   }, [selectedAccount]);
 
   useEffect(() => {

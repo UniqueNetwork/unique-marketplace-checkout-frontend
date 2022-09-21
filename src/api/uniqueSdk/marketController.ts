@@ -521,4 +521,8 @@ export class UniqueSDKMarketController {
   async getAccountBalance(address: Address): Promise<AllBalances> {
     return await this.kusamaSdk.balance.get({ address });
   }
+
+  transferTokenToFiatFixPrice(owner: Address, collectionId: string, tokenId: string, options: TransactionOptions): Promise<void> {
+    return this.transferToken(owner, this.auctionAddress, collectionId, tokenId, options);
+  }
 }

@@ -1,4 +1,4 @@
-import { Button, Heading, Tabs, Select, Link, useNotifications } from '@unique-nft/ui-kit';
+import { Button, Heading, Tabs, Select, Link, useNotifications, Loader, Icon, Text } from '@unique-nft/ui-kit';
 import { SelectOptionProps } from '@unique-nft/ui-kit/dist/cjs/types';
 import React, { FC, useCallback, useEffect, useState } from 'react';
 import styled from 'styled-components';
@@ -10,8 +10,10 @@ import { useAuctionSellStages, useSellFixStages } from '../../../hooks/marketpla
 import { useAccounts } from '../../../hooks/useAccounts';
 import { StageStatus } from '../../../types/StagesTypes';
 import { NumberInput } from 'components/NumberInput/NumberInput';
+import { sellTokenForFixedFiat } from '../../../api/restApi/checkout/checkout';
+import { useFiatSellFixStages } from '../../../hooks/marketplaceStages/useFiatSellFixStages';
 
-const tokenSymbol = 'KSM';
+const tokenSymbol = '$';
 
 export const SellModal: FC<TTokenPageModalBodyProps> = ({ token, onFinish, setIsClosable, testid }) => {
   const { collectionId, id: tokenId } = token || {};
@@ -45,7 +47,7 @@ export const SellModal: FC<TTokenPageModalBodyProps> = ({ token, onFinish, setIs
         testid={`${testid}-sell-auction`}
       />);
     case 'fix-price-stage':
-      return (<SellFixStagesModal
+      return (<SellFiatFixStagesModal
         collectionId={collectionId || 0}
         tokenId={tokenId || 0}
         tokenPrefix={token?.prefix || ''}
@@ -205,6 +207,7 @@ export const AskSellModal: FC<TAskSellModalProps> = ({ onSellAuction, onSellFixP
         labels={['Fixed price', 'Auction']}
         onClick={handleClick}
         testid={`${testid}-tabs`}
+        disabledIndexes={[1]}
       />
       <Tabs activeIndex={activeTab}>
         {FixedPriceTab}
@@ -232,8 +235,8 @@ type TSellAuctionStagesModal = {
   testid: string
 }
 
-export const SellFixStagesModal: FC<TSellFixStagesModal> = ({ collectionId, tokenId, tokenPrefix, sellFix, onFinish, testid }) => {
-  const { stages, status, initiate } = useSellFixStages(collectionId, tokenId);
+export const SellFiatFixStagesModal: FC<TSellFixStagesModal> = ({ collectionId, tokenId, tokenPrefix, sellFix, onFinish, testid }) => {
+  const { stages, status, initiate } = useFiatSellFixStages(collectionId, tokenId);
   const { info } = useNotifications();
 
   useEffect(() => { initiate(sellFix); }, [sellFix]);

@@ -13,12 +13,12 @@ import { Account } from '../../../account/AccountContext';
 import AccountCard from '../../../components/Account/Account';
 import config from '../../../config';
 import { useCheckout } from '../../../api/restApi/checkout/checkout';
-import { formatKusamaBalance } from '../../../utils/textUtils';
+import { formatFiatPrice, formatKusamaBalance } from '../../../utils/textUtils';
 import BN from 'bn.js';
 import { useApi } from '../../../hooks/useApi';
 import { FetchStatus } from '../../../api/restApi/checkout/types';
 
-const CheckoutModal: FC<TTokenPageModalBodyProps> = ({ offer }) => {
+const CheckoutModal: FC<TTokenPageModalBodyProps> = ({ offer, onFinish }) => {
   const [cardValid, setCardValid] = useState(false);
   const [loading, setLoading] = useState(false);
   const [paymentCompleted, setPaymentCompleted] = useState(false);
@@ -55,7 +55,8 @@ const CheckoutModal: FC<TTokenPageModalBodyProps> = ({ offer }) => {
     });
     setLoading(false);
     setPaymentCompleted(true);
-  }, [offer, walletAddress, payForTokenWithCard]);
+    onFinish();
+  }, [offer, walletAddress, payForTokenWithCard, onFinish]);
 
   return (
     <Content>
@@ -64,7 +65,7 @@ const CheckoutModal: FC<TTokenPageModalBodyProps> = ({ offer }) => {
           <CompletedMessage paymentRequestStatus={paymentRequestStatus} />
         </>
         : <>
-          <Heading size='2'>{`Buy NFT for  ${formatKusamaBalance(new BN(offer?.price || '').toString(), api?.market?.kusamaDecimals)}$`}</Heading>
+          <Heading size='2'>{`${offer && `Buy NFT for ${formatFiatPrice(offer.price)}$`}`}</Heading>
           <CheckoutForm
             publicKey={config.checkoutPublicKey || ''}
             onCardValidationChanged={onCardValidationChanged}

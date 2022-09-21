@@ -8,7 +8,7 @@ import { compareEncodedAddresses } from 'api/uniqueSdk/utils/addressUtils';
 import { Offer } from 'api/restApi/offers/types';
 import { useApi } from 'hooks/useApi';
 import { useAccounts } from 'hooks/useAccounts';
-import { formatKusamaBalance } from 'utils/textUtils';
+import { formatFiatPrice, formatKusamaBalance } from 'utils/textUtils';
 import { timeDifference } from 'utils/timestampUtils';
 import { Primary600 } from 'styles/colors';
 import config from '../../config';
@@ -35,18 +35,21 @@ export const TokensCard: FC<TTokensCard> = ({ collectionId, tokenId, testid, ...
     prefix,
     price,
     auction,
-    video
-  } = useMemo<Partial<Offer & NFTToken>>(() => {
+    video,
+    isSellBlockchain
+  } = useMemo<Partial<Offer & NFTToken & { isSellBlockchain: boolean }>>(() => {
     if (token?.tokenDescription) {
       const { collectionName, prefix, image } = token.tokenDescription;
       return { ...token,
         collectionName,
         prefix,
-        imageUrl: image };
+        imageUrl: image,
+        isSellBlockchain: token.type !== 'Fiat'
+      };
     }
 
     if (token) {
-      return token;
+      return { ...token, isSellBlockchain: token.type !== 'Fiat' };
     }
 
     if (tokenId && collectionId) {
@@ -73,6 +76,14 @@ export const TokensCard: FC<TTokensCard> = ({ collectionId, tokenId, testid, ...
     if (!selectedAccount || !isBidder || !topBid || !auction?.bids?.[0]?.bidderAddress) return false;
     return compareEncodedAddresses(auction.bids[0].bidderAddress, selectedAccount.address);
   }, [isBidder, topBid, selectedAccount, auction]);
+
+  const formattedPrice = useMemo(() => {
+    if (isSellBlockchain) {
+      return `${formatKusamaBalance(price || '', api?.market?.kusamaDecimals)}`;
+    } else {
+      return `${formatFiatPrice(price || '').toString()}$`;
+    }
+  }, [isSellBlockchain, price, api?.market?.kusamaDecimals]);
 
   return (
     <TokensCardStyled>
@@ -107,8 +118,8 @@ export const TokensCard: FC<TTokensCard> = ({ collectionId, tokenId, testid, ...
           <Text
             testid={`${testid}-price`}
             size='s'
-          >{topBid ? `${formatKusamaBalance(Number(topBid))}` : `${formatKusamaBalance(price)}` }</Text>
-          <Icon name={'chain-kusama'} size={16} />
+          >{topBid ? `${formatKusamaBalance(Number(topBid))}` : `${formattedPrice}` }</Text>
+          {isSellBlockchain && <Icon name={'chain-kusama'} size={16} />}
         </PriceWrapper>}
         {price && !auction && <Text size={'xs'} color={'grey-500'} >Price</Text>}
         {auction && <AuctionInfoWrapper>

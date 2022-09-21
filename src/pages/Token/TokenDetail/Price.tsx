@@ -1,10 +1,12 @@
 import React, { FC, useMemo } from 'react';
-import { Heading, Icon, Text } from '@unique-nft/ui-kit';
+import { Heading, Icon } from '@unique-nft/ui-kit';
 import BN from 'bn.js';
 import styled from 'styled-components';
 
 import { formatFiatPrice, formatKusamaBalance } from '../../../utils/textUtils';
 import { useApi } from '../../../hooks/useApi';
+
+const tokenSymbol = '$';
 
 interface PriceProps {
   price: string;
@@ -18,7 +20,7 @@ export const Price: FC<PriceProps> = ({ price, isSellBlockchain, testid = '' }) 
     if (isSellBlockchain) {
       return `${formatKusamaBalance(new BN(price).toString(), api?.market?.kusamaDecimals)}`;
     } else {
-      return `${formatFiatPrice(price).toString()}$`;
+      return `${tokenSymbol}${formatFiatPrice(price).toString()}`;
     }
   }, [isSellBlockchain, price, api?.market?.kusamaDecimals]);
 
