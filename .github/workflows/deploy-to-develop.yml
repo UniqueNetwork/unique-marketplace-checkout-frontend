@@ -23,3 +23,15 @@ jobs:
         run: docker build -t ghcr.io/uniquenetwork/unique-marketplace-checkout-frontend/checkout-market-front:dev . -f .docker/Dockerfile
       - name: Push to GitHub Registry
         run: docker push ghcr.io/uniquenetwork/unique-marketplace-checkout-frontend/checkout-market-front:dev
+
+  deploy:
+    name: Deploy
+    needs: build
+    runs-on: self-hosted
+    environment: dev
+    steps:
+      - uses: actions/checkout@v3
+      - uses: oNaiPs/secrets-to-env-action@v1
+        with:
+          secrets: ${{ toJSON(secrets) }}
+      - run: docker stack deploy -c .github/services/dev.yml ${{ secrets.DOCKER_NETWORK }}        

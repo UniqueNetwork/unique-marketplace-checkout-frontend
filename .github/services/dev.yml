@@ -1,0 +1,27 @@
+version: "3.9"
+services:
+  front:
+    image: ghcr.io/uniquenetwork/unique-marketplace-checkout-frontend/checkout-market-front:dev
+    networks:
+      - default
+    deploy:
+      replicas: 1
+      placement:
+        constraints: [node.hostname == ip-172-31-27-233]
+    environment:
+      - DOCUMENT_TITLE
+      - IPFS_GATEWAY
+      - SCAN_URL
+      - UNIQUE_API_URL
+      - CHECKOUT_PUBLIC_KEY
+      - RAMP_API_KEY
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.fiat-front-dev.rule=Host("fiat.uniquenetwork.dev")
+      - traefik.http.routers.fiat-front-dev.entrypoints=web
+      - traefik.http.services.fiat-front-dev.loadbalancer.server.port=80
+
+networks:
+  default:
+    external: true
+    name: $DOCKER_NETWORK
