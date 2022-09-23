@@ -3,7 +3,7 @@ import { Modal } from '@unique-nft/ui-kit';
 
 import { Offer } from 'api/restApi/offers/types';
 import { NFTToken } from 'api/uniqueSdk/types';
-import { MarketType } from '../../../types/MarketTypes';
+import { MarketType } from 'types/MarketTypes';
 import { SellModal } from './SellModal';
 import { CancelSellFixStagesModal } from './CancelSellModal';
 import PurchaseModal from './PurchaseModal';

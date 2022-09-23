@@ -13,9 +13,7 @@ import { Account } from '../../../account/AccountContext';
 import AccountCard from '../../../components/Account/Account';
 import config from '../../../config';
 import { useCheckout } from '../../../api/restApi/checkout/checkout';
-import { formatFiatPrice, formatKusamaBalance } from '../../../utils/textUtils';
-import BN from 'bn.js';
-import { useApi } from '../../../hooks/useApi';
+import { formatFiatPrice } from '../../../utils/textUtils';
 import { FetchStatus } from '../../../api/restApi/checkout/types';
 
 const CheckoutModal: FC<TTokenPageModalBodyProps> = ({ offer, onFinish }) => {
@@ -32,7 +30,6 @@ const CheckoutModal: FC<TTokenPageModalBodyProps> = ({ offer, onFinish }) => {
   const [walletAddress, setWalletAddress] = useState(selectedAccount?.address || '');
   const hasAccounts = useRef(accounts?.length > 0);
   const { payForTokenWithCard, paymentRequestStatus } = useCheckout();
-  const { api } = useApi();
 
   const onCardValidationChanged = useCallback((valid: boolean): void => setCardValid(valid), []);
   const onFrameValidationChanged = useCallback((event: ValidationChangeEvent) => {
@@ -65,7 +62,7 @@ const CheckoutModal: FC<TTokenPageModalBodyProps> = ({ offer, onFinish }) => {
           <CompletedMessage paymentRequestStatus={paymentRequestStatus} />
         </>
         : <>
-          <Heading size='2'>{`${offer && `Buy NFT for ${formatFiatPrice(offer.price)}$`}`}</Heading>
+          <Heading size='2'>{`${offer && `Buy NFT for $${formatFiatPrice(offer.price)}`}`}</Heading>
           <CheckoutForm
             publicKey={config.checkoutPublicKey || ''}
             onCardValidationChanged={onCardValidationChanged}
