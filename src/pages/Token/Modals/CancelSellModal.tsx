@@ -1,7 +1,6 @@
 import React, { FC, useEffect } from 'react';
 import { useNotifications } from '@unique-nft/ui-kit';
 
-import { useCancelSellFixStages } from '../../../hooks/marketplaceStages';
 import DefaultMarketStages from './StagesModal';
 import { TTokenPageModalBodyProps } from './TokenPageModal';
 import { useAccounts } from '../../../hooks/useAccounts';

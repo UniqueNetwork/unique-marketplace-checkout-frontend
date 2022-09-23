@@ -28,21 +28,14 @@ const CheckoutForm: FC<CheckoutFormProps> = ({
     base: {
       color: '#040B1D',
       letterSpacing: 0,
-      // padding: '12px 16px',
-      // fontSize: '12px',
-      // lineHeight: '18px',
       background: '#FFFFFF',
-      // border: '1px solid #7F90A1',
       borderRadius: '4px',
-      // color: '#040B1D',
-      // letterSpacing: 0,
       padding: '8px 16px',
       fontWeight: 400,
-      fontSize: 16,
+      fontSize: '16px',
       lineHeight: 24,
-      // background: ${AdditionalLight},
-      border: '1px solid #D2D3D6'
-      // borderRadius: 4
+      border: '1px solid #D2D3D6',
+      fontFamily: 'Inter, sans-serif'
     },
     focus: {
       borderColor: '#009CF0'

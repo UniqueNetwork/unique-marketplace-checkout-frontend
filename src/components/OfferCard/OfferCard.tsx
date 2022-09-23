@@ -80,11 +80,12 @@ export const OfferCard: FC<TTokensCard> = ({ offer, testid }) => {
           </Text>
         </a>
         <PriceWrapper>
+          {offer.type === 'Fiat' && <Text size='s'>$</Text>}
           <Text
             testid={`${testid}-price`}
             size='l'
           >{topBid ? `${formatBalance(Number(topBid))}` : `${formatBalance(offer?.price)}` }</Text>
-          {offer.type !== 'Fiat' ? <Icon name={'chain-kusama'} size={16}/> : <Text size='s'>$</Text>}
+          {offer.type !== 'Fiat' && <Icon name={'chain-kusama'} size={16}/>}
         </PriceWrapper>
         {!offer?.auction && <Text size={'xs'} color={'grey-500'} >Price</Text>}
         {offer?.auction && <AuctionInfoWrapper>
