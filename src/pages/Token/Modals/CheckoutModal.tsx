@@ -2,6 +2,7 @@ import React, { ChangeEvent, FC, useCallback, useRef, useState } from 'react';
 import { TTokenPageModalBodyProps } from './TokenPageModal';
 import CheckoutForm, { CardNumberFrame, CVVFrame, ExpiryDateFrame, ValidationChangeEvent } from 'components/CheckoutForm';
 import { Button, Heading } from '@unique-nft/ui-kit';
+import { Link } from 'react-router-dom';
 import styled from 'styled-components/macro';
 import { AdditionalDark, AdditionalLight, Coral700, Grey300, Grey500, Primary500, Secondary500 } from 'styles/colors';
 import { ReactComponent as PaymentsIcon } from 'static/icons/payment-types.svg';
@@ -73,7 +74,7 @@ const CheckoutModal: FC<TTokenPageModalBodyProps> = ({ offer, onFinish }) => {
           >
             <Field>
               <Label>Your crypto wallet address</Label>
-              <p className='no-wallet-notion'>If you don&apos;t have a wallet yet, create one here.</p>
+              <p className='no-wallet-notion'>If you don&apos;t have a wallet yet, create one <Link to={'/accounts'}>here</Link>.</p>
               <WalletField
                 selectedAccount={selectedAccount}
                 accounts={accounts}
@@ -138,7 +139,6 @@ const Content = styled.div`
 
 const Field = styled.label`
   display: block;
-  cursor: pointer;
   span {
     display: block;
   }
@@ -148,6 +148,11 @@ const Field = styled.label`
     font-feature-settings: 'pnum' on, 'lnum' on;
     color: ${Grey500};
     margin: 4px 0 16px;
+    a {
+      color: ${Grey500};
+      text-decoration: underline;
+      cursor: pointer;
+    }
   }
   #wallet {
     color: ${Secondary500};
