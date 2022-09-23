@@ -1,20 +1,21 @@
 import React, { ChangeEvent, FC, useCallback, useRef, useState } from 'react';
 import { TTokenPageModalBodyProps } from './TokenPageModal';
-import CheckoutForm, { CardNumberFrame, CVVFrame, ExpiryDateFrame, ValidationChangeEvent } from '../../../components/CheckoutForm';
+import CheckoutForm, { CardNumberFrame, CVVFrame, ExpiryDateFrame, ValidationChangeEvent } from 'components/CheckoutForm';
 import { Button, Heading } from '@unique-nft/ui-kit';
 import styled from 'styled-components/macro';
-import { AdditionalDark, AdditionalLight, Coral700, Grey300, Grey500, Primary500, Secondary500 } from '../../../styles/colors';
-import { ReactComponent as PaymentsIcon } from '../../../static/icons/payment-types.svg';
-import { ReactComponent as CheckCircle } from '../../../static/icons/check-circle.svg';
-import Warning from '../../../components/Warning/Warning';
-import { useAccounts } from '../../../hooks/useAccounts';
-import { DropdownSelect } from '../../../components/Header/WalletManager/AccountSelect/DropdownSelect';
-import { Account } from '../../../account/AccountContext';
-import AccountCard from '../../../components/Account/Account';
-import config from '../../../config';
-import { useCheckout } from '../../../api/restApi/checkout/checkout';
-import { formatFiatPrice } from '../../../utils/textUtils';
-import { FetchStatus } from '../../../api/restApi/checkout/types';
+import { AdditionalDark, AdditionalLight, Coral700, Grey300, Grey500, Primary500, Secondary500 } from 'styles/colors';
+import { ReactComponent as PaymentsIcon } from 'static/icons/payment-types.svg';
+import { ReactComponent as CheckCircle } from 'static/icons/check-circle.svg';
+import Warning from 'components/Warning/Warning';
+import { useAccounts } from 'hooks/useAccounts';
+import { DropdownSelect } from 'components/Header/WalletManager/AccountSelect/DropdownSelect';
+import { Account } from 'account/AccountContext';
+import AccountCard from 'components/Account/Account';
+import config from 'config';
+import { useCheckout } from 'api/restApi/checkout/checkout';
+import { formatFiatPrice } from 'utils/textUtils';
+import { FetchStatus } from 'api/restApi/checkout/types';
+import useDeviceSize, { DeviceSize } from 'hooks/useDeviceSize';
 
 const CheckoutModal: FC<TTokenPageModalBodyProps> = ({ offer, onFinish }) => {
   const [cardValid, setCardValid] = useState(false);
@@ -126,6 +127,12 @@ const Content = styled.div`
   }
   button {
     float: right;
+  
+  }
+  @media (max-width: 568px) {
+    button {
+      width: 100%;
+    }
   }
 `;
 
@@ -249,6 +256,7 @@ interface IWalletFieldProps {
 
 const WalletField: FC<IWalletFieldProps> = ({ accounts, selectedAccount, setWalletAddress, walletAddress }) => {
   const [selectedWallet, setSelectedWallet] = useState(selectedAccount);
+  const deviceSize = useDeviceSize();
   const onWalletAddressChange = useCallback(({ target }: ChangeEvent<HTMLInputElement>) => {
     setWalletAddress(target.value);
   }, [setWalletAddress]);
@@ -264,11 +272,11 @@ const WalletField: FC<IWalletFieldProps> = ({ accounts, selectedAccount, setWall
     <>
       {accounts.length > 0
         ? <DropdownSelect
-            renderOption={AccountOptionCard}
-            onChange={onWalletSelected}
-            options={accounts || []}
-            value={selectedWallet}
-            className={'account-select'}
+          renderOption={(option) => (<AccountOptionCard {...option} isShort={deviceSize < DeviceSize.md} />)}
+          onChange={onWalletSelected}
+          options={accounts || []}
+          value={selectedWallet}
+          className={'account-select'}
         />
         : <input
             id={'wallet'}
@@ -281,12 +289,13 @@ const WalletField: FC<IWalletFieldProps> = ({ accounts, selectedAccount, setWall
   );
 };
 
-const AccountOptionCard: FC<Account> = (account) => {
+const AccountOptionCard: FC<Account & { isShort: boolean }> = ({ meta, address, isShort }) => {
   return (<AccountOptionWrapper>
     <AccountCard
-      accountName={account.meta.name || ''}
-      accountAddress={account.address}
+      accountName={meta.name || ''}
+      accountAddress={address}
       canCopy={false}
+      isShort={isShort}
       hideName
     />
   </AccountOptionWrapper>);
