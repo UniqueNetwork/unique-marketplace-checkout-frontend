@@ -1,7 +1,7 @@
 import React, { ChangeEvent, FC, useCallback, useRef, useState } from 'react';
 import { TTokenPageModalBodyProps } from './TokenPageModal';
 import CheckoutForm, { CardNumberFrame, CVVFrame, ExpiryDateFrame, ValidationChangeEvent } from 'components/CheckoutForm';
-import { Button, Heading } from '@unique-nft/ui-kit';
+import { Button, Heading, Loader } from '@unique-nft/ui-kit';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components/macro';
 import { AdditionalDark, AdditionalLight, Coral700, Grey300, Grey500, Primary500, Secondary500 } from 'styles/colors';
@@ -113,11 +113,12 @@ const CheckoutModal: FC<TTokenPageModalBodyProps> = ({ offer, onFinish }) => {
             <Button
               type='submit'
               role='primary'
-              title={!loading ? 'Pay' : 'Loading'}
+              title={'Pay'}
               disabled={!cardValid || loading || !walletAddress}
             />
           </CheckoutForm>
         </>}
+      {loading && <LoaderWrapper><Loader /></LoaderWrapper>}
     </Content>
   );
 };
@@ -135,6 +136,18 @@ const Content = styled.div`
       width: 100%;
     }
   }
+`;
+
+const LoaderWrapper = styled.div`
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: rgba(255, 255, 255, 0.5);
 `;
 
 const Field = styled.label`
@@ -218,7 +231,8 @@ const DateCodeRow = styled.div`
 const Error = styled.span`
   position: absolute;
   color: ${Coral700};
-  font-size: 11px;
+  font-size: 12px;
+  margin-top: calc(var(--gap) / 4);
 `;
 
 export default CheckoutModal;
