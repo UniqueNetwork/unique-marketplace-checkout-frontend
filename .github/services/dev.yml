@@ -17,7 +17,7 @@ services:
       - RAMP_API_KEY
     labels:
       - traefik.enable=true
-      - traefik.http.routers.fiat-front-dev.rule=Host("fiat.uniquenetwork.dev")
+      - traefik.http.routers.fiat-front-dev.rule=Host($DOMAIN)
       - traefik.http.routers.fiat-front-dev.entrypoints=web
       - traefik.http.services.fiat-front-dev.loadbalancer.server.port=80
 
