@@ -148,6 +148,7 @@ export const AskSellModal: FC<TAskSellModalProps> = ({ onSellAuction, onSellFixP
         onChange={onPriceInputChange}
         value={priceInputValue?.toString()}
         testid={`${testid}-price-input`}
+        decimals={2}
       />
       <ButtonWrapper>
         <Button
