@@ -81,7 +81,7 @@ export const TokensCard: FC<TTokensCard> = ({ collectionId, tokenId, testid, ...
     if (isSellBlockchain) {
       return `${formatKusamaBalance(price || '', api?.market?.kusamaDecimals)}`;
     } else {
-      return `${formatFiatPrice(price || '').toString()}$`;
+      return `$${formatFiatPrice(price || '').toString()}`;
     }
   }, [isSellBlockchain, price, api?.market?.kusamaDecimals]);
 

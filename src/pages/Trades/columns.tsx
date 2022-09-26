@@ -5,13 +5,13 @@ import styled from 'styled-components';
 import { AddressComponent } from './AddressComponent/AddressComponent';
 import { timestampTableFormat } from '../../utils/timestampUtils';
 import { TokenComponent } from './TokenComponent/TokenComponent';
-import { formatKusamaBalance } from '../../utils/textUtils';
+import { formatFiatPrice } from '../../utils/textUtils';
 import { BlueGrey600, Grey300, Grey500, Secondary400 } from '../../styles/colors';
 import config from '../../config';
 import { TokenDescription, Trade } from '../../api/restApi/trades/types';
 import { DeviceSize } from '../../hooks/useDeviceSize';
 
-const tokenSymbol = 'KSM';
+const tokenSymbol = '$';
 
 type ColumnProps = {
   deviceSize: DeviceSize
@@ -60,7 +60,7 @@ const getTradesColumns = ({ deviceSize, onShowTradesDetailsModal }: ColumnProps)
     // width: deviceSize !== DeviceSize.md ? '7%' : '14.48%',
     width: deviceSize !== DeviceSize.md ? '14.3%' : '11.84%',
     isSortable: true,
-    render: (value: string) => <Text color={BlueGrey600}>{`${formatKusamaBalance(value)} ${tokenSymbol}`}</Text>,
+    render: (value: string) => <Text color={BlueGrey600}>{`${tokenSymbol}${formatFiatPrice(value)}`}</Text>,
     field: 'price'
   },
   {
