@@ -204,7 +204,7 @@ export const AskSellModal: FC<TAskSellModalProps> = ({ onSellAuction, onSellFixP
       </Content>
       <Tabs
         activeIndex={activeTab}
-        labels={['Fixed price', 'Auction']}
+        labels={['Fixed price']}
         onClick={handleClick}
         testid={`${testid}-tabs`}
         disabledIndexes={[1]}
