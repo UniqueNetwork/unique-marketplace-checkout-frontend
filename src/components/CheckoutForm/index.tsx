@@ -1,7 +1,6 @@
 import React, { FC, FormEvent, useCallback, useEffect } from 'react';
 import { FramesInitProps, FramesObject, ValidationChangeEvent } from '../../types/CheckoutTypes';
 import styled from 'styled-components/macro';
-import { AdditionalLight, Grey300, Secondary500 } from '../../styles/colors';
 
 declare global {
   interface Window {
@@ -60,7 +59,8 @@ const CheckoutForm: FC<CheckoutFormProps> = ({
       debug,
       namespace,
       localization,
-      style
+      style,
+      modes: [window.Frames.modes.DISABLE_COPY_PASTE]
     });
 
     if (onCardValidationChanged) {
@@ -109,6 +109,7 @@ const CheckoutForm: FC<CheckoutFormProps> = ({
       window.Frames.removeAllEventHandlers(window.Frames.Events.CARD_TOKENIZATION_FAILED);
       window.Frames.removeAllEventHandlers(window.Frames.Events.FRAME_VALIDATION_CHANGED);
       window.Frames.removeAllEventHandlers(window.Frames.Events.PAYMENT_METHOD_CHANGED);
+      window.Frames.removeAllEventHandlers(window.Frames.Events.FRAME_ACTIVATED);
     };
   }, []);
 

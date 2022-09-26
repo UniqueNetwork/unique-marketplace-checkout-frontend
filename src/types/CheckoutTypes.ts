@@ -59,6 +59,7 @@ export interface FramesInitProps {
   frameSelector?: null;
   localization?: FramesSupportedLanguage | FramesCustomLocalization;
   style?: FramesStyle;
+  modes?: any[]
 }
 
 export interface FramesObject {
@@ -85,6 +86,13 @@ export interface FramesObject {
   readonly version: boolean;
   readonly localization: FramesSupportedLanguage;
   readonly config: any;
+  readonly modes: {
+    CVV_HIDDEN: string,
+    CVV_OPTIONAL: string,
+    DISABLE_AUTO_FOCUS: string,
+    DISABLE_COPY_PASTE: string,
+    RIGHT_TO_LEFT: string
+  }
 }
 
 export interface ValidationChangeEvent {
