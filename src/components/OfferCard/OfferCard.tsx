@@ -46,7 +46,7 @@ export const OfferCard: FC<TTokensCard> = ({ offer, testid }) => {
 
   const formatBalance = useCallback((balance: string | number) => {
     if (offer.type !== 'Fiat') return formatKusamaBalance(balance);
-    return formatFiatPrice(balance);
+    return `$${formatFiatPrice(balance)}`;
   }, [offer]);
 
   return (
@@ -80,7 +80,6 @@ export const OfferCard: FC<TTokensCard> = ({ offer, testid }) => {
           </Text>
         </a>
         <PriceWrapper>
-          {offer.type === 'Fiat' && <Text size='s'>$</Text>}
           <Text
             testid={`${testid}-price`}
             size='l'
