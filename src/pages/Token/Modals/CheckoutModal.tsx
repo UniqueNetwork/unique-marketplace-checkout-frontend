@@ -1,4 +1,4 @@
-import React, { ChangeEvent, FC, useCallback, useRef, useState } from 'react';
+import React, { ChangeEvent, FC, useCallback, useMemo, useRef, useState } from 'react';
 import { TTokenPageModalBodyProps } from './TokenPageModal';
 import CheckoutForm, { CardNumberFrame, CVVFrame, ExpiryDateFrame, ValidationChangeEvent } from 'components/CheckoutForm';
 import { Button, Heading, Loader } from '@unique-nft/ui-kit';
@@ -17,6 +17,8 @@ import { useCheckout } from 'api/restApi/checkout/checkout';
 import { formatFiatPrice } from 'utils/textUtils';
 import { FetchStatus } from 'api/restApi/checkout/types';
 import useDeviceSize, { DeviceSize } from 'hooks/useDeviceSize';
+import { checkAddress } from '@polkadot/util-crypto';
+import { useApi } from 'hooks/useApi';
 
 const CheckoutModal: FC<TTokenPageModalBodyProps> = ({ offer, onFinish }) => {
   const [cardValid, setCardValid] = useState(false);
@@ -32,6 +34,12 @@ const CheckoutModal: FC<TTokenPageModalBodyProps> = ({ offer, onFinish }) => {
   const [walletAddress, setWalletAddress] = useState(selectedAccount?.address || '');
   const hasAccounts = useRef(accounts?.length > 0);
   const { payForTokenWithCard, paymentRequestStatus } = useCheckout();
+  const { chainData } = useApi();
+
+  const isAddressValid = useMemo(() => {
+    const [isValid] = checkAddress(walletAddress, chainData?.SS58Prefix || 255);
+    return isValid;
+  }, [walletAddress, chainData?.SS58Prefix]);
 
   const onCardValidationChanged = useCallback((valid: boolean): void => setCardValid(valid), []);
   const onFrameValidationChanged = useCallback((event: ValidationChangeEvent) => {
@@ -55,7 +63,7 @@ const CheckoutModal: FC<TTokenPageModalBodyProps> = ({ offer, onFinish }) => {
     setLoading(false);
     setPaymentCompleted(true);
     onFinish();
-  }, [offer, walletAddress, payForTokenWithCard, onFinish]);
+  }, [offer, hasAccounts, walletAddress, payForTokenWithCard, onFinish]);
 
   return (
     <Content>
@@ -114,7 +122,7 @@ const CheckoutModal: FC<TTokenPageModalBodyProps> = ({ offer, onFinish }) => {
               type='submit'
               role='primary'
               title={'Pay'}
-              disabled={!cardValid || loading || !walletAddress}
+              disabled={!cardValid || loading || !walletAddress || !isAddressValid}
             />
           </CheckoutForm>
         </>}

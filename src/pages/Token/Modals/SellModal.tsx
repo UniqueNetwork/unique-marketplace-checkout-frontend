@@ -148,6 +148,7 @@ export const AskSellModal: FC<TAskSellModalProps> = ({ onSellAuction, onSellFixP
         onChange={onPriceInputChange}
         value={priceInputValue?.toString()}
         testid={`${testid}-price-input`}
+        decimals={2}
       />
       <ButtonWrapper>
         <Button
@@ -204,7 +205,7 @@ export const AskSellModal: FC<TAskSellModalProps> = ({ onSellAuction, onSellFixP
       </Content>
       <Tabs
         activeIndex={activeTab}
-        labels={['Fixed price', 'Auction']}
+        labels={['Fixed price']}
         onClick={handleClick}
         testid={`${testid}-tabs`}
         disabledIndexes={[1]}
