@@ -70,6 +70,7 @@ const PricesFilter: FC<PricesFilterProps> = ({ value, onChange, testid }) => {
             onChange={onChangeMinPrice}
             placeholder={'Min'}
             testid={`${testid}-minPrice`}
+            decimals={2}
           />
           <Text>to</Text>
           <NumberInput
@@ -77,6 +78,7 @@ const PricesFilter: FC<PricesFilterProps> = ({ value, onChange, testid }) => {
             onChange={onChangeMaxPrice}
             placeholder={'Max'}
             testid={`${testid}-maxPrice`}
+            decimals={2}
           />
         </PricesRangeWrapper>
         <Button
