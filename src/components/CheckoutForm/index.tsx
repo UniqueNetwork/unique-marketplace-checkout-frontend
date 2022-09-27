@@ -111,7 +111,7 @@ const CheckoutForm: FC<CheckoutFormProps> = ({
       window.Frames.removeAllEventHandlers(window.Frames.Events.PAYMENT_METHOD_CHANGED);
       window.Frames.removeAllEventHandlers(window.Frames.Events.FRAME_ACTIVATED);
     };
-  }, []);
+  }, [onCardValidationChanged, onCardSubmitted, onCardTokenized, paymentMethodChanged, onValidationChanged, onCardTokenizationFailed]);
 
   const onSubmit = useCallback((e: FormEvent<HTMLFormElement>): void => {
     e.preventDefault();
