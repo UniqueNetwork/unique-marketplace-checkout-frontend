@@ -33,5 +33,8 @@ export const formatKusamaBalance = (balance: string | number, decimals = 12) => 
 
 export const formatFiatPrice = (price: string | number) => {
   const priceValue = Number(price);
-  return priceValue / 100;
+  return (priceValue / 100).toLocaleString('en-US', {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 2
+  });
 };
