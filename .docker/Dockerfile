@@ -6,7 +6,7 @@ COPY . .
 RUN npm install
 RUN npm run build
 # for dafc
-RUN cp -u dafc/* build
+RUN cp dafc/* build
 
 
 FROM nginx:alpine
