@@ -1,7 +1,7 @@
 import React, { ChangeEvent, FC, useCallback, useMemo, useRef, useState } from 'react';
 import { TTokenPageModalBodyProps } from './TokenPageModal';
 import CheckoutForm, { CardNumberFrame, CVVFrame, ExpiryDateFrame, ValidationChangeEvent } from 'components/CheckoutForm';
-import { Button, Heading, Loader } from '@unique-nft/ui-kit';
+import { Button, Heading, Loader, Text } from '@unique-nft/ui-kit';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components/macro';
 import { AdditionalDark, AdditionalLight, Coral700, Grey300, Grey500, Primary500, Secondary500 } from 'styles/colors';
@@ -88,6 +88,7 @@ const CheckoutModal: FC<TTokenPageModalBodyProps> = ({ offer, onFinish }) => {
                 accounts={accounts}
                 setWalletAddress={setWalletAddress}
                 walletAddress={walletAddress}
+                isValidAddress={isAddressValid}
               />
             </Field>
             {!hasAccounts.current && <WarningsContainer>
@@ -279,9 +280,10 @@ interface IWalletFieldProps {
   selectedAccount: Account | undefined,
   setWalletAddress: (address: string) => void,
   walletAddress: string
+  isValidAddress: boolean
 }
 
-const WalletField: FC<IWalletFieldProps> = ({ accounts, selectedAccount, setWalletAddress, walletAddress }) => {
+const WalletField: FC<IWalletFieldProps> = ({ accounts, selectedAccount, setWalletAddress, walletAddress, isValidAddress }) => {
   const [selectedWallet, setSelectedWallet] = useState(selectedAccount);
   const deviceSize = useDeviceSize();
   const onWalletAddressChange = useCallback(({ target }: ChangeEvent<HTMLInputElement>) => {
@@ -305,12 +307,15 @@ const WalletField: FC<IWalletFieldProps> = ({ accounts, selectedAccount, setWall
           value={selectedWallet}
           className={'account-select'}
         />
-        : <input
+        : <>
+          <input
             id={'wallet'}
             type={'text'}
             value={walletAddress}
             onChange={onWalletAddressChange}
-        />
+          />
+          {!isValidAddress && walletAddress && <ErrorWrapper size={'s'} color={'var(--color-coral-500)'} >Address is not valid</ErrorWrapper>}
+        </>
       }
     </>
   );
@@ -333,4 +338,9 @@ const AccountOptionWrapper = styled.div`
   column-gap: calc(var(--gap) / 2);
   cursor: pointer;
   align-items: center;
+`;
+
+const ErrorWrapper = styled(Text)`
+  margin-top: calc(var(--gap) / 2);
+  display: block;
 `;

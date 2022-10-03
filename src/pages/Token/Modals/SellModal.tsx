@@ -1,16 +1,14 @@
-import { Button, Heading, Tabs, Select, Link, useNotifications, Loader, Icon, Text } from '@unique-nft/ui-kit';
-import { SelectOptionProps } from '@unique-nft/ui-kit/dist/cjs/types';
+import { Button, Heading, Link, useNotifications } from '@unique-nft/ui-kit';
 import React, { FC, useCallback, useEffect, useState } from 'react';
 import styled from 'styled-components';
 
 import DefaultMarketStages from './StagesModal';
 import { TTokenPageModalBodyProps } from './TokenPageModal';
 import { TAuctionProps, TFixPriceProps } from './types';
-import { useAuctionSellStages, useSellFixStages } from '../../../hooks/marketplaceStages';
+import { useAuctionSellStages } from '../../../hooks/marketplaceStages';
 import { useAccounts } from '../../../hooks/useAccounts';
 import { StageStatus } from '../../../types/StagesTypes';
 import { NumberInput } from 'components/NumberInput/NumberInput';
-import { sellTokenForFixedFiat } from '../../../api/restApi/checkout/checkout';
 import { useFiatSellFixStages } from '../../../hooks/marketplaceStages/useFiatSellFixStages';
 
 const tokenSymbol = '$';
@@ -67,21 +65,9 @@ type TAskSellModalProps = {
   testid: string
 }
 
-export const AskSellModal: FC<TAskSellModalProps> = ({ onSellAuction, onSellFixPrice, testid }) => {
+export const AskSellModal: FC<TAskSellModalProps> = ({ onSellFixPrice, testid }) => {
   const { selectedAccount } = useAccounts();
-  const [activeTab, setActiveTab] = useState<number>(0);
   const [priceInputValue, setPriceInputValue] = useState<string>();
-
-  const [minStepInputValueAuction, setMinStepInputValueAuction] = useState<string>();
-  const [inputStartingPriceValue, setInputStartingPriceValue] = useState<string>();
-  const [durationSelectValue, setDurationSelectValue] = useState<number>();
-
-  const handleClick = useCallback(
-    (tabIndex: number) => {
-      setActiveTab(tabIndex);
-    },
-    [setActiveTab]
-  );
 
   const onPriceInputChange = useCallback((value: string) => {
       setPriceInputValue(value);
@@ -89,60 +75,17 @@ export const AskSellModal: FC<TAskSellModalProps> = ({ onSellAuction, onSellFixP
     [setPriceInputValue]
   );
 
-  const isAuctionValid = selectedAccount && minStepInputValueAuction && durationSelectValue && Number(minStepInputValueAuction);
-
-  const onConfirmAuctionClick = useCallback(() => {
-    if (!isAuctionValid) return;
-
-    onSellAuction({ minimumStep: minStepInputValueAuction, startingPrice: inputStartingPriceValue || minStepInputValueAuction, duration: durationSelectValue, accountAddress: selectedAccount.address } as TAuctionProps);
-  }, [minStepInputValueAuction, inputStartingPriceValue, durationSelectValue, selectedAccount, onSellAuction]);
-
   const onConfirmFixPriceClick = useCallback(() => {
     if (!selectedAccount || !priceInputValue || !Number(priceInputValue)) return;
 
     onSellFixPrice({ price: priceInputValue, accountAddress: selectedAccount.address } as TFixPriceProps); // TODO: proper typing, proper calculated object
   }, [priceInputValue, selectedAccount, onSellFixPrice]);
 
-  const onMinStepInputChange = useCallback(
-    (value: string) => {
-      setMinStepInputValueAuction(value);
-    },
-    [setMinStepInputValueAuction]
-  );
-
-  const onInputStartingPriceChange = useCallback(
-    (value: string) => {
-      setInputStartingPriceValue(value);
-    },
-    [setInputStartingPriceValue]
-  );
-
-  const onDurationSelectChange = useCallback((value: SelectOptionProps) => {
-      setDurationSelectValue(Number(value.id));
-    }, [setDurationSelectValue]
-  );
-
-  const durationOptions: SelectOptionProps[] = [
-    {
-      id: '3',
-      title: '3 days'
-    },
-    {
-      id: '7',
-      title: '7 days'
-    },
-    {
-      id: '14',
-      title: '14 days'
-    },
-    {
-      id: '21',
-      title: '21 days'
-    }
-  ];
-
-  const FixedPriceTab = (
-    <>
+  return (
+    <SellModalStyled>
+      <Content>
+        <Heading size='2'>List item for sale</Heading>
+      </Content>
       <InputWrapper
         label={`Price (${tokenSymbol})*`}
         onChange={onPriceInputChange}
@@ -159,61 +102,6 @@ export const AskSellModal: FC<TAskSellModalProps> = ({ onSellAuction, onSellFixP
           testid={`${testid}-confirm-button`}
         />
       </ButtonWrapper>
-    </>
-  );
-
-  const AuctionTab = (
-    <>
-      <InputWrapper
-        label={`Minimum step (${tokenSymbol})*`}
-        onChange={onMinStepInputChange}
-        value={minStepInputValueAuction?.toString()}
-        testid={`${testid}-min-step`}
-      />
-      <Row>
-        <InputWrapper
-          label={`Starting Price (${tokenSymbol})`}
-          onChange={onInputStartingPriceChange}
-          value={inputStartingPriceValue?.toString()}
-          testid={`${testid}-starting-price`}
-        />
-        <SelectWrapper
-          label='Duration*'
-          onChange={onDurationSelectChange}
-          options={durationOptions}
-          optionKey={'id'}
-          value={durationSelectValue?.toString()}
-          testid={`${testid}-duration-select`}
-        />
-      </Row>
-      <ButtonWrapper>
-        <Button
-          disabled={!isAuctionValid}
-          onClick={onConfirmAuctionClick}
-          role='primary'
-          title='Confirm'
-          testid={`${testid}-confirm-button`}
-        />
-      </ButtonWrapper>
-    </>
-  );
-
-  return (
-    <SellModalStyled>
-      <Content>
-        <Heading size='2'>Selling method</Heading>
-      </Content>
-      <Tabs
-        activeIndex={activeTab}
-        labels={['Fixed price']}
-        onClick={handleClick}
-        testid={`${testid}-tabs`}
-        disabledIndexes={[1]}
-      />
-      <Tabs activeIndex={activeTab}>
-        {FixedPriceTab}
-        {AuctionTab}
-      </Tabs>
     </SellModalStyled>
   );
 };
@@ -292,10 +180,6 @@ const InputWrapper = styled(NumberInput)`
   width: 100%;
 `;
 
-const SelectWrapper = styled(Select)`
-  margin-bottom: 32px;
-`;
-
 const ButtonWrapper = styled.div`
   display: flex;
   justify-content: flex-end;
@@ -305,13 +189,6 @@ const Content = styled.div`
   && h2 {
     margin-bottom: 0;
   }
-`;
-
-const Row = styled.div`
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  min-height: 180px;
 `;
 
 const SellModalStyled = styled.div`

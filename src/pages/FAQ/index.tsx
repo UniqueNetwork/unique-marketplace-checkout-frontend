@@ -3,6 +3,7 @@ import styled from 'styled-components';
 import { Heading } from '@unique-nft/ui-kit';
 import { PagePaper } from '../../components/PagePaper/PagePaper';
 import { Primary600 } from '../../styles/colors';
+import config from 'config';
 
 const Faq = (): React.ReactElement<void> => {
   return (<PagePaper>
@@ -72,9 +73,10 @@ const Faq = (): React.ReactElement<void> => {
         >here.
         </a>
       </p>
-
       <Heading size='4'>Q: Whom can I contact if I have questions regarding the marketplace?</Heading>
       <p>Please contact <a href='mailto:unqnftsupport@unique.network'>unqnftsupport@unique.network</a> if you have any questions.</p>
+      <Heading size='4'>Q: Can I get a refund on an NFT?</Heading>
+      <p>Per our <a href={config.termsUrl}>Terms of Use</a>, we do not offer any refunds after you&apos;ve purchased an NFT. There is no exception to this rule at the moment, including common requests such as accidental purchases, secondary market fluctuation, or discontent about edition numbers.</p>
     </MainWrapper>
   </PagePaper>);
 };
