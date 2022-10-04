@@ -37,7 +37,7 @@ export const Header: FC<HeaderProps> = ({ activeItem }) => {
           <Icon name={'menu'} size={32} />
         </MenuIcon>}
         <LogoLink to={'/'}>
-          <LogoIcon src={activeItem === 'Collections' ? '/logos/admin.svg' : '/logos/logo.svg'} />
+          <LogoIcon src={activeItem === 'Collections' ? '/logos/admin.svg' : '/logos/logo.png'} />
         </LogoLink>
         {!showMobileMenu && (
           <nav>
@@ -130,6 +130,7 @@ const LogoLink = styled(Link)`
 
 const LogoIcon = styled.img`
   margin-right: 32px;
+  height: 64px;
 `;
 
 const RightSide = styled.div`
