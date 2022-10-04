@@ -1,8 +1,8 @@
 import React, { FC, useCallback, useRef, useState } from 'react';
-import questionFilledIcon from 'static/icons/question-fill.svg';
 import questionIcon from 'static/icons/question.svg';
 import styled from 'styled-components';
 import { Tooltip, TooltipAlign } from '@unique-nft/ui-kit';
+import { Primary500 } from 'styles/colors';
 
 interface IProps {
   align?: TooltipAlign;
@@ -10,7 +10,7 @@ interface IProps {
 
 const IconWithHint: FC<IProps> = ({ align, children }) => {
   const [isHovered, setIsHovered] = useState(false);
-  const targetRef = useRef<HTMLDivElement>(null);
+  const targetRef = useRef<any>(null);
   const onHover = useCallback(
     () => {
       setIsHovered(true);
@@ -35,9 +35,16 @@ const IconWithHint: FC<IProps> = ({ align, children }) => {
         >
           {children}
         </Tooltip>
-        <div ref={targetRef}>
-          <img alt='questionIcon' src={isHovered ? questionFilledIcon : questionIcon}/>
-        </div>
+        <svg
+          className={'icon icon-question'}
+          fill={Primary500}
+          width={24}
+          height={24}
+          data-testid={'icon-question'}
+          ref={targetRef}
+        >
+          <use href={`${questionIcon}#question${isHovered ? '-filled' : ''}`} xlinkHref={`${questionIcon}#question${isHovered ? '-filled' : ''}`} />
+        </svg>
       </IconContainer>
     </Cell>
   );
@@ -50,7 +57,7 @@ const Cell = styled.div`
 
 const IconContainer = styled.div`
   position: relative;
-  img { cursor: pointer; }
+  svg { cursor: pointer; }
 `;
 
 export default IconWithHint;
