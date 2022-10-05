@@ -1,13 +1,9 @@
 import React, { useCallback } from 'react';
 import { Heading, Modal, useNotifications } from '@unique-nft/ui-kit';
 import styled from 'styled-components/macro';
-import { Primary600 } from 'styles/colors';
-import copyIcon from 'static/icons/copy_blue.svg';
-import facebookIcon from 'static/icons/facebook.svg';
-import redditIcon from 'static/icons/reddit.svg';
-import telegramIcon from 'static/icons/telegram.svg';
-import twitterIcon from 'static/icons/twitter.svg';
+import { Primary500, Primary600 } from 'styles/colors';
 import { TelegramShareButton, TwitterShareButton, FacebookShareButton, RedditShareButton } from 'components/ShareButton';
+import { Icon } from '../../../components/Icon/Icon';
 
 interface IShareTokenModalProps {
   isVisible: boolean;
@@ -34,41 +30,26 @@ const ShareTokenModal = ({ isVisible, onClose, testid }: IShareTokenModalProps) 
       </HeadingWrapper>
       <SocialButtonsWrapper>
         <TwitterShareButton url={window.location.href}>
-          <img
-            alt='twitterIcon'
-            src={twitterIcon}
-          />
+          <Icon name={'social-twitter'} size={32} color={Primary500}/>
           <span>Twitter</span>
         </TwitterShareButton>
         <RedditShareButton url={window.location.href}>
-          <img
-            alt='redditIcon'
-            src={redditIcon}
-          />
+          <Icon name={'social-reddit'} size={32} color={Primary500}/>
           <span>Reddit</span>
         </RedditShareButton>
         <TelegramShareButton url={window.location.href}>
-          <img
-            alt='telegramIcon'
-            src={telegramIcon}
-          />
+          <Icon name={'social-telegram'} size={32} color={Primary500}/>
           <span>Telegram</span>
         </TelegramShareButton>
         <FacebookShareButton url={window.location.href}>
-          <img
-            alt='facebookIcon'
-            src={facebookIcon}
-          />
+          <Icon name={'social-facebook'} size={32} color={Primary500}/>
           <span>Facebook</span>
         </FacebookShareButton>
       </SocialButtonsWrapper>
       <CopyBtnWrapper
         onClick={copyUrl}
       >
-        <img
-          alt='copyIcon'
-          src={copyIcon}
-        />
+        <Icon name={'copy'} size={32} color={Primary500}/>
         <span>Copy link</span>
       </CopyBtnWrapper>
     </Modal>
