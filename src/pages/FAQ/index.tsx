@@ -35,7 +35,6 @@ const Faq = (): React.ReactElement<void> => {
       <p>A: Just wail for half a minute and try again</p>
       <Heading size='4'>Q: I am trying to buy an NFT, but I am seeing the other owner and the “Withdraw your KSM” button on the Heading is active. Why?</Heading>
       <p>A: Unfortunately someone has beaten you in buying the same NFT, but you can either withdraw your KSM back to your wallet or leave it in the deposit balance to use in future purchases.</p>
-
       <Heading size='4'>Q: How to transfer KSM to the other wallet or exchange?</Heading>
       <p>A: KSM that you use and see on the marketplace is on your Kusama (Substrate) account, you don`t have to withdraw it. You can interact with your wallet using any Polkadot/Kusama network tool.
         To transfer KSM to the other wallet or exchange:</p>
@@ -43,27 +42,6 @@ const Faq = (): React.ReactElement<void> => {
         <li>Go to `Accounts` at <a href='https://polkadot.js.org/apps/?rpc=wss%3A%2F%2Fkusama-rpc.polkadot.io#/accounts'>https://polkadot.js.org/apps/accounts</a></li>
         <li> Restore your wallet through the seed phrase, JSON file+password or QR code.Make sure that using Chrome or Firefox desktop with the Polkadot.js browser extension you’ve set your wallet account setting to `allow use on any chain`.</li>
         <li>Send KSM anywhere you want</li>
-      </ol>
-      <Heading size='4'>Q: How do auctions work?</Heading>
-      <p>
-        A: There are two available options for selling NFTs on the Unique market: Fixed price and Auction.
-        In case of Auction, the ‘English auction’ or ‘Sell to the highest bidder’ type of auction is used in which case the highest bid wins.
-      </p>
-      <br/>
-      <p><b>Seller rules:</b></p>
-      <ol>
-        <li>Choose a starting price.</li>
-        <li>Set an ending time and a minimum bidding step.</li>
-        <li>Highest bid placed wins the auction at auction end.</li>
-        <li>An offer for auction can be cancelled as long as no bids are placed. Once a bid is placed an offer put up for auction cannot be retracted.</li>
-        <li>A seller receives 90% of a winning bid. The remaining 10% is the market commission percentage.</li>
-      </ol>
-      <br/>
-      <p><b>Buyer rules:</b></p>
-      <ol>
-        <li>All bids are held in escrow. When counter-bidding in a sequence of bids, only the difference in price between your most recent bid and the current bid is deducted from your account (bidding price top-up). For example: if your previous bid was for 2 KSM and a counter-bid was placed at 2.5 KSM, should you decide to outbid this offer at 3 KSM only 1 KSM will be deducted from your funding account to top-up the bid in escrow.</li>
-        <li>Auction participants may withdraw from participating in the auction at any point during the auction by choosing “Withdraw” on the token page. In doing so the deposited funds will be automatically redeemed by the participant.</li>
-        <li>All participant’s funds held in escrow other than the winning bid’s  are automatically redeemed by the their owners on successful conclusion of the auction.</li>
       </ol>
       <Heading size='4'>Q: Where can I read the Terms of Service?</Heading>
       <p>A: You can read our Terms of Service&nbsp;
