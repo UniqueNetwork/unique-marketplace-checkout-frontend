@@ -1,7 +1,7 @@
 import React, { ChangeEvent, FC, useCallback, useMemo, useRef, useState } from 'react';
 import { TTokenPageModalBodyProps } from './TokenPageModal';
 import CheckoutForm, { CardNumberFrame, CVVFrame, ExpiryDateFrame, ValidationChangeEvent } from 'components/CheckoutForm';
-import { Button, Heading, Loader, Text } from '@unique-nft/ui-kit';
+import { Button, Heading, Loader, Text, useNotifications } from '@unique-nft/ui-kit';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components/macro';
 import { AdditionalDark, AdditionalLight, Coral700, Grey300, Grey500, Primary500, Secondary500 } from 'styles/colors';
@@ -24,7 +24,6 @@ const CheckoutModal: FC<TTokenPageModalBodyProps> = ({ offer, onFinish }) => {
   const [cardValid, setCardValid] = useState(false);
   const [loading, setLoading] = useState(false);
   const [paymentCompleted, setPaymentCompleted] = useState(false);
-  const [cardToken, setCardToken] = useState('');
   const [errors, setErrors] = useState({
     'card-number': false,
     'expiry-date': false,
@@ -35,6 +34,7 @@ const CheckoutModal: FC<TTokenPageModalBodyProps> = ({ offer, onFinish }) => {
   const hasAccounts = useRef(accounts?.length > 0);
   const { payForTokenWithCard, paymentRequestStatus } = useCheckout();
   const { chainData } = useApi();
+  const { info } = useNotifications();
 
   const isAddressValid = useMemo(() => {
     const [isValid] = checkAddress(walletAddress, chainData?.SS58Prefix || 255);
@@ -52,16 +52,26 @@ const CheckoutModal: FC<TTokenPageModalBodyProps> = ({ offer, onFinish }) => {
   }, []);
   const onCardSubmitted = useCallback((): void => setLoading(true), []);
   const onCardTokenized = useCallback(async (cardToken: string) => {
+    if (!offer) return;
+
+    const { tokenId, collectionId, tokenDescription } = offer;
+
     // send request with tokenized card here
-    setCardToken(cardToken);
     await payForTokenWithCard({
-      tokenId: offer?.tokenId.toString() || '0',
-      collectionId: offer?.collectionId.toString() || '0',
+      tokenId: tokenId.toString() || '0',
+      collectionId: collectionId.toString() || '0',
       tokenCard: cardToken,
       buyerAddress: walletAddress
     });
+
     setLoading(false);
     setPaymentCompleted(true);
+
+    info(
+      <div data-testid={'success-notification'}>You are the new owner of <Link to={`/token/${collectionId || ''}/${tokenId || ''}`} title={`${tokenDescription?.prefix || ''} #${tokenId || ''}`}/></div>,
+      { name: 'success', size: 32, color: 'var(--color-additional-light)' }
+    );
+
     onFinish();
   }, [offer, hasAccounts, walletAddress, payForTokenWithCard, onFinish]);
 
