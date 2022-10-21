@@ -10,7 +10,7 @@ document.title = config.documentTitle || 'Unique Market';
 
 export default function App() {
   return (
-    <Notifications closingDelay={2 * 1000}>
+    <Notifications closingDelay={5 * 1000}>
       <ApiWrapper>
         <AccountWrapper>
           <PageLayout>
