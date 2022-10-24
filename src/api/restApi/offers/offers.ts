@@ -5,10 +5,11 @@ import { get } from '../base';
 import { defaultParams } from '../base/axios';
 import { Attribute, AttributeCount, GetOffersRequestPayload, Offer, OffersResponse } from './types';
 import { ResponseError } from '../base/types';
-import { useApi } from '../../../hooks/useApi';
-import { fromStringToBnString } from '../../../utils/bigNum';
+import { fromStringToBnString } from 'utils/bigNum';
 
 const endpoint = '/api/Offers';
+
+export const fiatDecimals = 2;
 
 export const getOffers = (payload: GetOffersRequestPayload) => get<OffersResponse>(endpoint, { ...defaultParams, params: payload });
 
@@ -19,15 +20,14 @@ export const useOffers = () => {
   const [attributeCounts, setAttributeCounts] = useState<AttributeCount[]>([]);
   const [isFetching, setIsFetching] = useState<boolean>(false);
   const [fetchingError, setFetchingError] = useState<ResponseError | undefined>();
-  const { api } = useApi();
 
   const fetch = useCallback(async ({ minPrice, maxPrice, ...payload }: GetOffersRequestPayload) => {
     setIsFetching(true);
     try {
       const { status, data } = await getOffers({
         ...payload,
-        minPrice: minPrice && fromStringToBnString(minPrice, api?.market?.kusamaDecimals),
-        maxPrice: maxPrice && fromStringToBnString(maxPrice, api?.market?.kusamaDecimals)
+        minPrice: minPrice && fromStringToBnString(minPrice, fiatDecimals),
+        maxPrice: maxPrice && fromStringToBnString(maxPrice, fiatDecimals)
       });
       if (status === 200) {
         setOffers(data.items);
@@ -45,15 +45,15 @@ export const useOffers = () => {
       });
     }
     return { items: [], attributes: {}, attributesCount: [], itemsCount: 0, page: 1, pageSize: 10 };
-  }, [api?.market?.kusamaDecimals]);
+  }, []);
 
   const fetchMore = useCallback(async ({ minPrice, maxPrice, ...payload }: GetOffersRequestPayload) => {
     setIsFetching(true);
     try {
       const { status, data } = await getOffers({
         ...payload,
-        minPrice: minPrice && fromStringToBnString(minPrice, api?.market?.kusamaDecimals),
-        maxPrice: maxPrice && fromStringToBnString(maxPrice, api?.market?.kusamaDecimals)
+        minPrice: minPrice && fromStringToBnString(minPrice, fiatDecimals),
+        maxPrice: maxPrice && fromStringToBnString(maxPrice, fiatDecimals)
       });
       if (status === 200) {
         setOffers([...offers, ...data.items]);
@@ -66,7 +66,7 @@ export const useOffers = () => {
         message
       });
     }
-  }, [offers, api?.market?.kusamaDecimals]);
+  }, [offers]);
 
   return {
     offers,
