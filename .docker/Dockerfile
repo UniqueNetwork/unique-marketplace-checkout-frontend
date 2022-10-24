@@ -7,6 +7,7 @@ RUN npm install
 RUN npm run build
 # for dafc
 RUN cp -r dafc/* build/
+RUN cp dafc/logos/logo.svg build/logos/admin.svg
 
 
 FROM nginx:alpine
