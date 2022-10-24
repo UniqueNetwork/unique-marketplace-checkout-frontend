@@ -7,7 +7,7 @@ import { BoxedNumberWithDefault, LocalizedStringWithDefault } from '@unique-nft/
 import { SelectOptionProps } from '@unique-nft/ui-kit/dist/cjs/types';
 
 import { NFTToken } from 'api/uniqueSdk/types';
-import { useOffers } from 'api/restApi/offers/offers';
+import { fiatDecimals, useOffers } from 'api/restApi/offers/offers';
 import { Offer } from 'api/restApi/offers/types';
 import { TokensList } from 'components';
 import { PagePaper } from 'components/PagePaper/PagePaper';
@@ -152,8 +152,8 @@ export const NFTPage = () => {
           filteredByPrice = false;
         } else {
           const tokenPrice = new BN(token.price);
-          const minPrice = new BN(fromStringToBnString(prices.minPrice || '0', api?.market?.kusamaDecimals));
-          const maxPrice = prices.maxPrice ? new BN(fromStringToBnString(prices.maxPrice, api?.market?.kusamaDecimals)) : BN_MAX_INTEGER;
+          const minPrice = new BN(fromStringToBnString(prices.minPrice || '0', fiatDecimals));
+          const maxPrice = prices.maxPrice ? new BN(fromStringToBnString(prices.maxPrice, fiatDecimals)) : BN_MAX_INTEGER;
           filteredByPrice = (tokenPrice.gte(minPrice) && tokenPrice.lte(maxPrice));
         }
       }
@@ -180,7 +180,7 @@ export const NFTPage = () => {
 
       return filterByStatus(token) && filteredByPrice && filteredByCollections && filteredByAttributes && filteredBySearchValue;
     },
-    [filterState, searchString, api?.market?.kusamaDecimals]
+    [filterState, searchString]
   );
 
   const filterByAttributeCounts = useCallback((token: NFTToken & Partial<Offer>) => {
