@@ -8,7 +8,7 @@ import { useNotifications } from '@unique-nft/ui-kit';
 
 const endpoint = '/api';
 
-const validateStatus = (status: number) => status === 200 || status === 400;
+const validateStatus = (status: number) => status === 200 || status === 201 || status === 400;
 
 export const payForTokenWithCardMethod = (body: TCheckoutPayParams) => post<TCheckoutPayParams>(`${endpoint}/pay`, body, { ...defaultParams, validateStatus });
 export const sellTokenForFixedFiat = (body: TCheckoutFixedSellParams) => post<TCheckoutFixedSellParams>(`${endpoint}/create_fiat_offer`, body, { headers: { ...defaultParams.headers, Authorization: `Bearer ${localStorage.getItem(JWTokenLocalStorageKey)}` }, ...defaultParams });
@@ -23,12 +23,12 @@ export const useCheckout = () => {
       try {
         setPaymentRequestStatus(FetchStatus.inProgress);
         const response = await payForTokenWithCardMethod(params);
-        setPaymentRequestStatus(FetchStatus.success);
         if (response.status === 400) {
           error(`Sorry, your purchase couldn't be completed (${response.data.statusCode}: ${response.data.message})`);
           setPaymentRequestStatus(FetchStatus.error);
           return;
         }
+        setPaymentRequestStatus(FetchStatus.success);
       } catch (e) {
         setPaymentRequestStatus(FetchStatus.error);
         console.log(e);

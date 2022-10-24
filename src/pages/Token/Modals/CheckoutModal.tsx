@@ -1,4 +1,4 @@
-import React, { ChangeEvent, FC, useCallback, useMemo, useRef, useState } from 'react';
+import React, { ChangeEvent, FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { TTokenPageModalBodyProps } from './TokenPageModal';
 import CheckoutForm, { CardNumberFrame, CVVFrame, ExpiryDateFrame, ValidationChangeEvent } from 'components/CheckoutForm';
 import { Button, Heading, Loader, Text, useNotifications } from '@unique-nft/ui-kit';
@@ -54,7 +54,7 @@ const CheckoutModal: FC<TTokenPageModalBodyProps> = ({ offer, onFinish }) => {
   const onCardTokenized = useCallback(async (cardToken: string) => {
     if (!offer) return;
 
-    const { tokenId, collectionId, tokenDescription } = offer;
+    const { tokenId, collectionId } = offer;
 
     // send request with tokenized card here
     await payForTokenWithCard({
@@ -67,13 +67,17 @@ const CheckoutModal: FC<TTokenPageModalBodyProps> = ({ offer, onFinish }) => {
     setLoading(false);
     setPaymentCompleted(true);
 
+    onFinish();
+  }, [offer, hasAccounts, walletAddress, payForTokenWithCard, onFinish]);
+
+  useEffect(() => {
+    if (!offer || paymentRequestStatus !== FetchStatus.success) return;
+    const { tokenId, collectionId, tokenDescription } = offer;
     info(
       <div data-testid={'success-notification'}>You are the new owner of <Link to={`/token/${collectionId || ''}/${tokenId || ''}`} title={`${tokenDescription?.prefix || ''} #${tokenId || ''}`}/></div>,
       { name: 'success', size: 32, color: 'var(--color-additional-light)' }
     );
-
-    onFinish();
-  }, [offer, hasAccounts, walletAddress, payForTokenWithCard, onFinish]);
+  }, [paymentRequestStatus, offer]);
 
   return (
     <Content>
