@@ -1,7 +1,7 @@
 import React, { ChangeEvent, FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { TTokenPageModalBodyProps } from './TokenPageModal';
 import CheckoutForm, { CardNumberFrame, CVVFrame, ExpiryDateFrame, ValidationChangeEvent } from 'components/CheckoutForm';
-import { Button, Heading, Loader, Text, useNotifications } from '@unique-nft/ui-kit';
+import { Button, Heading, Loader, Text, useNotifications, Link as UILink } from '@unique-nft/ui-kit';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components/macro';
 import { AdditionalDark, AdditionalLight, Coral700, Grey300, Grey500, Primary500, Secondary500 } from 'styles/colors';
@@ -74,7 +74,7 @@ const CheckoutModal: FC<TTokenPageModalBodyProps> = ({ offer, onFinish }) => {
     if (!offer || paymentRequestStatus !== FetchStatus.success) return;
     const { tokenId, collectionId, tokenDescription } = offer;
     info(
-      <div data-testid={'success-notification'}>You are the new owner of <Link to={`/token/${collectionId || ''}/${tokenId || ''}`} title={`${tokenDescription?.prefix || ''} #${tokenId || ''}`}/></div>,
+      <div data-testid={'success-notification'}>You are the new owner of <UILink href={`/token/${collectionId || ''}/${tokenId || ''}`} title={`${tokenDescription?.prefix || ''} #${tokenId || ''}`}/></div>,
       { name: 'success', size: 32, color: 'var(--color-additional-light)' }
     );
   }, [paymentRequestStatus, offer]);
