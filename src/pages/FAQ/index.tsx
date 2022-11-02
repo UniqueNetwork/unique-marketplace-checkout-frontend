@@ -47,7 +47,7 @@ const Faq = (): React.ReactElement<void> => {
       <p>A: You can read our Terms of Service&nbsp;
         <a
           download
-          href='/Terms.pdf'
+          href='/DIGITALART4CLIMATE ART COMPETITION TERMS & CONDITIONS.pdf'
         >here.
         </a>
       </p>
