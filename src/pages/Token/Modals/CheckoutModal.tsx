@@ -38,7 +38,10 @@ const CheckoutModal: FC<TTokenPageModalBodyProps> = ({ offer, onFinish }) => {
 
   const isAddressValid = useMemo(() => {
     const [isValid] = checkAddress(walletAddress, chainData?.SS58Prefix || 255);
-    return isValid;
+    if (isValid) return true;
+    // we should also always allow 42's
+    const [is42Valid] = checkAddress(walletAddress, 42);
+    return is42Valid;
   }, [walletAddress, chainData?.SS58Prefix]);
 
   const onCardValidationChanged = useCallback((valid: boolean): void => setCardValid(valid), []);
