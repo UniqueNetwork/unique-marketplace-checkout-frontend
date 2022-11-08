@@ -1,6 +1,6 @@
-import React, { ChangeEvent, FC, useCallback, useEffect, useState } from 'react';
+import React, { ChangeEvent, FC, useCallback, useEffect, useRef, useState } from 'react';
 import { mnemonicGenerate, mnemonicValidate } from '@polkadot/util-crypto';
-import { Button, Checkbox, Heading, Link, Select, Text } from '@unique-nft/ui-kit';
+import { Button, Checkbox, Heading, Link, Select, Text, useNotifications } from '@unique-nft/ui-kit';
 import styled from 'styled-components';
 
 import { TCreateAccountBodyModalProps } from './types';
@@ -8,13 +8,14 @@ import { addressFromSeed } from '../../../utils/seedUtils';
 
 import DefaultAvatar from 'static/icons/default-avatar.svg';
 import { defaultPairType, derivePath } from './CreateAccount';
-import { Coral700 } from 'styles/colors';
+import { Coral700, Primary500 } from 'styles/colors';
 import { Avatar } from 'components/Avatar/Avatar';
 import { SelectOptionProps } from '@unique-nft/ui-kit/dist/cjs/types';
 import IconWithHint from 'components/IconWithHint/IconWithHint';
 import { IconButton } from 'components/IconButton/IconButton';
 import { WarningBlock } from 'components/WarningBlock/WarningBlock';
 import useDeviceSize, { DeviceSize } from 'hooks/useDeviceSize';
+import { Icon } from 'components/Icon/Icon';
 
 type TOption = SelectOptionProps & { id: string, title: string };
 
@@ -29,6 +30,8 @@ export const AskSeedPhraseModal: FC<TCreateAccountBodyModalProps> = ({ onFinish,
   const [seedGenerator, setSeedGenerator] = useState('Mnemonic');
   const [seedValid, setSeedValid] = useState(true);
   const deviceSize = useDeviceSize();
+  const { info } = useNotifications();
+  const seedInputRef = useRef<HTMLTextAreaElement>(null);
 
   const changeSeed = useCallback((value: string) => {
     setSeed(value);
@@ -63,6 +66,24 @@ export const AskSeedPhraseModal: FC<TCreateAccountBodyModalProps> = ({ onFinish,
     onFinish({ seed, address });
   }, [seed, address, confirmSeedSaved, onFinish]);
 
+  const onCopySeedClick = useCallback(() => {
+    if (!navigator.clipboard) {
+      seedInputRef.current?.select();
+      document.execCommand('copy');
+      info(
+        'Seed copied',
+        { name: 'success', size: 32, color: 'var(--color-additional-light)' }
+      );
+      return;
+    }
+    navigator.clipboard.writeText(seed).then(() => {
+      info(
+        'Seed copied',
+        { name: 'success', size: 32, color: 'var(--color-additional-light)' }
+      );
+    });
+  }, [seed]);
+
   return (<>
     <AddressWrapper>
       {address && <Avatar size={24} src={DefaultAvatar} address={address} />}
@@ -90,6 +111,7 @@ export const AskSeedPhraseModal: FC<TCreateAccountBodyModalProps> = ({ onFinish,
         onChange={onSeedChange}
         value={seed}
         rows={deviceSize === DeviceSize.sm ? 4 : 2}
+        ref={seedInputRef}
       />
       <IconButton
         testid={`${testid}-seed-reload`}
@@ -100,6 +122,10 @@ export const AskSeedPhraseModal: FC<TCreateAccountBodyModalProps> = ({ onFinish,
       />
     </InputSeedWrapper>
     {!seedValid && <ErrorText>Seed phrase is invalid</ErrorText>}
+    {deviceSize < DeviceSize.md && <CopySeedWrapper onClick={onCopySeedClick} >
+      <Icon name='copy' color={Primary500} size={24} />
+      <Text size='s' weight={'regular'} color={'primary-500'}>Copy seed phrase</Text>
+    </CopySeedWrapper>}
     <WarningBlock>
       Ensure that you keep this seed in a safe place. Anyone with access to it can re-create the account and gain full access to it.
     </WarningBlock>
@@ -153,8 +179,16 @@ const SeedGeneratorSelectWrapper = styled.div`
 const InputSeedWrapper = styled.div`
   display: flex;
   margin-bottom: var(--gap);
-  column-gap: calc(var(--gap) / 2);
   align-items: flex-start;
+`;
+
+const CopySeedWrapper = styled.button`
+  display: flex;
+  column-gap: calc(var(--gap) / 4);
+  align-items: center;
+  height: 24px;
+  border: none;
+  background: transparent;
 `;
 
 const SeedInput = styled.textarea`
@@ -170,6 +204,7 @@ const SeedInput = styled.textarea`
   font-weight: 400;
   font-size: 16px;
   line-height: 24px;
+  margin-right: calc(var(--gap) / 2);
 `;
 
 const ConfirmWrapperRow = styled.div`
