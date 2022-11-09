@@ -91,7 +91,7 @@ export function MobileFilters<T = FilterState>({ filterCount, filterComponent, d
 const MobileFilterActionsWrapper = styled.div`
   display: none;
   position: fixed;
-  top: calc(100vh - 60px);    
+  top: calc(100% - 60px);
   right: 0;
   left: 0;
   padding: 10px calc(var(--gap) * 1.5);
@@ -99,7 +99,7 @@ const MobileFilterActionsWrapper = styled.div`
   box-shadow: 0px -8px 12px rgba(0, 0, 0, 0.06);
   z-index: 8;
   column-gap: calc(var(--gap) / 2);
-  
+
   @media (max-width: 1024px) {
     display: flex;
   }
@@ -116,11 +116,12 @@ const MobileFilterModal = styled.div<{ isVisible: boolean }>`
   position: fixed;
   background-color: ${AdditionalLight};
   padding: calc(var(--gap) * 1.5);
-  height: calc(100vh - 140px);
+  height: calc(100% - 184px);
   top: 80px;
   right: 0;
   left: 0;
-  overflow-y: auto;
+  overflow-y: scroll;
+  z-index: 2;
 
   & div[class^=Filters] {
     width: 100%;
