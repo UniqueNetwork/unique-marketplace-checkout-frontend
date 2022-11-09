@@ -4,7 +4,7 @@
 import { RampInstantSDK } from '@ramp-network/ramp-instant-sdk';
 import React, { useCallback, useEffect, useRef } from 'react';
 
-import { Modal } from '@unique-nft/ui-kit';
+import { Modal } from 'components/UI';
 import config from '../../config';
 import styled from 'styled-components';
 

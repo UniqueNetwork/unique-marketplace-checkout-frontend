@@ -1,7 +1,8 @@
 import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
-import { AccountsManager, Button, Text, useNotifications } from '@unique-nft/ui-kit';
+import { Button, Text, useNotifications } from 'components/UI';
+import { AccountsManager } from '@unique-nft/ui-kit';
 import { BN } from '@polkadot/util';
 
 import { toChainFormatAddress } from 'api/uniqueSdk/utils/addressUtils';

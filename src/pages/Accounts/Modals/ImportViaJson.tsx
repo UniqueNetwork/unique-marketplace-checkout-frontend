@@ -1,5 +1,6 @@
 import React, { FC, useCallback, useState } from 'react';
-import { Button, Heading, Modal, Text, Upload } from '@unique-nft/ui-kit';
+import { Button, Modal, Text, Upload } from 'components/UI';
+import { Heading } from '@unique-nft/ui-kit';
 import { KeyringPair } from '@polkadot/keyring/types';
 import styled from 'styled-components';
 
@@ -16,19 +17,17 @@ export const ImportViaJSONAccountModal: FC<TAccountModalProps> = ({ isVisible, o
   const [password, setPassword] = useState<string>('');
   const [passwordIncorrect, setPasswordIncorrect] = useState<boolean>(false);
 
-  const onUploadChange = useCallback((data: { url: string; file: Blob } | null) => {
-    if (!data) return;
+  const onUploadChange = useCallback((url: string, file: Blob) => {
     const reader = new FileReader();
     reader.onload = ({ target }: ProgressEvent<FileReader>): void => {
       if (target && target.result && uniqueSdk) {
-        console.log(target.result);
         const data = convertToU8a(target.result as ArrayBuffer);
 
         setPair(keyringFromFile(data, uniqueSdk.api.genesisHash.toHex()));
       }
     };
 
-    reader.readAsArrayBuffer(data.file);
+    reader.readAsArrayBuffer(file);
   }, [setPair, uniqueSdk?.api]);
 
   const onRestoreClick = useCallback(() => {
@@ -60,7 +59,6 @@ export const ImportViaJSONAccountModal: FC<TAccountModalProps> = ({ isVisible, o
       <Upload
         testid={`${testid}-upload-button`}
         onChange={onUploadChange}
-        type={'square'}
         accept={'.json'}
       />
     </InputWrapper>

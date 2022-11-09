@@ -1,7 +1,7 @@
 import React, { FC, useEffect, useMemo, useState } from 'react';
-import { Dropdown, Icon, Text } from '@unique-nft/ui-kit';
+import { Dropdown, Text } from 'components/UI';
 import styled from 'styled-components/macro';
-
+import { Icon } from 'components/Icon/Icon';
 import { CollectionData } from 'api/restApi/admin/types';
 import { compareEncodedAddresses } from 'api/uniqueSdk/utils/addressUtils';
 import { NFTCollection } from 'api/uniqueSdk/types';

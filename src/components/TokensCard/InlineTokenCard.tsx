@@ -1,5 +1,6 @@
 import React, { FC, useEffect, useState } from 'react';
-import { Loader, Text } from '@unique-nft/ui-kit';
+import { Text } from 'components/UI';
+import { Loader } from '@unique-nft/ui-kit';
 import styled from 'styled-components';
 
 import { NFTToken } from 'api/uniqueSdk/types';

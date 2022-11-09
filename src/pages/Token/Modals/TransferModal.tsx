@@ -1,5 +1,6 @@
 import React, { FC, useCallback, useEffect, useState } from 'react';
-import { Button, Heading, Link, useNotifications } from '@unique-nft/ui-kit';
+import { Button, useNotifications } from 'components/UI';
+import { Heading, Link } from '@unique-nft/ui-kit';
 import styled from 'styled-components';
 
 import { TTransfer } from './types';

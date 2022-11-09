@@ -1,5 +1,6 @@
 import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
-import { Pagination, SortQuery } from '@unique-nft/ui-kit';
+import { Pagination } from 'components/UI';
+import { SortQuery } from '@unique-nft/ui-kit';
 import styled from 'styled-components';
 
 import { useTrades } from '../../api/restApi/trades/trades';

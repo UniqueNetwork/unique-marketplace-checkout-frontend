@@ -1,10 +1,11 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Icon, Link, useNotifications } from '@unique-nft/ui-kit';
 
-import { useApi } from '../../hooks/useApi';
 import { NFTToken } from 'api/uniqueSdk/types';
-import { MarketType } from '../../types/MarketTypes';
+import { Icon, useNotifications } from 'components/UI';
+import { Link } from '@unique-nft/ui-kit';
+import { useApi } from 'hooks/useApi';
+import { MarketType } from 'types/MarketTypes';
 import { CommonTokenDetail } from './TokenDetail/CommonTokenDetail';
 import { useOffer } from 'api/restApi/offers/offer';
 import { TokenTrading } from './TokenDetail/TokenTrading';

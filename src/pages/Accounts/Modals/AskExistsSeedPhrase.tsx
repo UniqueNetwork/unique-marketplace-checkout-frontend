@@ -1,5 +1,5 @@
 import React, { ChangeEvent, FC, useCallback, useState } from 'react';
-import { Button, Text } from '@unique-nft/ui-kit';
+import { Button, Text } from 'components/UI';
 import styled from 'styled-components';
 
 import { TCreateAccountBodyModalProps } from './types';

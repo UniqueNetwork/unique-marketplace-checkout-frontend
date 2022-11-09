@@ -1,5 +1,6 @@
 import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
-import { Button, Select, SelectOptionProps, useNotifications } from '@unique-nft/ui-kit';
+import { Button, Select, useNotifications } from 'components/UI';
+import { SelectOptionProps } from '@unique-nft/ui-kit';
 import styled from 'styled-components/macro';
 
 import NoItems from '../../components/NoItems';

@@ -1,6 +1,7 @@
 import { FC } from 'react';
 import styled from 'styled-components';
-import { Heading, Text } from '@unique-nft/ui-kit';
+import { Text } from 'components/UI';
+import { Heading } from '@unique-nft/ui-kit';
 import noCollections from '../../../static/icons/no-collections.svg';
 import { CollectionCover } from 'components/CollectionCover/CollectionCover';
 

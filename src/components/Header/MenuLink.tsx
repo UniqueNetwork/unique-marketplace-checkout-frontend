@@ -1,7 +1,7 @@
 import { FC } from 'react';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
-import { Text } from '@unique-nft/ui-kit';
+import { Text } from 'components/UI';
 import { ITextBaseProps } from '@unique-nft/ui-kit/dist/cjs/components/Text/Text';
 
 interface IMenuLink extends ITextBaseProps {

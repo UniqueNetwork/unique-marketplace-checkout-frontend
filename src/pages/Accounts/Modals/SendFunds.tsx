@@ -1,5 +1,6 @@
 import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
-import { Button, Dropdown, Heading, Loader, Modal, SelectOptionProps, Text, useNotifications } from '@unique-nft/ui-kit';
+import { Button, Dropdown, Modal, Text, useNotifications } from 'components/UI';
+import { Heading, Loader, SelectOptionProps } from '@unique-nft/ui-kit';
 import { BN } from '@polkadot/util';
 import styled from 'styled-components';
 import { checkAddress } from '@polkadot/util-crypto';

@@ -4,7 +4,7 @@ import { TCheckoutPayParams, FetchStatus, TCheckoutFixedSellParams, TCheckoutDel
 import { useCallback, useState } from 'react';
 import { JWTokenLocalStorageKey } from '../admin/login';
 import { TSignature } from '../auction/types';
-import { useNotifications } from '@unique-nft/ui-kit';
+import { useNotifications } from 'components/UI';
 
 const endpoint = '/api';
 

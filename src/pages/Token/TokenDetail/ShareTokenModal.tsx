@@ -1,5 +1,6 @@
 import React, { useCallback } from 'react';
-import { Heading, Modal, useNotifications } from '@unique-nft/ui-kit';
+import { Modal, useNotifications } from 'components/UI';
+import { Heading } from '@unique-nft/ui-kit';
 import styled from 'styled-components/macro';
 import { Primary500, Primary600 } from 'styles/colors';
 import { TelegramShareButton, TwitterShareButton, FacebookShareButton, RedditShareButton } from 'components/ShareButton';

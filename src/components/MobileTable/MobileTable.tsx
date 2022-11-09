@@ -1,5 +1,6 @@
 import React, { FC } from 'react';
-import { IconProps, TableColumnProps, TableRowProps, Text } from '@unique-nft/ui-kit';
+import { Text } from 'components/UI';
+import { IconProps, TableColumnProps, TableRowProps } from '@unique-nft/ui-kit';
 import styled from 'styled-components';
 
 import { MobileTableRow } from './MobileTableRow';
@@ -29,7 +30,7 @@ const MobileTable: FC<MobileTableProps> = ({
   else if (!loading) {
     children = <>{data?.map((item, rowIndex) => (
       <MobileTableRow
-        key={item[idColumnName] as string}
+        key={item.key?.toString()}
       >
         {columns?.map((column, columnIndex) => (
           <div key={`column-${column.field || ''}`}>
