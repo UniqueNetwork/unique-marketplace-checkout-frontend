@@ -16,6 +16,7 @@ interface CheckoutFormProps extends FramesInitProps {
   paymentMethodChanged?: (paymentMethod: string) => void;
   onValidationChanged?: (event: ValidationChangeEvent) => void;
   className?: string;
+  onFormActive: () => void
 }
 
 const CheckoutForm: FC<CheckoutFormProps> = ({
@@ -51,8 +52,18 @@ const CheckoutForm: FC<CheckoutFormProps> = ({
   paymentMethodChanged,
   onValidationChanged,
   className,
-  children
+  children,
+  onFormActive
 }) => {
+  useEffect(() => {
+    window.Frames.addEventHandler(window.Frames.Events.READY, () => {
+      setTimeout(onFormActive, 500);
+    });
+    return () => {
+      window.Frames.removeAllEventHandlers(window.Frames.Events.READY);
+    };
+  }, []);
+
   useEffect(() => {
     window.Frames.init({
       publicKey,
@@ -118,15 +129,16 @@ const CheckoutForm: FC<CheckoutFormProps> = ({
     window.Frames.submitCard();
   }, []);
 
-    return (
-      <form
-        id={'payment-form'}
-        onSubmit={onSubmit}
-        className={className}
-      >
-        {children}
-      </form>
-    );
+  return (
+    <form
+      id={'payment-form'}
+      onSubmit={onSubmit}
+      className={className}
+    >
+      {children}
+
+    </form>
+  );
 };
 
 export const CardNumberFrame: React.FC<React.HTMLAttributes<HTMLDivElement>> = ({

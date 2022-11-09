@@ -90,8 +90,18 @@ const LayoutStyled = styled.div<{hasFooterSpacing: boolean}>`
     }
   }
 
-  .unique-modal-wrapper .unique-modal {
-    overflow-y: auto;
+  .unique-modal-wrapper {
+    padding: calc(var(--prop-gap) * 5.5) 0;
+    .unique-modal {
+      overflow-y: auto;
+      @media (max-width: 767px) {
+        width: calc(100vw - (var(--gap) * 3));
+      }
+      @media (max-width: 567px) {
+        padding: 24px 16px;
+        width: calc(100vw - (var(--gap) * 3));
+      }
+    }
   }
   
   .unique-layout__content {

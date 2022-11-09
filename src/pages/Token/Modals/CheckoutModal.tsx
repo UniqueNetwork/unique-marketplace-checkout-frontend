@@ -23,6 +23,7 @@ import { useApi } from 'hooks/useApi';
 
 const CheckoutModal: FC<TTokenPageModalBodyProps> = ({ offer, onFinish }) => {
   const [cardValid, setCardValid] = useState(false);
+  const [isCheckoutFromReady, setIsCheckoutFromReady] = useState(false);
   const [loading, setLoading] = useState(false);
   const [paymentCompleted, setPaymentCompleted] = useState(false);
   const [errors, setErrors] = useState({
@@ -54,6 +55,7 @@ const CheckoutModal: FC<TTokenPageModalBodyProps> = ({ offer, onFinish }) => {
       setErrors((curErrors) => ({ ...curErrors, [e]: true }));
     }
   }, []);
+  const onFormReady = useCallback((): void => setIsCheckoutFromReady(true), []);
   const onCardSubmitted = useCallback((): void => setLoading(true), []);
   const onCardTokenized = useCallback(async (cardToken: string) => {
     if (!offer) return;
@@ -97,6 +99,7 @@ const CheckoutModal: FC<TTokenPageModalBodyProps> = ({ offer, onFinish }) => {
             onCardSubmitted={onCardSubmitted}
             onCardTokenized={onCardTokenized}
             onValidationChanged={onFrameValidationChanged}
+            onFormActive={onFormReady}
           >
             <Field>
               <Label>Your crypto wallet address</Label>
@@ -119,24 +122,26 @@ const CheckoutModal: FC<TTokenPageModalBodyProps> = ({ offer, onFinish }) => {
               <Heading size='4'>Payment details</Heading>
               <PaymentsIcon />
             </PaymentHeader>
-            <Field>
-              <Label>Card number</Label>
-              <CardNumberFrame/>
-              {errors['card-number'] && <Error>Wrong card number</Error>}
-            </Field>
-            <DateCodeRow>
-              <Field>
-                <Label>Expiry date</Label>
-                <ExpiryDateFrame/>
-                {errors['expiry-date'] && <Error>Wrong expiry date</Error>}
+            <PaymentWrapper>
+              {!isCheckoutFromReady && <FormReadyLoaderWrapper><Loader /></FormReadyLoaderWrapper>}
+              <Field isReady={isCheckoutFromReady}>
+                <Label>Card number</Label>
+                <CardNumberFrame/>
+                {errors['card-number'] && <Error>Wrong card number</Error>}
               </Field>
-              <Field>
-                <Label>CVV</Label>
-                <CVVFrame/>
-                {errors.cvv && <Error>Wrong CVV</Error>}
-              </Field>
-            </DateCodeRow>
-
+              <DateCodeRow>
+                <Field isReady={isCheckoutFromReady}>
+                  <Label>Expiry date</Label>
+                  <ExpiryDateFrame/>
+                  {errors['expiry-date'] && <Error>Wrong expiry date</Error>}
+                </Field>
+                <Field isReady={isCheckoutFromReady}>
+                  <Label>CVV</Label>
+                  <CVVFrame/>
+                  {errors.cvv && <Error>Wrong CVV</Error>}
+                </Field>
+              </DateCodeRow>
+            </PaymentWrapper>
             <Button
               type='submit'
               role='primary'
@@ -177,7 +182,24 @@ const LoaderWrapper = styled.div`
   background-color: rgba(255, 255, 255, 0.5);
 `;
 
-const Field = styled.label`
+const PaymentWrapper = styled.div`
+  position: relative;
+`;
+
+const FormReadyLoaderWrapper = styled.div`
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: rgba(255, 255, 255, 0.5);
+`;
+
+const Field = styled.label<{ isReady?: boolean }>`
+  visibility: ${({ isReady = true }) => isReady ? 'visible' : 'hidden'};
   display: block;
   span {
     display: block;
