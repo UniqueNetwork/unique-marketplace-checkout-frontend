@@ -1,5 +1,5 @@
 import React, { FC, useEffect, useMemo, useState } from 'react';
-import { Modal } from '@unique-nft/ui-kit';
+import { Modal } from 'components/UI';
 import { AdminPanelModalType } from './types';
 import { RejectSponsorshipModal } from './RejectSposorshipModal';
 import { RemoveCollectionModal } from './RemoveCollectionModal';

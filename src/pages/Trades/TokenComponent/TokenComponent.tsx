@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Text } from '@unique-nft/ui-kit';
+import { Text } from 'components/UI';
 import styled from 'styled-components';
 
 import { Avatar } from '../../../components/Avatar/Avatar';

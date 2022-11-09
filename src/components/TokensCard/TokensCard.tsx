@@ -1,7 +1,9 @@
 import React, { FC, useMemo, useState } from 'react';
-import { Icon, Loader, Text } from '@unique-nft/ui-kit';
+import { Text } from 'components/UI';
+import { Loader } from '@unique-nft/ui-kit';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
+import { Icon } from 'components/Icon/Icon';
 
 import { NFTToken } from 'api/uniqueSdk/types';
 import { compareEncodedAddresses } from 'api/uniqueSdk/utils/addressUtils';

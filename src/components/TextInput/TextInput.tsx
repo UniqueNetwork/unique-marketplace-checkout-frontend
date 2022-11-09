@@ -1,5 +1,6 @@
 import React, { FC, useCallback, useMemo } from 'react';
-import { IconProps, InputText } from '@unique-nft/ui-kit';
+import { InputText } from 'components/UI';
+import { IconProps } from '@unique-nft/ui-kit';
 import styled from 'styled-components';
 import { IconButton } from '../IconButton/IconButton';
 

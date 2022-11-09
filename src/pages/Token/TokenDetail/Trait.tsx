@@ -1,6 +1,6 @@
 import { FC } from 'react';
 import styled from 'styled-components';
-import { Text } from '@unique-nft/ui-kit';
+import { Text } from 'components/UI';
 import { BlueGrey100 } from '../../../styles/colors';
 
 export interface ITraitProps {

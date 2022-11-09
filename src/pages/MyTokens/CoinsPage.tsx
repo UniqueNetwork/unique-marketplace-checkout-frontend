@@ -1,6 +1,6 @@
 import React, { FC, useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
-import { Button, Text, Heading } from '@unique-nft/ui-kit';
+import { Button, Text } from 'components/UI';
 
 import { Table } from '../../components/Table';
 import { TransferFundsModal } from '../Accounts/Modals/SendFunds';

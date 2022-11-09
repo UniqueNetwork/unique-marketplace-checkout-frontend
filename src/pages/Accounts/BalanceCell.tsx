@@ -1,5 +1,5 @@
 import React from 'react';
-import { Text } from '@unique-nft/ui-kit';
+import { Text } from 'components/UI';
 import { formatKusamaBalance } from 'utils/textUtils';
 import styled from 'styled-components';
 import { AccountInfo } from './types';

@@ -1,5 +1,6 @@
 import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
-import { Heading, Modal } from '@unique-nft/ui-kit';
+import { Heading } from '@unique-nft/ui-kit';
+import { Modal } from 'components/UI';
 import styled from 'styled-components';
 
 import { TAccountModalProps, CreateAccountModalStages, TAccountProperties, TCreateAccountBodyModalProps } from './types';

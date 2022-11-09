@@ -1,6 +1,6 @@
 import React, { FC, useCallback, useEffect, useState } from 'react';
 import styled from 'styled-components';
-import { Checkbox, Text } from '@unique-nft/ui-kit';
+import { Checkbox, Text } from 'components/UI';
 import Accordion from 'components/Accordion/Accordion';
 import AttributeCountsFilter from 'components/Filters/AttributeCountsFilter';
 import AttributesFilter from 'components/Filters/AttributesFilter';

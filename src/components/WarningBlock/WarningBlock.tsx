@@ -1,6 +1,6 @@
 import React, { FC } from 'react';
 import styled from 'styled-components';
-import { Text } from '@unique-nft/ui-kit';
+import { Text } from 'components/UI';
 import { AdditionalWarning100 } from '../../styles/colors';
 
 export const WarningBlock: FC = ({ children }) => {

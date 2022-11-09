@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { useNotifications } from '@unique-nft/ui-kit';
+import { useNotifications } from 'components/UI';
 import { UnsignedTxPayload } from '@unique-nft/substrate-client/types';
 import { InternalStage, SignFunction, StageStatus, useStagesReturn } from '../types/StagesTypes';
 

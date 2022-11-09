@@ -1,5 +1,5 @@
 import React, { FC, KeyboardEvent, useCallback, useEffect, useState } from 'react';
-import { Button, InputText } from '@unique-nft/ui-kit';
+import { Button, InputText } from 'components/UI';
 import styled from 'styled-components';
 import { IconButton } from '../IconButton/IconButton';
 
