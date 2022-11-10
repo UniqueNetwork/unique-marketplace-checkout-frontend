@@ -17,6 +17,7 @@ import { IconButton } from 'components/IconButton/IconButton';
 import { WarningBlock } from 'components/WarningBlock/WarningBlock';
 import useDeviceSize, { DeviceSize } from 'hooks/useDeviceSize';
 import { Icon } from 'components/Icon/Icon';
+import { shortcutText } from 'utils/textUtils';
 
 type TOption = SelectOptionProps & { id: string, title: string };
 
@@ -91,7 +92,7 @@ export const AskSeedPhraseModal: FC<TCreateAccountBodyModalProps> = ({ onFinish,
       <Text
         testid={`${testid}-address`}
         color={'grey-500'}
-      >{address}</Text>
+      >{deviceSize < DeviceSize.md ? shortcutText(address) : address}</Text>
     </AddressWrapper>
     <Heading size={'4'} >The secret seed value for this account</Heading>
     <SeedGeneratorSelectWrapper>
