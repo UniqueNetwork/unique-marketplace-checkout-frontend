@@ -3,7 +3,7 @@ import { TTokenPageModalBodyProps } from './TokenPageModal';
 import CheckoutForm, { CardNumberFrame, CVVFrame, ExpiryDateFrame, ValidationChangeEvent } from 'components/CheckoutForm';
 import { Button, Text, useNotifications } from 'components/UI';
 import { Heading, Loader, Link as UILink } from '@unique-nft/ui-kit';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import styled from 'styled-components/macro';
 import { AdditionalDark, AdditionalLight, Coral700, Grey300, Grey500, Primary500, Secondary500 } from 'styles/colors';
 import { ReactComponent as PaymentsIcon } from 'static/icons/payment-types.svg';
@@ -37,6 +37,7 @@ const CheckoutModal: FC<TTokenPageModalBodyProps> = ({ offer, onFinish }) => {
   const { payForTokenWithCard, paymentRequestStatus } = useCheckout();
   const { chainData } = useApi();
   const { info } = useNotifications();
+  const navigate = useNavigate();
 
   const isAddressValid = useMemo(() => {
     const [isValid] = checkAddress(walletAddress, chainData?.SS58Prefix || 255);
@@ -63,12 +64,17 @@ const CheckoutModal: FC<TTokenPageModalBodyProps> = ({ offer, onFinish }) => {
     const { tokenId, collectionId } = offer;
 
     // send request with tokenized card here
-    await payForTokenWithCard({
+    const result = await payForTokenWithCard({
       tokenId: tokenId.toString() || '0',
       collectionId: collectionId.toString() || '0',
       tokenCard: cardToken,
       buyerAddress: walletAddress
     });
+
+    if (result) {
+      const { collectionId, tokenId } = result;
+      navigate(`/token/${collectionId}/${tokenId}`);
+    }
 
     setLoading(false);
     setPaymentCompleted(true);
