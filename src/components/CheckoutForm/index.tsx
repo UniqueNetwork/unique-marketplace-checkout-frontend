@@ -33,7 +33,7 @@ const CheckoutForm: FC<CheckoutFormProps> = ({
       padding: '8px 16px',
       fontWeight: 400,
       fontSize: '16px',
-      lineHeight: 24,
+      lineHeight: '24px',
       border: '1px solid #D2D3D6',
       fontFamily: 'Inter, sans-serif'
     },
