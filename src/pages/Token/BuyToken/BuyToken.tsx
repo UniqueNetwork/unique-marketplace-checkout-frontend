@@ -52,6 +52,9 @@ export const BuyToken: FC<BuyTokenProps> = ({ offer, onBuy }) => {
 const ButtonWrapper = styled.div`
   width: 200px;
   margin-top: calc(var(--gap) * 1.5);
+  @media (max-width: 767px) {
+    width: 100%;
+  }
 `;
 
 const Divider = styled.div`
