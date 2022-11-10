@@ -191,6 +191,13 @@ const NotificationStyled = styled.div`
     &.closed {
       animation: slide-close-right 0.6s ease-in-out both;
     }
+    @media (max-width: 767px) {
+      max-width: 66vw;
+    }
+    @media (max-width: 567px) {
+      max-width: calc(100vw - (var(--gap) * 2));
+    }
+    
   }
 
   &.left {
