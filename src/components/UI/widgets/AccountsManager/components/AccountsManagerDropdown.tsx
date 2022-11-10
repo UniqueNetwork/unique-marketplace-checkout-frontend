@@ -62,7 +62,7 @@ export const AccountsManagerDropdown = ({
             data-testid={'wallet-link'}
           >
             <Link
-              to={`/${activeNetwork?.id}/accounts`}
+              to={'/accounts'}
               onClick={onManageBalanceClick}
               title='Manage accounts'
             >Manage accounts</Link>
