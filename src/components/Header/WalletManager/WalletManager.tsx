@@ -2,7 +2,7 @@ import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { Button, Text, useNotifications } from 'components/UI';
-import { AccountsManager } from '@unique-nft/ui-kit';
+import { AccountsManager } from '../../UI/widgets/AccountsManager';
 import { BN } from '@polkadot/util';
 
 import { toChainFormatAddress } from 'api/uniqueSdk/utils/addressUtils';
@@ -137,7 +137,7 @@ export const WalletManager: FC = () => {
         manageBalanceLinkTitle='Manage my balance'
         networks={[]}
         onAccountChange={widgetAccountChange}
-        // onCopyAddressClick={onCopyAddress}
+        onCopyAddressClick={onCopyAddress}
         onManageBalanceClick={onCreateAccountClick}
         onNetworkChange={function noRefCheck() { }}
         selectedAccount={widgetSelectedAccount}

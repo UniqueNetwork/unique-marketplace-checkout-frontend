@@ -90,7 +90,16 @@ const ModalWrapper = styled.div<{ isGlobalBackdrop?: boolean }>`
       right: 19px;
 
       svg {
-          fill: var(--color-additional-dark);
+        fill: var(--color-additional-dark);
+      }
+      &:hover svg{
+        fill: var(--color-primary-500);
+      }
+    }
+    @media (max-width: 568px) {
+      width: calc(100% - var(--prop-gap) * 5);
+      .unique-font-heading.size-2 {
+        font-size: 24px;
       }
     }
   }
