@@ -29,5 +29,13 @@ export type TCheckoutDelistParams = {
 }
 
 export type TCheckoutPayResponse = {
-  isOk: boolean
+  collectionId: number
+  price: string
+  quoteId: null
+  seller: string
+  status: string
+  tokenId: number
+  type: string
+  statusCode?: number
+  message?: string
 }
