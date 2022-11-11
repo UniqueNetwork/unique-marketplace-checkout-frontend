@@ -11,6 +11,7 @@ import { timeDifference } from 'utils/timestampUtils';
 import { Primary600 } from 'styles/colors';
 import config from '../../config';
 import { TokensMedia } from '../TokensCard/TokensMedia';
+import { getRemains } from '../../utils/uiUtils';
 
 export type TTokensCard = {
   offer: Offer
@@ -49,6 +50,8 @@ export const OfferCard: FC<TTokensCard> = ({ offer, testid }) => {
     return `$${formatFiatPrice(balance)}`;
   }, [offer]);
 
+  const [remains, max] = getRemains(offer.copiesCount);
+
   return (
     <TokensCardStyled>
       <TokensMedia
@@ -79,6 +82,10 @@ export const OfferCard: FC<TTokensCard> = ({ offer, testid }) => {
             {`${collectionName?.substring(0, 25) || ''} [id ${offer?.collectionId || ''}]`}
           </Text>
         </a>
+        <RemainingWrapper>
+          <Text color={'grey-500'} size={'s'}>Remaining NFTs</Text>
+          <Text size={'s'}>{`${remains}/${max}`}</Text>
+        </RemainingWrapper>
         <PriceWrapper>
           <Text
             testid={`${testid}-price`}
@@ -121,49 +128,6 @@ const TokensCardStyled = styled.div`
   cursor: pointer;
 `;
 
-const PictureWrapper = styled(Link)`
-  position: relative;
-  width: 100%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  margin-bottom: 8px;
-
-  &::before {
-    content: "";
-    display: block;
-    padding-top: 100%;
-  }
-
-  .picture {
-    position: absolute;
-    top: 0;
-    left: 0;
-    bottom: 0;
-    right: 0;
-    color: white;
-    text-align: center;
-    max-height: 100%;
-    border-radius: 8px;
-    transition: 50ms;
-    overflow: hidden;
-
-    img {
-      max-width: 100%;
-      max-height: 100%;
-    }
-
-    svg {
-      border-radius: 8px;
-    }
-    
-    &:hover {
-      transform: translate(0, -5px);
-      text-decoration: none;
-    }
-  }
-`;
-
 const PriceWrapper = styled.div` 
   display: flex;
   align-items: center;
@@ -191,10 +155,8 @@ const AuctionInfoWrapper = styled.div`
   column-gap: calc(var(--gap) / 2);
 `;
 
-const Row = styled.div` 
-  && {
-    display: flex;
-    align-items: center;
-    column-gap: calc(var(--gap) / 4);
-  }
+const RemainingWrapper = styled.div`
+  margin-top: calc(var(--gap) / 2);
+  display: flex;
+  gap: 4px;
 `;
