@@ -1,13 +1,17 @@
 import { useCallback, useContext, useEffect } from 'react';
 import { web3FromSource } from '@polkadot/extension-dapp';
 import keyring from '@polkadot/ui-keyring';
-import { stringToHex, u8aToHex } from '@polkadot/util';
+import { stringToHex, stringToU8a, u8aToHex, u8aToString, hexToU8a } from '@polkadot/util';
 import { KeypairType } from '@polkadot/util-crypto/types';
 import { UnsignedTxPayload } from '@unique-nft/substrate-client/types';
 
 import { useApi } from './useApi';
 import AccountContext, { Account, AccountSigner } from 'account/AccountContext';
 import { getSuri, PairType } from 'utils/seedUtils';
+import { naclDecrypt, naclEncrypt } from '@polkadot/util-crypto';
+
+const salt = 'qSd=1dMqd_KLljLk{1AS11sw1Ka31AGU';
+const nonce = 'Fd1dqdKLljk1AS_11sa31AGU';
 
 export const useAccounts = () => {
   const { api, uniqueSdk, kusamaSdk } = useApi();
@@ -29,9 +33,44 @@ export const useAccounts = () => {
     if (updatedSelectedAccount) setSelectedAccount(updatedSelectedAccount);
   }, [accounts, setSelectedAccount, selectedAccount, api]);
 
+  const saveEncryptedMnemonic = useCallback((address: string, mnemonic: string, password: string) => {
+    const saltU8a = stringToU8a(salt);
+    const nonceU8a = stringToU8a(nonce);
+    const passwordU8a = stringToU8a(password);
+
+    const secret = new Uint8Array([...saltU8a.slice(0, -passwordU8a.length), ...passwordU8a]);
+
+    const { encrypted } = naclEncrypt(
+      stringToU8a(mnemonic),
+      secret,
+      nonceU8a
+    );
+
+    localStorage.setItem(`encrypted-${address}`, u8aToHex(encrypted));
+  }, []);
+
+  const hasEncryptedMnemonic = useCallback((address: string) => {
+    return !!localStorage.getItem(`encrypted-${address}`);
+  }, []);
+
+  const restoreEncryptedMnemonic = useCallback((address: string, password: string) => {
+    const saltU8a = stringToU8a(salt);
+    const passwordU8a = stringToU8a(password);
+
+    const secret = new Uint8Array([...saltU8a.slice(0, -passwordU8a.length), ...passwordU8a]);
+
+    const encripted = localStorage.getItem(`encrypted-${address}`);
+
+    const messageDecrypted = naclDecrypt(hexToU8a(encripted), stringToU8a(nonce), secret);
+
+    return u8aToString(messageDecrypted);
+  }, []);
+
   const addLocalAccount = useCallback((seed: string, derivePath: string, name: string, password: string, pairType: PairType) => {
     const options = { genesisHash: kusamaSdk?.api.genesisHash.toString(), isHardware: false, name: name.trim(), tags: [] };
-    keyring.addUri(getSuri(seed, derivePath, pairType), password, options, pairType as KeypairType);
+    const { pair } = keyring.addUri(getSuri(seed, derivePath, pairType), password, options, pairType as KeypairType);
+
+    saveEncryptedMnemonic(pair.address, seed, password);
   }, [kusamaSdk]);
 
   const addAccountViaQR = useCallback((scanned: { name: string, isAddress: boolean, content: string, password: string, genesisHash: string}) => {
@@ -141,6 +180,8 @@ export const useAccounts = () => {
     fetchAccounts,
     fetchAccountsWithDeposits,
     changeAccount,
-    deleteLocalAccount
+    deleteLocalAccount,
+    restoreEncryptedMnemonic,
+    hasEncryptedMnemonic
   };
 };
