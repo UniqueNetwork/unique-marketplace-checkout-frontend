@@ -57,6 +57,7 @@ export type Offer = {
   }
   currency: string
   type: string
+  copiesCount: number
 }
 
 export type OffersResponse = PaginatedResponse<Offer> & {

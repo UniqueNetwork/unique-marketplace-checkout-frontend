@@ -45,3 +45,8 @@ export const sortData = (
       ? sorted.reverse()
       : sorted;
 };
+
+export const getRemains = (count: number) => {
+  const max = count >= 1000 ? 10 ** count.toString().length : 1000;
+  return [max - count, max];
+};
