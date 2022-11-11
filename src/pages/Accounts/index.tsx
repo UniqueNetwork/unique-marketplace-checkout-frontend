@@ -92,7 +92,7 @@ const getAccountsColumns = ({
     }
   },
   {
-    title: (<Title>Security</Title>),
+    title: (<Title>Recovery Phrase</Title>),
     width: '20%',
     field: 'accountInfo',
     render(accountInfo: AccountInfo) {
