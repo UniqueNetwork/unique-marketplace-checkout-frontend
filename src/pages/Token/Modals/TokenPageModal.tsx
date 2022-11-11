@@ -12,6 +12,7 @@ import { AuctionModal } from './AuctionModal';
 import { WithdrawBidStagesModal } from './WithdrawBidModal';
 import { CancelAuctionStagesModal } from './CancelAuctionModal';
 import CheckoutModal from './CheckoutModal';
+import { AddAccountModal } from './AddAccountModals';
 
 export type TTokenPageModalProps = {
   offer?: Offer
@@ -20,6 +21,7 @@ export type TTokenPageModalProps = {
   marketType: MarketType
   onClose(): void
   onFinish(): void
+  onOpenAddAccountModal?(modal: AddAccountModal): () => void
   testid: string
 }
 
@@ -29,9 +31,10 @@ export type TTokenPageModalBodyProps = {
   onFinish(): void // TODO: make a type, in future we would definitly wan't to pass smth like success/error/error.message
   setIsClosable(value: boolean): void
   testid: string
+  onOpenAddAccountModal?(modal: AddAccountModal): () => void
 }
 
-const TokenPageModal = ({ onClose, onFinish, marketType, offer, token, testid }: TTokenPageModalProps) => {
+const TokenPageModal = ({ onClose, onFinish, marketType, offer, token, testid, onOpenAddAccountModal }: TTokenPageModalProps) => {
   const [isVisible, setIsVisible] = useState<boolean>(false);
   const [isClosable, setIsClosable] = useState<boolean>(true);
 
@@ -75,6 +78,7 @@ const TokenPageModal = ({ onClose, onFinish, marketType, offer, token, testid }:
         offer={offer}
         onFinish={onFinish}
         testid={`${testid}-${marketType.toLowerCase().replaceAll(' ', '-')}-modal`}
+        onOpenAddAccountModal={onOpenAddAccountModal}
       />
     </Modal>
   );

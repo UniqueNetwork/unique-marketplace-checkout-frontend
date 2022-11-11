@@ -1,11 +1,11 @@
 import React, { ChangeEvent, FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { TTokenPageModalBodyProps } from './TokenPageModal';
 import CheckoutForm, { CardNumberFrame, CVVFrame, ExpiryDateFrame, ValidationChangeEvent } from 'components/CheckoutForm';
-import { Button, Text, useNotifications } from 'components/UI';
+import { Button, Dropdown, Text, useNotifications } from 'components/UI';
 import { Heading, Loader, Link as UILink } from '@unique-nft/ui-kit';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components/macro';
-import { AdditionalDark, AdditionalLight, Coral700, Grey300, Grey500, Primary500, Secondary500 } from 'styles/colors';
+import { AdditionalDark, AdditionalLight, BlueGrey300, Coral700, Grey300, Grey500, Primary100, Primary500, Secondary500 } from 'styles/colors';
 import { ReactComponent as PaymentsIcon } from 'static/icons/payment-types.svg';
 import { ReactComponent as CheckCircle } from 'static/icons/check-circle.svg';
 import Warning from 'components/Warning/Warning';
@@ -20,8 +20,12 @@ import { FetchStatus } from 'api/restApi/checkout/types';
 import useDeviceSize, { DeviceSize } from 'hooks/useDeviceSize';
 import { checkAddress } from '@polkadot/util-crypto';
 import { useApi } from 'hooks/useApi';
+import { AddAccountModal } from './AddAccountModals';
 
-const CheckoutModal: FC<TTokenPageModalBodyProps> = ({ offer, onFinish }) => {
+const caretDown = { name: 'carret-down', size: 16, color: AdditionalLight };
+const caretUp = { name: 'carret-up', size: 16, color: AdditionalLight };
+
+const CheckoutModal: FC<TTokenPageModalBodyProps> = ({ offer, onFinish, onOpenAddAccountModal }) => {
   const [cardValid, setCardValid] = useState(false);
   const [isCheckoutFromReady, setIsCheckoutFromReady] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -38,6 +42,13 @@ const CheckoutModal: FC<TTokenPageModalBodyProps> = ({ offer, onFinish }) => {
   const { chainData } = useApi();
   const { info } = useNotifications();
   const navigate = useNavigate();
+  const [isDropdownOpened, setIsDropdownOpened] = useState(false);
+
+  useEffect(() => {
+    if (!selectedAccount || accounts.length === 0) return;
+    setWalletAddress(selectedAccount.address);
+    hasAccounts.current = true;
+  }, [selectedAccount]);
 
   const isAddressValid = useMemo(() => {
     const [isValid] = checkAddress(walletAddress, chainData?.SS58Prefix || 255);
@@ -107,9 +118,28 @@ const CheckoutModal: FC<TTokenPageModalBodyProps> = ({ offer, onFinish }) => {
             onValidationChanged={onFrameValidationChanged}
             onFormActive={onFormReady}
           >
-            <Field>
+            {!hasAccounts.current && <AddAccountButtonsWrapper>
+              <CreateAccountButton
+                title={'New substrate account'}
+                onClick={onOpenAddAccountModal?.(AddAccountModal.create)}
+              />
+              <DropdownStyled
+                dropdownRender={() => <DropdownMenu>
+                  <DropdownMenuItem onClick={onOpenAddAccountModal?.(AddAccountModal.importViaSeed)}>Seed phrase</DropdownMenuItem>
+                  <DropdownMenuItem onClick={onOpenAddAccountModal?.(AddAccountModal.importViaJSON)}>Backup JSON file</DropdownMenuItem>
+                  <DropdownMenuItem onClick={onOpenAddAccountModal?.(AddAccountModal.importViaQRCode)}>QR-code</DropdownMenuItem>
+                </DropdownMenu>}
+                onOpenChange={setIsDropdownOpened}
+              >
+                <AddAccountButton
+                  title={'Add account via'}
+                  role={'primary'}
+                  iconRight={isDropdownOpened ? caretUp : caretDown}
+                />
+              </DropdownStyled>
+            </AddAccountButtonsWrapper>}
+            {hasAccounts.current && <Field>
               <Label>Your crypto wallet address</Label>
-              <p className='no-wallet-notion'>If you don&apos;t have a wallet yet, create one <Link to={'/accounts'}>here</Link>.</p>
               <WalletField
                 selectedAccount={selectedAccount}
                 accounts={accounts}
@@ -117,13 +147,13 @@ const CheckoutModal: FC<TTokenPageModalBodyProps> = ({ offer, onFinish }) => {
                 walletAddress={walletAddress}
                 isValidAddress={isAddressValid}
               />
-            </Field>
-            {!hasAccounts.current && <WarningsContainer>
+            </Field>}
+            <WarningsContainer>
               <Warning>Proceed with caution, once confirmed the transaction cannot be reverted.</Warning>
               <Warning>Make sure to use a Substrate address created with a Polkadot.&#123;js&#125; wallet. There is no
                 guarantee that third-party wallets, exchanges or hardware wallets can successfully sign and process your
                 transfer which will result in a possible loss of the NFT.</Warning>
-            </WarningsContainer>}
+            </WarningsContainer>
             <PaymentHeader>
               <Heading size='4'>Payment details</Heading>
               <PaymentsIcon />
@@ -389,4 +419,63 @@ const AccountOptionWrapper = styled.div`
 const ErrorWrapper = styled(Text)`
   margin-top: calc(var(--gap) / 2);
   display: block;
+`;
+
+const CreateAccountButton = styled(Button)`
+  width: 243px;
+  @media (max-width: 1024px) {
+    width: 100%;
+  }
+`;
+
+const DropdownStyled = styled(Dropdown)`
+  .unique-button {
+    width: 100%;
+  }
+  .dropdown-options {
+    padding: 0;
+    width: 100%;
+  }
+  @media (max-width: 1024px) {
+    width: 100%;
+  }
+`;
+
+const AddAccountButtonsWrapper = styled.div`
+  display: flex;
+  column-gap: var(--gap);
+  &>* {
+    flex-grow: 1;
+  };
+
+  @media (max-width: 568px) {
+    flex-direction: column;
+    row-gap: var(--gap)
+  }
+`;
+
+const AddAccountButton = styled(Button)`
+  width: 196px;
+  @media (max-width: 1024px) {
+    width: 100%;
+  }
+`;
+
+const DropdownMenu = styled.div`
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+`;
+
+const DropdownMenuItem = styled.div`
+  padding: var(--gap);
+  cursor: pointer;
+  &:hover {
+    background: var(--color-primary-100);
+    color: var(--color-primary-500);
+  }
+  &:active {
+    background: ${BlueGrey300};
+    color: ${Primary100};
+  }
 `;

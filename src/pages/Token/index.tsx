@@ -17,17 +17,19 @@ import { shortcutText } from '../../utils/textUtils';
 import { compareEncodedAddresses } from 'api/uniqueSdk/utils/addressUtils';
 import styled from 'styled-components';
 import { BlueGrey500 } from 'styles/colors';
+import { AddAccountModal, AddAccountModals } from './Modals/AddAccountModals';
 
 const testid = 'token-page';
 
 const TokenPage = () => {
   const { api } = useApi();
-  const { selectedAccount } = useAccounts();
+  const { selectedAccount, fetchAccounts } = useAccounts();
   const { id, collectionId } = useParams<{ id: string, collectionId: string}>();
   const [token, setToken] = useState<NFTToken>();
   const [isFetchingToken, setIsFetchingToken] = useState<boolean>(true);
   const { offer, fetch: fetchOffer, isFetching: isFetchingOffer } = useOffer(Number(collectionId), Number(id));
   const [marketType, setMarketType] = useState<MarketType>(MarketType.default);
+  const [currentAddAccountModal, setCurrentAddAccountModal] = useState<AddAccountModal>();
   const navigate = useNavigate();
 
   const { info } = useNotifications();
@@ -62,6 +64,19 @@ const TokenPage = () => {
   const onActionClick = useCallback((action: MarketType) => () => {
     setMarketType(action);
   }, []);
+
+  const onOpenAddAccountModal = useCallback((modal: AddAccountModal) => () => {
+    setCurrentAddAccountModal(modal);
+  }, []);
+
+  const onAddAccountModalClose = useCallback(() => {
+    setCurrentAddAccountModal(undefined);
+  }, []);
+
+  const onAddAccountFinish = useCallback(async () => {
+    await fetchAccounts();
+    setCurrentAddAccountModal(undefined);
+  }, [fetchAccounts]);
 
   const onAuctionClose = useCallback((newOwnerAddress: string) => {
     if (!token) return;
@@ -127,6 +142,12 @@ const TokenPage = () => {
             onFinish={onFinish}
             onClose={onClose}
             testid={`${testid}`}
+            onOpenAddAccountModal={onOpenAddAccountModal}
+          />
+          <AddAccountModals
+            currentModal={currentAddAccountModal}
+            onAddAccountsFinish={onAddAccountFinish}
+            onModalClose={onAddAccountModalClose}
           />
         </CommonTokenDetail>
       </TokenPagePaper>
