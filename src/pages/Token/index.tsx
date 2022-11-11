@@ -57,9 +57,10 @@ const TokenPage = () => {
 
   const onFinish = useCallback(() => {
     setMarketType(MarketType.default);
+    if (marketType === MarketType.checkout) return;
     void fetchToken();
     fetchOffer(Number(collectionId), Number(id));
-  }, [fetchOffer, fetchToken, collectionId, id]);
+  }, [fetchOffer, fetchToken, collectionId, id, marketType]);
 
   const onActionClick = useCallback((action: MarketType) => () => {
     setMarketType(action);
@@ -74,8 +75,8 @@ const TokenPage = () => {
   }, []);
 
   const onAddAccountFinish = useCallback(async () => {
-    await fetchAccounts();
     setCurrentAddAccountModal(undefined);
+    await fetchAccounts();
   }, [fetchAccounts]);
 
   const onAuctionClose = useCallback((newOwnerAddress: string) => {

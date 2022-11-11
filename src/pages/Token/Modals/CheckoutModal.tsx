@@ -81,15 +81,13 @@ const CheckoutModal: FC<TTokenPageModalBodyProps> = ({ offer, onFinish, onOpenAd
       tokenCard: cardToken,
       buyerAddress: walletAddress
     });
+    setLoading(false);
+    setPaymentCompleted(true);
 
     if (result) {
       const { collectionId, tokenId } = result;
       navigate(`/token/${collectionId}/${tokenId}`);
     }
-
-    setLoading(false);
-    setPaymentCompleted(true);
-
     onFinish();
   }, [offer, hasAccounts, walletAddress, payForTokenWithCard, onFinish]);
 
@@ -149,10 +147,10 @@ const CheckoutModal: FC<TTokenPageModalBodyProps> = ({ offer, onFinish, onOpenAd
               />
             </Field>}
             <WarningsContainer>
-              <Warning>Proceed with caution, once confirmed the transaction cannot be reverted.</Warning>
-              <Warning>Make sure to use a Substrate address created with a Polkadot.&#123;js&#125; wallet. There is no
+              {hasAccounts.current && <Warning>Proceed with caution, once confirmed the transaction cannot be reverted.</Warning>}
+              {!hasAccounts.current && <Warning>Make sure to use a Substrate address created with a Polkadot.&#123;js&#125; wallet. There is no
                 guarantee that third-party wallets, exchanges or hardware wallets can successfully sign and process your
-                transfer which will result in a possible loss of the NFT.</Warning>
+                transfer which will result in a possible loss of the NFT.</Warning>}
             </WarningsContainer>
             <PaymentHeader>
               <Heading size='4'>Payment details</Heading>
