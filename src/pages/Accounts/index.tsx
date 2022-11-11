@@ -24,7 +24,9 @@ import { ImportViaJSONAccountModal } from './Modals/ImportViaJson';
 import { ImportViaQRCodeAccountModal } from './Modals/ImportViaQRCode';
 import { WithdrawDepositModal } from './Modals/WithdrawDeposit';
 import { TransferFundsModal } from './Modals/SendFunds';
+import { RecoveryMnemonicPhraseModal } from './Modals/RecoveryMnemonicPhrase';
 import BalanceCell from './BalanceCell';
+import { SecurityCell } from './SecurityCell';
 import { AdditionalLight, BlueGrey300, Grey500, Primary100, Primary500 } from 'styles/colors';
 import config from '../../config';
 import { AccountInfo } from './types';
@@ -40,7 +42,8 @@ type AccountsColumnsProps = {
   onShowSendFundsModal(address: string): () => void
   onShowWithdrawDepositModal(address: string): () => void
   onShowDeleteLocalAccountModal(address: string): () => void
-  onShowGetKsmModal: () => void
+  onShowGetKsmModal(): void
+  onShowRecoveryMnemonic(address: string): () => void
 };
 
 const getAccountsColumns = ({
@@ -49,7 +52,8 @@ const getAccountsColumns = ({
     onShowWithdrawDepositModal,
     isSmallDevice,
     onShowDeleteLocalAccountModal,
-    onShowGetKsmModal
+    onShowGetKsmModal,
+    onShowRecoveryMnemonic
   }: AccountsColumnsProps): TableColumnProps[] => [
   {
     title: (
@@ -64,7 +68,7 @@ const getAccountsColumns = ({
         }
       </>
     ),
-    width: '25%',
+    width: '20%',
     field: 'accountInfo',
     render(accountInfo: AccountInfo) {
       if (accountInfo.deposit && !isSmallDevice) return <></>;
@@ -81,15 +85,24 @@ const getAccountsColumns = ({
   },
   {
     title: (<Title>Balance</Title>),
-    width: '25%',
+    width: '20%',
     field: 'balance',
     render(data, { accountInfo }: (Account & { accountInfo: AccountInfo })) {
       return (<BalanceCell accountInfo={accountInfo} isSmallDevice={isSmallDevice} tokenSymbol={tokenSymbol} />);
     }
   },
   {
+    title: (<Title>Security</Title>),
+    width: '20%',
+    field: 'accountInfo',
+    render(accountInfo: AccountInfo) {
+      if (!accountInfo.hasEncryptedMnemonic || accountInfo.deposit) return <></>;
+      return (<SecurityCell onClick={onShowRecoveryMnemonic(accountInfo.address)}/>);
+    }
+  },
+  {
     title: (<Title>Block explorer</Title>),
-    width: '25%',
+    width: '20%',
     field: 'blockExplorer',
     render(data, { accountInfo }: (Account & { accountInfo: AccountInfo })) {
       if (accountInfo.deposit && !isSmallDevice) return <></>;
@@ -111,7 +124,7 @@ const getAccountsColumns = ({
   },
   {
     title: isSmallDevice ? '' : (<Title>Actions</Title>),
-    width: '25%',
+    width: '20%',
     field: 'actions',
     render(data, { accountInfo }: (Account & { accountInfo: AccountInfo })) {
       if (accountInfo.deposit && !isSmallDevice) {
@@ -158,7 +171,8 @@ enum AccountModal {
   sendFunds,
   withdrawDeposit,
   deleteLocalAccount,
-  getKsmModal
+  getKsmModal,
+  recoveryMnemonic
 }
 
 export const AccountsPage = () => {
@@ -167,7 +181,8 @@ export const AccountsPage = () => {
     fetchAccounts,
     isLoading,
     isLoadingDeposits,
-    deleteLocalAccount
+    deleteLocalAccount,
+    hasEncryptedMnemonic
   } = useAccounts();
   const [searchString, setSearchString] = useState<string>('');
   const [currentModal, setCurrentModal] = useState<AccountModal | undefined>();
@@ -180,34 +195,12 @@ export const AccountsPage = () => {
     return toChainFormatAddress(address, chainData?.SS58Prefix || 0);
   }, [chainData?.SS58Prefix]);
 
-  const onCreateAccountClick = useCallback(() => {
-    setCurrentModal(AccountModal.create);
+  const onShowModal = useCallback((modal: AccountModal) => () => {
+    setCurrentModal(modal);
   }, []);
 
-  const onImportViaSeedClick = useCallback(() => {
-    setCurrentModal(AccountModal.importViaSeed);
-  }, []);
-
-  const onImportViaJSONClick = useCallback(() => {
-    setCurrentModal(AccountModal.importViaJSON);
-  }, []);
-
-  const onImportViaQRClick = useCallback(() => {
-    setCurrentModal(AccountModal.importViaQRCode);
-  }, []);
-
-  const onShowSendFundsModal = useCallback((address: string) => () => {
-    setCurrentModal(AccountModal.sendFunds);
-    setSelectedAddress(address);
-  }, []);
-
-  const onShowWithdrawDepositModal = useCallback((address: string) => () => {
-    setCurrentModal(AccountModal.withdrawDeposit);
-    setSelectedAddress(address);
-  }, []);
-
-  const onShowDeleteLocalAccountModal = useCallback((address: string) => () => {
-    setCurrentModal(AccountModal.deleteLocalAccount);
+  const onShowModalForAccount = useCallback((modal: AccountModal) => (address: string) => () => {
+    setCurrentModal(modal);
     setSelectedAddress(address);
   }, []);
 
@@ -228,7 +221,8 @@ export const AccountsPage = () => {
           address: account.address,
           name: account.meta.name || '',
           balance: account.balance,
-          signerType: account.signerType
+          signerType: account.signerType,
+          hasEncryptedMnemonic: hasEncryptedMnemonic(account.address)
         }
       });
       if (!account.deposits) return acc;
@@ -301,13 +295,13 @@ export const AccountsPage = () => {
         <CreateAccountButton
           testid={`${testid}-create-substrate-button`}
           title={'Create substrate account'}
-          onClick={onCreateAccountClick}
+          onClick={onShowModal(AccountModal.create)}
         />
         <DropdownStyled
           dropdownRender={() => <DropdownMenu>
-            <DropdownMenuItem onClick={onImportViaSeedClick} data-testid={`${testid}-seed-button`}>Seed phrase</DropdownMenuItem>
-            <DropdownMenuItem onClick={onImportViaJSONClick} data-testid={`${testid}-json-file-button`}>Backup JSON file</DropdownMenuItem>
-            <DropdownMenuItem onClick={onImportViaQRClick} data-testid={`${testid}-qr-button`}>QR-code</DropdownMenuItem>
+            <DropdownMenuItem onClick={onShowModal(AccountModal.importViaSeed)} data-testid={`${testid}-seed-button`}>Seed phrase</DropdownMenuItem>
+            <DropdownMenuItem onClick={onShowModal(AccountModal.importViaJSON)} data-testid={`${testid}-json-file-button`}>Backup JSON file</DropdownMenuItem>
+            <DropdownMenuItem onClick={onShowModal(AccountModal.importViaQRCode)} data-testid={`${testid}-qr-button`}>QR-code</DropdownMenuItem>
           </DropdownMenu>}
           onOpenChange={setIsDropdownOpened}
         >
@@ -333,9 +327,10 @@ export const AccountsPage = () => {
           columns={getAccountsColumns({
             isSmallDevice: deviceSize === DeviceSize.sm,
             formatAddress,
-            onShowSendFundsModal,
-            onShowWithdrawDepositModal,
-            onShowDeleteLocalAccountModal,
+            onShowSendFundsModal: onShowModalForAccount(AccountModal.sendFunds),
+            onShowWithdrawDepositModal: onShowModalForAccount(AccountModal.withdrawDeposit),
+            onShowDeleteLocalAccountModal: onShowModalForAccount(AccountModal.deleteLocalAccount),
+            onShowRecoveryMnemonic: onShowModalForAccount(AccountModal.recoveryMnemonic),
             onShowGetKsmModal
           })}
           data={filteredAccounts}
@@ -380,6 +375,11 @@ export const AccountsPage = () => {
         onClose={onModalClose}
         address={selectedAddress}
         testid={`${testid}-withdraw-modal`}
+      />
+      <RecoveryMnemonicPhraseModal
+        isVisible={currentModal === AccountModal.recoveryMnemonic}
+        onClose={onModalClose}
+        address={selectedAddress}
       />
       <ConfirmModal
         isVisible={currentModal === AccountModal.deleteLocalAccount}

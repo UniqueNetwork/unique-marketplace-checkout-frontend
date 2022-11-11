@@ -9,7 +9,7 @@ interface PasswordInputProps {
   value: string
   maxLength?: number
   onChange(value: string): void
-  testid: string
+  testid?: string
 }
 
 export const PasswordInput: FC<PasswordInputProps> = ({ placeholder, value, onChange, maxLength = 40, testid }) => {

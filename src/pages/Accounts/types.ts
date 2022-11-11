@@ -9,4 +9,5 @@ export type AccountInfo = {
   }
   deposit?: BN
   signerType: AccountSigner
+  hasEncryptedMnemonic?: boolean
 }
