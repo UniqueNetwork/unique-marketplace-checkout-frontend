@@ -8,7 +8,6 @@ import styled from 'styled-components/macro';
 import { AdditionalDark, AdditionalLight, BlueGrey300, Coral700, Grey300, Grey500, Primary100, Primary500, Secondary500 } from 'styles/colors';
 import { ReactComponent as PaymentsIcon } from 'static/icons/payment-types.svg';
 import { ReactComponent as CheckCircle } from 'static/icons/check-circle.svg';
-import Warning from 'components/Warning/Warning';
 import { useAccounts } from 'hooks/useAccounts';
 import { DropdownSelect } from 'components/Header/WalletManager/AccountSelect/DropdownSelect';
 import { Account } from 'account/AccountContext';
@@ -21,6 +20,7 @@ import useDeviceSize, { DeviceSize } from 'hooks/useDeviceSize';
 import { checkAddress } from '@polkadot/util-crypto';
 import { useApi } from 'hooks/useApi';
 import { AddAccountModal } from './AddAccountModals';
+import { sleep } from 'utils/helpers';
 
 const caretDown = { name: 'carret-down', size: 16, color: AdditionalLight };
 const caretUp = { name: 'carret-up', size: 16, color: AdditionalLight };
@@ -81,6 +81,7 @@ const CheckoutModal: FC<TTokenPageModalBodyProps> = ({ offer, onFinish, onOpenAd
       tokenCard: cardToken,
       buyerAddress: walletAddress
     });
+    await sleep(1000); // await just in case
     setLoading(false);
     setPaymentCompleted(true);
 
@@ -116,28 +117,34 @@ const CheckoutModal: FC<TTokenPageModalBodyProps> = ({ offer, onFinish, onOpenAd
             onValidationChanged={onFrameValidationChanged}
             onFormActive={onFormReady}
           >
-            {!hasAccounts.current && <AddAccountButtonsWrapper>
-              <CreateAccountButton
-                title={'New substrate account'}
-                onClick={onOpenAddAccountModal?.(AddAccountModal.create)}
-              />
-              <DropdownStyled
-                dropdownRender={() => <DropdownMenu>
-                  <DropdownMenuItem onClick={onOpenAddAccountModal?.(AddAccountModal.importViaSeed)}>Seed phrase</DropdownMenuItem>
-                  <DropdownMenuItem onClick={onOpenAddAccountModal?.(AddAccountModal.importViaJSON)}>Backup JSON file</DropdownMenuItem>
-                  <DropdownMenuItem onClick={onOpenAddAccountModal?.(AddAccountModal.importViaQRCode)}>QR-code</DropdownMenuItem>
-                </DropdownMenu>}
-                onOpenChange={setIsDropdownOpened}
-              >
-                <AddAccountButton
-                  title={'Add account via'}
-                  role={'primary'}
-                  iconRight={isDropdownOpened ? caretUp : caretDown}
+            {!hasAccounts.current && <>
+              <Text size={'m'}>If you want to buy an NFT, create or import an existing Substrate account in any suitable way</Text>
+              <AddAccountButtonsWrapper>
+                <CreateAccountButton
+                  title={'New substrate account'}
+                  onClick={onOpenAddAccountModal?.(AddAccountModal.create)}
                 />
-              </DropdownStyled>
-            </AddAccountButtonsWrapper>}
+                <DropdownStyled
+                  dropdownRender={() => <DropdownMenu>
+                    <DropdownMenuItem onClick={onOpenAddAccountModal?.(AddAccountModal.importViaSeed)}>Seed phrase</DropdownMenuItem>
+                    <DropdownMenuItem onClick={onOpenAddAccountModal?.(AddAccountModal.importViaJSON)}>Backup JSON file</DropdownMenuItem>
+                    <DropdownMenuItem onClick={onOpenAddAccountModal?.(AddAccountModal.importViaQRCode)}>QR-code</DropdownMenuItem>
+                  </DropdownMenu>}
+                  onOpenChange={setIsDropdownOpened}
+                >
+                  <AddAccountButton
+                    title={'Add account via'}
+                    role={'primary'}
+                    iconRight={isDropdownOpened ? caretUp : caretDown}
+                  />
+                </DropdownStyled>
+              </AddAccountButtonsWrapper>
+            </>}
             {hasAccounts.current && <Field>
-              <Label>Your crypto wallet address</Label>
+              <LabelWrapper>
+                <Text size={'m'}>Your substrate account address</Text>
+                <Text size={'s'} color={'grey-500'}>After the purchase, you will receive the NFT to the specified account</Text>
+              </LabelWrapper>
               <WalletField
                 selectedAccount={selectedAccount}
                 accounts={accounts}
@@ -146,12 +153,6 @@ const CheckoutModal: FC<TTokenPageModalBodyProps> = ({ offer, onFinish, onOpenAd
                 isValidAddress={isAddressValid}
               />
             </Field>}
-            <WarningsContainer>
-              {hasAccounts.current && <Warning>Proceed with caution, once confirmed the transaction cannot be reverted.</Warning>}
-              {!hasAccounts.current && <Warning>Make sure to use a Substrate address created with a Polkadot.&#123;js&#125; wallet. There is no
-                guarantee that third-party wallets, exchanges or hardware wallets can successfully sign and process your
-                transfer which will result in a possible loss of the NFT.</Warning>}
-            </WarningsContainer>
             <PaymentHeader>
               <Heading size='4'>Payment details</Heading>
               <PaymentsIcon />
@@ -275,7 +276,6 @@ const Field = styled.label<{ isReady?: boolean }>`
   .unique-text[class*=color-grey-500] {
     font-size: 16px;
     line-height: 24px;
-    color: ${AdditionalDark};
   }
   
   .account-select > div {
@@ -291,11 +291,11 @@ const Label = styled.span`
   color: ${AdditionalDark};
 `;
 
-const WarningsContainer = styled.div`
-  margin-top: 16px;
+const LabelWrapper = styled.div`
+  margin: 16px 0;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: calc(var(--gap) / 2);
 `;
 
 const PaymentHeader = styled.div`
@@ -440,6 +440,7 @@ const DropdownStyled = styled(Dropdown)`
 `;
 
 const AddAccountButtonsWrapper = styled.div`
+  margin-top: var(--gap);
   display: flex;
   column-gap: var(--gap);
   &>* {

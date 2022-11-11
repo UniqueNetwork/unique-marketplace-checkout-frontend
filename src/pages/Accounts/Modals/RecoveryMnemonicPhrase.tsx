@@ -103,7 +103,7 @@ const AskPasswordModalBody = ({ address, onFinish }: TRecoveryMnemonicPhraseModa
         />
         {passwordIncorrect && <Text size={'s'} color={'coral-500'}>Password incorrect</Text>}
       </InputWrapper>
-      <WarningBlock>Do not share this phrase with anyone! These words can be used to steal all your accounts.</WarningBlock>
+      <WarningBlock>Do not share this phrase with anyone! This phrase is all that is needed for full access to your assets tied to the account.</WarningBlock>
       <ButtonWrapper>
         <Button
           disabled={!password}
